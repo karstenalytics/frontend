@@ -1,13 +1,13 @@
 {
   "metadata": {
-    "generated_at": "2025-11-15T02:09:14.613840+00:00",
+    "generated_at": "2025-11-16T02:24:10.595718+00:00",
     "date_range": {
       "start": "2025-07-24",
-      "end": "2025-11-14"
+      "end": "2025-11-15"
     },
-    "total_positions_opened": 12182,
-    "total_volume_sol": 835144.48872,
-    "avg_position_size_sol": 68.555614
+    "total_positions_opened": 12349,
+    "total_volume_sol": 849889.309086,
+    "avg_position_size_sol": 68.822521
   },
   "daily_metrics": [
     {
@@ -2479,6 +2479,54 @@
           "label": "Orca (CBBTC\u2013USDC)",
           "count": 12,
           "volume_sol": 1987.192632
+        }
+      ]
+    },
+    {
+      "date": "2025-11-15",
+      "total_count": 167,
+      "total_volume_sol": 14744.820366,
+      "avg_position_size_sol": 88.292338,
+      "by_dex": {
+        "fusion": {
+          "count": 44,
+          "volume_sol": 10211.841327
+        },
+        "orca": {
+          "count": 123,
+          "volume_sol": 4532.979039
+        }
+      },
+      "top_pools": [
+        {
+          "pool": "CzgRYcH2eEv4hybzRGkKMaDGLfVKvW2qdADanJhwryTZ",
+          "label": "Fusion USDC-ZEC",
+          "count": 5,
+          "volume_sol": 7059.154704
+        },
+        {
+          "pool": "AXB9KoFBT4ZxJgc4bHMYDgSkxjox6JuL3bbLBeL8LdSJ",
+          "label": "Fusion USDC-TUNA",
+          "count": 9,
+          "volume_sol": 2961.707546
+        },
+        {
+          "pool": "27ExzqiGapKFd6NhffapRfdSkuykTVUqY5qeuNnrzBNm",
+          "label": "Orca SOL-ORE",
+          "count": 45,
+          "volume_sol": 1237.802316
+        },
+        {
+          "pool": "HktfL7iwGKT5QHjywQkcDnZXScoh811k7akrMZJkCcEF",
+          "label": "Orca (SOL\u2013ETH)",
+          "count": 6,
+          "volume_sol": 1173.184529
+        },
+        {
+          "pool": "FwewVm8u6tFPGewAyHmWAqad9hmF7mvqxK4mJ7iNqqGC",
+          "label": "Orca (SOL\u2013USDT)",
+          "count": 8,
+          "volume_sol": 692.122368
         }
       ]
     }
