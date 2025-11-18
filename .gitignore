@@ -1,0 +1,43 @@
+# Docusaurus
+.docusaurus/
+build/
+node_modules/
+.cache/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Claude Code
+.claude/
+
+# Generated data files (avoid conflicts with automated pipeline)
+static/data/
+
+# Internal documentation (keep local only)
+docs-internal/

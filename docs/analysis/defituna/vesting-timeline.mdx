@@ -1,0 +1,364 @@
+---
+title: Vesting Timeline
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Vesting Timeline
+
+Tracks TUNA tokens locked in vesting schedules and their unlock timeline. The chart shows how locked TUNA decreases over time as unlock events occur, reveals the next upcoming unlocks, and displays all active vesting schedules with their cliff periods and unlock frequencies.
+
+## Data
+
+<BrowserOnly fallback={<LoadingSpinner />}>
+  {() => {
+    const { useVestingTimeline } = require('@site/src/hooks/useVestingTimeline');
+    const UnlockTimelineChart = require('@site/src/components/Vesting/UnlockTimelineChart').default;
+    const NextUnlocksTable = require('@site/src/components/Vesting/NextUnlocksTable').default;
+    const VestingWalletStakingOperationsTable = require('@site/src/components/Vesting/VestingWalletStakingOperationsTable').default;
+
+    function VestingTimelinePage() {
+      const { data, loading, error } = useVestingTimeline();
+      const { useState } = require('react');
+      const [selectedDate, setSelectedDate] = useState(null);
+
+      if (loading) {
+        return (
+          <div style={{ padding: '48px', textAlign: 'center' }}>
+            <LoadingSpinner />
+            <p style={{ marginTop: '16px', color: 'var(--ifm-color-emphasis-600)' }}>
+              Loading vesting data...
+            </p>
+          </div>
+        );
+      }
+
+      if (error || !data) {
+        return (
+          <div className="alert alert--danger" role="alert">
+            <h4>Error Loading Vesting Data</h4>
+            <p>{error || 'Failed to load vesting timeline data.'}</p>
+          </div>
+        );
+      }
+
+      const { schedules, daily_timeline, staked_by_vesting_wallets_timeline, vesting_wallet_staking_operations } = data;
+
+      // Calculate unlock dates for each schedule
+      const getScheduleUnlockDates = (schedule) => {
+        const dates = [];
+        if (!schedule.first_unlock || !schedule.last_unlock) return dates;
+
+        const startDate = new Date(schedule.first_unlock);
+        const endDate = new Date(schedule.last_unlock);
+        const unlockPeriodMs = schedule.unlock_period_hours * 60 * 60 * 1000;
+
+        let currentDate = new Date(startDate);
+        while (currentDate <= endDate) {
+          dates.push(currentDate.toISOString().split('T')[0]);
+          currentDate = new Date(currentDate.getTime() + unlockPeriodMs);
+        }
+
+        return dates;
+      };
+
+      // Filter schedules by selected date
+      const getFilteredSchedules = () => {
+        if (!selectedDate) return schedules;
+
+        return schedules.filter(schedule => {
+          const unlockDates = getScheduleUnlockDates(schedule);
+          return unlockDates.includes(selectedDate);
+        });
+      };
+
+      const filteredSchedules = getFilteredSchedules();
+
+      // Calculate statistics
+      const totalLocked = schedules.reduce((sum, s) => sum + s.locked_tuna, 0);
+
+      // Get current locked amount for today's date
+      const today = new Date().toISOString().split('T')[0];
+      const currentLocked = daily_timeline[today] ?? 0;
+
+      const peakLocked = Object.values(daily_timeline).length > 0
+        ? Math.max(...Object.values(daily_timeline))
+        : 0;
+
+      return (
+        <>
+          {/* Summary stats */}
+          <div className="alert alert--info" role="alert" style={{ marginBottom: '24px' }}>
+            <h4 style={{ marginTop: 0 }}>Vesting Overview</h4>
+            <p style={{ marginBottom: 0 }}>
+              <strong>{schedules.length}</strong> vesting schedule(s) with{' '}
+              <strong>{totalLocked.toLocaleString(undefined, { maximumFractionDigits: 0 })}</strong> TUNA total locked.{' '}
+              Currently{' '}
+              <strong>{currentLocked.toLocaleString(undefined, { maximumFractionDigits: 0 })}</strong> TUNA remain locked
+              ({((currentLocked / totalLocked) * 100).toFixed(1)}% of total).
+            </p>
+          </div>
+
+          {/* Unlock timeline chart */}
+          <UnlockTimelineChart
+            timeline={daily_timeline}
+            stakedTimeline={staked_by_vesting_wallets_timeline || {}}
+            totalSchedules={schedules.length}
+          />
+
+          {/* Next unlocks table */}
+          <NextUnlocksTable
+            schedules={schedules}
+            onDateClick={(date) => setSelectedDate(date)}
+          />
+
+          {/* Vesting wallet staking operations table */}
+          {/* TODO: Uncomment when ready
+          {vesting_wallet_staking_operations && vesting_wallet_staking_operations.length > 0 && (
+            <VestingWalletStakingOperationsTable operations={vesting_wallet_staking_operations} />
+          )}
+          */}
+
+          {/* Schedule details */}
+          {(() => {
+            const { tableStyles, tableRowHoverHandlers, linkHoverHandlers } = require('@site/src/styles/tableStyles');
+
+            return (
+              <details style={{ marginBottom: '24px' }} open={selectedDate !== null}>
+                <summary style={{ cursor: 'pointer', padding: '12px', background: 'var(--ifm-background-surface-color)', border: '1px solid var(--ifm-toc-border-color)', borderRadius: 'var(--ifm-global-radius)' }}>
+                  <strong>All Vesting Schedules ({selectedDate ? filteredSchedules.length : schedules.length})</strong>
+                </summary>
+                {selectedDate && (
+                  <div style={{
+                    marginTop: '16px',
+                    marginBottom: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px'
+                  }}>
+                    <span style={{ fontSize: '14px', color: 'var(--ifm-color-secondary)' }}>
+                      Filtered by: <strong>Has an unlock on {selectedDate}</strong>
+                    </span>
+                    <button
+                      onClick={() => setSelectedDate(null)}
+                      style={{
+                        padding: '6px 12px',
+                        fontSize: '13px',
+                        background: 'var(--ifm-color-emphasis-200)',
+                        border: '1px solid var(--ifm-toc-border-color)',
+                        borderRadius: 'var(--ifm-global-radius)',
+                        cursor: 'pointer',
+                        color: 'var(--ifm-font-color-base)',
+                      }}
+                    >
+                      Clear Filter
+                    </button>
+                  </div>
+                )}
+                <div style={{
+                  marginTop: '16px',
+                  background: 'var(--ifm-background-surface-color)',
+                  border: '1px solid var(--ifm-toc-border-color)',
+                  borderRadius: 'var(--ifm-global-radius)',
+                  padding: '24px',
+                }}>
+                  {filteredSchedules.length === 0 ? (
+                    <div style={{ padding: '16px 0', color: 'var(--ifm-color-emphasis-600)' }}>
+                      No vesting schedules have unlocks on {selectedDate}.
+                    </div>
+                  ) : (
+                    <div style={{ overflowX: 'auto' }}>
+                    <table style={{ ...tableStyles.table, minWidth: '900px' }}>
+                      <thead>
+                        <tr style={tableStyles.headerRow}>
+                          <th style={tableStyles.headerCell}>Start Date</th>
+                          <th style={tableStyles.headerCell}>Locked (TUNA) ▼</th>
+                          <th style={tableStyles.headerCell}>per Unlock (TUNA)</th>
+                          <th style={tableStyles.headerCell}>Cliff (days)</th>
+                          <th style={tableStyles.headerCell}>Unlock Period (days)</th>
+                          <th style={tableStyles.headerCell}>Unlocks</th>
+                          <th style={tableStyles.headerCell}>First Unlock</th>
+                          <th style={tableStyles.headerCell}>Last Unlock</th>
+                          <th style={tableStyles.headerCell}>Tx</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredSchedules
+                          .sort((a, b) => b.locked_tuna - a.locked_tuna)
+                          .map((schedule, idx) => (
+                          <tr
+                            key={idx}
+                            style={tableStyles.bodyRow}
+                            {...tableRowHoverHandlers}
+                          >
+                            <td style={tableStyles.dateCell}>
+                              {schedule.start_time.split('T')[0]}
+                            </td>
+                            <td style={tableStyles.amountCell}>
+                              {schedule.locked_tuna.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                            </td>
+                            <td style={tableStyles.cell}>
+                              {schedule.unlock_rate_tuna.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                            </td>
+                            <td style={tableStyles.cell}>
+                              {(schedule.cliff_hours / 24).toFixed(1)}
+                            </td>
+                            <td style={tableStyles.cell}>
+                              {(schedule.unlock_period_hours / 24).toFixed(1)}
+                            </td>
+                            <td style={tableStyles.cell}>
+                              {schedule.num_unlocks}
+                            </td>
+                            <td style={tableStyles.dateCell}>
+                              {schedule.first_unlock ? schedule.first_unlock.split('T')[0] : 'N/A'}
+                            </td>
+                            <td style={tableStyles.dateCell}>
+                              {schedule.last_unlock ? schedule.last_unlock.split('T')[0] : 'N/A'}
+                            </td>
+                            <td style={tableStyles.addressCell}>
+                              <a
+                                href={`https://solscan.io/tx/${schedule.signature}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={tableStyles.link}
+                                {...linkHoverHandlers}
+                              >
+                                {schedule.signature.substring(0, 5)}...{schedule.signature.slice(-5)}
+                              </a>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  )}
+                </div>
+              </details>
+            );
+          })()}
+
+        </>
+      );
+    }
+
+    return <VestingTimelinePage />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Track locked token supply**: Monitor total TUNA tokens locked in vesting schedules and percentage remaining locked
+- **Plan for upcoming unlocks**: See when the next unlock events will occur and how much TUNA will be released
+- **Analyze unlock distribution**: Understand how locked tokens are distributed across different vesting schedules
+- **Monitor unlock velocity**: Track how quickly locked TUNA is being released over time
+- **Verify vesting parameters**: Examine individual schedule details including cliff periods, unlock frequencies, and total locked amounts
+- **Forecast future supply**: Project when locked tokens will become liquid based on unlock timelines
+
+## How to Read This Chart
+
+**Unlock Timeline Chart:**
+- **X-axis**: Date (chronological)
+- **Y-axis**: Total TUNA tokens remaining locked across all vesting schedules
+- **Line trend**: Decreasing line shows locked tokens being released over time
+- **Steps/drops**: Sudden decreases indicate unlock events
+
+**Vesting Overview (info box):**
+- **Number of schedules**: Total active vesting contracts
+- **Total locked**: Sum of all TUNA initially locked across all schedules
+- **Currently locked**: TUNA still locked today (not yet unlocked)
+- **Percentage**: (Currently locked / Total locked) × 100
+
+**Next 10 Unlock Days Table:**
+Shows upcoming unlock events sorted by date, including:
+- **Unlock Date**: When the unlock event will occur
+- **Total Amount (TUNA)**: How much TUNA will unlock on that date (sum of all schedules)
+- **Days Until**: Number of days until the unlock (highlighted in warning color if < 7 days)
+- **Schedules**: Clickable button showing number of schedules with unlocks on that date - click to filter the "All Vesting Schedules" table
+
+**All Vesting Schedules (expandable):**
+- **Start Date**: When the vesting schedule began
+- **Locked (TUNA) ▼**: Total amount initially locked in this schedule (sorted descending - highest amounts first)
+- **per Unlock (TUNA)**: Amount of TUNA released per unlock event
+- **Cliff (days)**: Initial waiting period before any tokens unlock
+- **Unlock Period (days)**: Time between each unlock event
+- **Unlocks**: Total number of unlock events in this schedule
+- **First/Last Unlock**: Date range for unlock events
+- **Tx**: Transaction signature link (Solscan) for the vesting setup
+
+**Interactive Features:**
+- **Click schedule button**: In the "Next 10 Unlock Days" table, click the button in the "Schedules" column to filter the "All Vesting Schedules" table to show only schedules with unlocks on that specific date
+- **Hover on chart**: See exact locked amount for any date
+- **Clear filter**: Use the "Clear Filter" button to show all schedules again
+- **Expand details**: The "All Vesting Schedules" section auto-expands when a filter is active
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Data Sources**
+
+- **Vesting instructions**: On-chain `SetVestingStrategy` instructions from TUNA unstake program (`tUnst2Y2sbmgSgARBpSBZhqPzpoy2iUsdCwb5ToYVJa`)
+- **Schedule parameters**: Cliff period, unlock period, unlock rate, and total locked amount for each vesting contract
+- **Transaction signatures**: On-chain transaction records linking to Solscan for verification
+
+For complete pipeline details, see [Data Pipeline](/analysis/methodology).
+
+**Unlock Calculation**
+
+For each vesting schedule, the unlock timeline is calculated based on:
+
+- **Cliff Period**: Initial waiting period before first unlock (specified in hours, displayed in days)
+- **Unlock Period**: Time between subsequent unlock events (specified in hours, displayed in days)
+- **Unlock Rate**: Amount of TUNA released per unlock period
+- **Number of Unlocks**: Total unlock events = (Total Locked ÷ Unlock Rate)
+
+**Unlock Event Timing:**
+
+1. **First unlock**: Occurs at `start_time + cliff_period + unlock_period`
+2. **Subsequent unlocks**: Occur every `unlock_period` hours after the first unlock
+3. **Final unlock**: Last event when all locked tokens are released
+
+Each unlock event releases a fixed amount of TUNA (the unlock rate) until the entire locked amount is distributed.
+
+**Timeline Aggregation**
+
+The daily timeline chart shows:
+
+1. **Daily snapshot**: Total TUNA locked across all vesting schedules on each calendar day (UTC)
+2. **Cumulative view**: Sum of locked tokens from all active schedules on that date
+3. **Decreasing total**: As unlock events occur, the total locked amount decreases by the unlock rate
+4. **Current locked**: Today's value represents TUNA still locked and not yet unlocked
+
+**Schedule Discovery**
+
+Vesting schedules are discovered by:
+- Scanning on-chain transactions for `SetVestingStrategy` instructions
+- Extracting schedule parameters from instruction data
+- Calculating unlock dates based on start time, cliff, and unlock period
+- Tracking which schedules are still active (have locked tokens remaining)
+
+**Relationship to Other Views**
+
+This vesting timeline complements:
+- **[Staking Overview](/analysis/defituna/staked-tuna)**: Shows treasury TUNA allocation (staked vs. unstaked)
+- **[Stakers](/analysis/defituna/usage-statistics/usage-statistics-stakers)**: Tracks wallets executing staking instructions
+
+Vesting locks tokens in a time-based release schedule, while staking locks tokens to earn rewards. Both restrict immediate liquidity but serve different purposes.
+
+**Update Frequency**
+
+Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- Only tracks vesting schedules created via on-chain instructions (manual arrangements not included)
+- Past unlock events are calculated but not verified against actual claim transactions
+- Chart shows scheduled unlocks, not actual claims (tokens may remain unclaimed past unlock date)
+- Unlock calculations assume schedules haven't been modified or cancelled on-chain
+- Very long schedules with many small unlocks may create visual clutter in the timeline
+
+</details>

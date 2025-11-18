@@ -1,0 +1,162 @@
+---
+title: Staking Overview
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Staking Overview
+
+Daily time-series view of treasury TUNA allocation showing the split between staked and unstaked tokens. The chart tracks how the treasury allocates its TUNA holdings over time, whether staked TUNA is at all-time high (ATH), and identifies the most active stakers and withdrawers in recent periods.
+
+## Data
+
+<BrowserOnly fallback={<LoadingSpinner />}>
+  {() => {
+    const StakingBalanceChart = require('@site/src/components/Staking/StakingBalanceChart').default;
+    const StakingTopTables = require('@site/src/components/Staking/StakingTopTables').default;
+    const { useStakingMetrics } = require('@site/src/hooks/useStakingMetrics');
+
+    function DefitunaStakedTunaPage() {
+      const { data, loading, error } = useStakingMetrics();
+
+      if (loading) {
+        return <LoadingSpinner />;
+      }
+
+      if (error || !data) {
+        return (
+          <div className="alert alert--danger" role="alert">
+            <strong>Could not load staking metrics.</strong> {error || 'Unknown error'}
+          </div>
+        );
+      }
+
+      const { daily, top_stakers_7d, top_withdrawers_7d, supply } = data;
+
+      return (
+        <>
+          <StakingBalanceChart data={daily} maxSupply={supply?.max} />
+
+          <div style={{ marginTop: '32px' }}>
+            <h2 id="top-stakers-withdrawers">Recent Activity</h2>
+            <p style={{ marginBottom: '16px' }}>
+              The tables below show the most active stakers and withdrawers over the last 7 days, ranked by TUNA amount.
+              Click "Staking Timeline" to view detailed staking history for each wallet.
+            </p>
+            <StakingTopTables topStakers={top_stakers_7d} topWithdrawers={top_withdrawers_7d} />
+          </div>
+        </>
+      );
+    }
+
+    return <DefitunaStakedTunaPage />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Track amount of unstaked TUNA**: See how the treasury is composed of liquid vs. staked TUNA over time
+- **Monitor staking commitment**: Check if staked TUNA is at ATH or has declined from peak levels
+- **Identify active participants**: Find the most active stakers and withdrawers in recent days (all protocol participants, not just treasury)
+- **Compare staking patterns**: Link staking activity to protocol events or market conditions
+
+## How to Read This Chart
+
+**Stacked Area Chart:**
+- **X-axis**: Date (chronological)
+- **Y-axis**: TUNA token amount
+- **Staked TUNA area** (accent color): TUNA locked in staking positions to earn rewards
+- **Unstaked TUNA area** (gray): TUNA held liquid in treasury, available for operations
+- **Total Height**: Combined staked + unstaked TUNA held by treasury
+- **Max Staked line** (dashed red): Historical peak staked amount for comparison
+
+**Status Indicators:**
+- **✓ Staked TUNA currently at ATH**: Current staked amount equals or exceeds all previous amounts
+- **↓ Staked TUNA X% below ATH**: Current staked amount has declined from peak by X%
+
+**Current Values:**
+The badges at the top show:
+- **Staked TUNA**: Amount currently locked in staking positions
+- **Unstaked TUNA**: Amount held liquid in treasury
+- **Total TUNA**: Combined holdings (sum of staked and unstaked)
+
+**Recent Activity Tables:**
+- **Top Stakers (7d)**: Wallets that staked the most TUNA in the last 7 days
+- **Top Withdrawers (7d)**: Wallets that withdrew the most TUNA in the last 7 days
+- **Staking Timeline button**: Links to detailed staking history for each wallet
+
+**Interactive Features:**
+- **Hover**: See exact staked/unstaked amounts for any date
+- **Legend**: Click legend items to show/hide staked or unstaked areas
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Data Sources**
+
+- **Treasury TUNA holdings**: On-chain balance tracking from DefiTuna treasury accounts
+- **Staking positions**: Smart contract state showing locked TUNA amounts
+- **Daily snapshots**: End-of-day balances recorded in UTC timezone
+- **Maximum supply**: Hard cap on TUNA token supply from token contract
+
+For complete pipeline details, see [Data Pipeline](/analysis/methodology).
+
+**Balance Calculation**
+
+Daily staked and unstaked amounts are calculated as:
+
+1. **Staked TUNA**: Sum of all TUNA locked in staking contracts owned by treasury
+2. **Unstaked TUNA**: TUNA held in treasury wallets but not locked in staking
+3. **Total TUNA**: Staked + Unstaked (treasury's total TUNA holdings)
+4. **Daily snapshot**: Balances recorded at end of each UTC day
+
+**ATH Tracking**
+
+The "All-Time High" (ATH) for staked TUNA:
+- **Max Staked**: Historical maximum of all daily staked amounts
+- **Current deviation**: Percentage difference between current staked amount and ATH
+- **ATH indicator**: Green checkmark if at ATH, red arrow with % if below
+
+This helps identify whether the treasury is maintaining, increasing, or reducing its staking commitment over time.
+
+**Recent Activity Tables**
+
+The 7-day activity tables show:
+
+**Top Stakers (7d):**
+- Wallets ranked by total TUNA amount staked in the last 7 days
+- Includes all staking operations (new stakes, additional deposits)
+- Sorted by descending amount
+
+**Top Withdrawers (7d):**
+- Wallets ranked by total TUNA amount withdrawn in the last 7 days
+- Includes all withdrawal operations (unstaking, claiming)
+- Sorted by descending amount
+
+These tables help identify the most active participants in recent staking activity.
+
+**Relationship to Other Views**
+
+This overview complements:
+- **[Stakers](/analysis/defituna/usage-statistics/usage-statistics-stakers)**: Shows unique wallets executing staking instructions over all time
+- **[Wallet Timeline](/analysis/defituna/staking/wallet-timeline)**: Detailed staking history for individual wallets
+- **[Staker Conviction](/analysis/defituna/staker-conviction)**: Analyzes long-term staker behavior and loyalty
+
+**Update Frequency**
+
+Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- Shows treasury allocation only (does not include all protocol participants)
+- Daily snapshots may miss intraday fluctuations
+- Recent activity tables limited to 7-day window
+- Does not show staking APR or rewards earned (see [Staking APR](/analysis/defituna/staking-apr) for that)
+- Unstaked TUNA may include tokens allocated for other purposes (operations, liquidity, etc.)
+
+</details>

@@ -1,0 +1,10 @@
+/**
+ * Search Dropdown - Minimal overrides
+ * Let the plugin handle everything by default
+ */
+
+/* Only ensure navbar allows overflow so dropdown can appear */
+.navbar,
+.navbar__inner {
+  overflow: visible !important;
+}

@@ -1,0 +1,146 @@
+---
+title: Transaction Types per Day
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Transaction Types per Day
+
+Daily time-series view of protocol revenue showing how transaction types evolve over time. The stacked area chart reveals daily patterns in protocol operations, compositional shifts between revenue sources, and the impact of protocol events on treasury inflows.
+
+## Data
+
+<BrowserOnly fallback={<LoadingSpinner />}>
+  {() => {
+    const { useDashboardData } = require('@site/src/components/Dashboard/useDashboardData');
+    const DailyStackedBarChart = require('@site/src/components/Dashboard/DailyStackedBarChart').default;
+
+    function RevenueDashboard() {
+      const data = useDashboardData();
+
+      if (data.loading) {
+        return <LoadingSpinner />;
+      }
+
+      if (data.error) {
+        return (
+          <div style={{
+            padding: '32px',
+            background: 'var(--ifm-background-surface-color)',
+            border: '1px solid var(--ifm-color-danger)',
+            borderRadius: 'var(--ifm-global-radius)',
+            color: 'var(--ifm-color-danger)',
+          }}>
+            <h3>Error Loading Dashboard</h3>
+            <p>{data.error}</p>
+          </div>
+        );
+      }
+
+      if (!data.dailyByType || data.dailyByType.length === 0) {
+        return <div>No daily transaction type data available</div>;
+      }
+
+      return <DailyStackedBarChart data={data.dailyByType} />;
+    }
+
+    return <RevenueDashboard />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Identify growth periods**: Track upward or downward trends in daily revenue and determine which transaction types drive changes
+- **Analyze composition shifts**: See which revenue sources are gaining or losing importance over time
+- **Investigate revenue spikes**: Hover over spikes to see which transaction types contributed to unusual patterns
+- **Detect protocol impact**: Validate expected outcomes from protocol changes, new features, or pool launches
+- **Spot seasonal patterns**: Identify cyclical or seasonal trends in protocol activity
+- **Assess revenue stability**: Evaluate whether revenue is consistent or volatile across different periods
+- **Correlate with events**: Link revenue patterns to external market events or protocol milestones
+
+## How to Read This Chart
+
+**Stacked Area Chart Structure:**
+- **X-axis**: Date (chronological)
+- **Y-axis**: Daily revenue in SOL
+- **Stacked Areas**: Each colored area represents a different transaction type
+- **Total Height**: The top edge shows total daily revenue across all transaction types
+
+**Grouping Modes:**
+
+Switch between different perspectives using the chart controls:
+- **By Type** (default): Track how transaction types (fees, liquidations, positions, etc.) evolve over time
+- **By Token**: See how different token inflows contribute to daily revenue
+- **By Pool**: Monitor which liquidity pools drive daily activity
+
+**What to Look For:**
+- **Spikes and anomalies**: Sudden increases often indicate large liquidations or significant protocol events
+- **Compositional shifts**: Changes in the relative height of areas show evolving revenue sources
+- **Trends**: Upward or downward slopes reveal growth or decline patterns
+- **Volatility**: Fluctuation patterns indicate revenue stability or variability
+
+**Interactive Features:**
+- **Hover**: See detailed breakdown for any day including exact SOL amounts per transaction type
+- **Legend**: Click legend items to show/hide specific transaction types
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Data Sources**
+
+- **Treasury transactions**: On-chain data from DefiTuna treasury PDA (`G9XfJoY81n8A9bZKaJFhJYomRrcvFkuJ22em2g8rZuCh`)
+- **Classification system**: Log-based transaction analysis with [100% attribution accuracy](/analysis/data-quality)
+- **Daily aggregation**: Transactions grouped by UTC day
+
+For complete pipeline details, see [Data Pipeline](/analysis/methodology).
+
+**Daily Revenue Calculation**
+
+Daily revenue is calculated using the revenue attribution system:
+
+1. **Transaction classification**: Each day's transactions are classified by type using log-based pattern matching
+2. **Revenue grouping**: Revenue is grouped by the selected dimension (type, token, or pool)
+3. **Stacking calculation**: Values are stacked to show composition while maintaining total visibility
+4. **Token conversion**: All SOL equivalents are calculated using same-day conversion rates from actual on-chain swaps
+
+**Time-Series Construction**
+
+- **UTC days**: All transactions are grouped by UTC day for consistent timezone handling
+- **Cumulative view**: Each day shows the composition of that day's revenue
+- **Gap handling**: Days with zero revenue appear as gaps in the chart
+- **Completeness**: All revenue-generating transactions are included (100% attribution accuracy)
+
+**Grouping Mode Details**
+
+- **By Type**: Shows transaction type composition (fees, liquidations, position management, etc.)
+- **By Token**: Shows which tokens contributed to revenue (SOL, USDC, JUP, TUNA, etc.)
+- **By Pool**: Shows which liquidity pools generated revenue (Orca Whirlpools, Fusion pools, Other)
+
+**Relationship to Other Views**
+
+This time-series view complements the aggregate breakdowns:
+- **[By Type](/analysis/defituna/revenue-breakdown/by-type)**: Shows cumulative totals by transaction type
+- **[By Token](/analysis/defituna/revenue-breakdown/by-token)**: Shows cumulative totals by token
+- **[By Pool](/analysis/defituna/revenue-breakdown/by-pool)**: Shows cumulative totals by pool
+- **[Pools vs. Types](/analysis/defituna/revenue-breakdown/pools-vs-types)**: Shows cross-dimensional breakdown
+
+The daily view adds temporal context, revealing how these totals accumulated over time and when specific patterns emerged.
+
+**Update Frequency**
+
+Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- Chart shows realized revenue only (excludes unrealized gains from held positions)
+- Days with extremely high volatility may appear compressed in the default zoom level
+- Very small transaction types may not be visible in the stacked areas
+- Token conversion rates based on treasury swap prices (may differ from market mid-price by a few basis points)
+
+</details>
+

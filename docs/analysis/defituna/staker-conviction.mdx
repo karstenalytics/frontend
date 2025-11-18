@@ -1,0 +1,209 @@
+---
+title: Staker Conviction
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Staker Conviction
+
+Protocol loyalty analysis through reward behavior patterns showing how stakers manage their rewards. Tracks the split between compounders (reinvest rewards as TUNA), claimers (extract rewards as SOL), and mixed strategists, revealing conviction levels, reinvestment rates, and loyalty trends across different stake sizes and time periods.
+
+## Data
+
+<BrowserOnly fallback={<LoadingSpinner />}>
+  {() => {
+    const { useStakerLoyalty } = require('@site/src/hooks/useStakerLoyalty');
+    const { useStakingMetrics } = require('@site/src/hooks/useStakingMetrics');
+    const {
+      LoyaltyStats,
+      BehaviorPieChart,
+      InverseWhaleChart,
+      DailyTrendsChart,
+    } = require('@site/src/components/Loyalty');
+
+    function StakerConvictionPage() {
+      const { data, loading, error } = useStakerLoyalty();
+      const { data: stakingData, loading: stakingLoading, error: stakingError } = useStakingMetrics();
+
+      if (loading || stakingLoading) {
+        return <LoadingSpinner />;
+      }
+
+      if (error || !data) {
+        return (
+          <div className="alert alert--danger" role="alert">
+            <strong>Could not load staker loyalty data.</strong> {error || 'Unknown error'}
+          </div>
+        );
+      }
+
+      if (stakingError || !stakingData) {
+        return (
+          <div className="alert alert--danger" role="alert">
+            <strong>Could not load staking data.</strong> {stakingError || 'Unknown error'}
+          </div>
+        );
+      }
+
+      const { summary, user_segments, daily_trends, date_range } = data;
+
+      // Get current active stakers from the latest daily count
+      const activeStakersCounts = stakingData.active_stakers?.daily_counts || [];
+      const currentActiveStakers = activeStakersCounts.length > 0
+        ? activeStakersCounts[activeStakersCounts.length - 1].count
+        : undefined;
+
+      return (
+        <>
+          <LoyaltyStats summary={summary} />
+
+          <BehaviorPieChart
+            userSegments={user_segments}
+            totalUsers={summary.total_users}
+            currentActiveStakers={currentActiveStakers}
+          />
+
+          <InverseWhaleChart userSegments={user_segments} />
+
+          {daily_trends && <DailyTrendsChart dailyTrends={daily_trends} />}
+        </>
+      );
+    }
+
+    return <StakerConvictionPage />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Assess protocol conviction**: Measure how many stakers reinvest rewards vs. extract them, indicating long-term belief
+- **Identify loyalty trends**: Track whether the compound-only cohort is growing or shrinking over time
+- **Analyze whale behavior**: See if large stakers (whales) are more or less likely to compound compared to smaller holders
+- **Evaluate reward strategies**: Understand which behavior patterns (compound, claim, mixed) are most common
+- **Segment by stake size**: Identify whether conviction differs between small, medium, and large stakers
+
+## How to Read This Chart
+
+**Loyalty Summary Statistics:**
+- **Loyalty Score**: Percentage of reward-active stakers who have ONLY compounded (never claimed)
+- **Reinvestment Rate**: Percentage of total reward SOL that was compounded rather than claimed
+- **Total Rewards**: Sum of all SOL from claim + compound operations
+- **Reward Active Stakers**: Count of wallets that have claimed or compounded at least once
+- **Current Active Stakers**: Total wallets with non-zero staking balances (for context)
+
+**How Stakers Manage Their Rewards (Pie Charts):**
+Shows the distribution of stakers across three behavior categories:
+- **Compound-only (Green)**: Never claimed, always reinvest - highest conviction
+- **Mixed (Amber)**: Sometimes compound, sometimes claim - flexible strategy
+- **Claim-only (Red)**: Never compound, always claim - may indicate different liquidity strategy
+
+The left pie shows the split between all active stakers (with and without reward activity). The right pie (highlighted with teal border) shows the breakdown of behavior types among stakers who actively manage rewards.
+
+**Compound Rate by Stake Size (Stacked Bar Chart):**
+Displays how behavior differs across stake size tiers:
+- **Y-axis**: Stake size tiers (from smallest at bottom to largest at top)
+- **X-axis**: Percentage breakdown (always totals 100%)
+- **Bar segments**: Green (compound-only), Amber (mixed), Red (claim-only)
+- **Right side annotations**: Total rewards and staker count per tier
+
+Helps identify whether whales (large stakers) or shrimp (small stakers) are more likely to reinvest rewards.
+
+**Interactive Features:**
+- **Hover on charts**: See exact values and percentages
+- **Legend toggles**: Click legend items to show/hide specific segments
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Data Sources**
+
+- **Staking transactions**: On-chain ClaimReward and CompoundReward instructions from DefiTuna staking program
+- **Transaction logs**: Reward amounts extracted from instruction logs
+- **Wallet tracking**: Each unique wallet address (fee payer) tracked separately
+- **Active staker counts**: Daily snapshots of wallets with non-zero staking balances
+
+For complete pipeline details, see [Data Pipeline](/analysis/methodology).
+
+**Metric Calculations**
+
+**Loyalty Score:**
+```
+Loyalty Score = (Compound-only Stakers / Total Reward-Active Stakers) × 100
+```
+Where:
+- Compound-only Stakers = Wallets that have ONLY executed CompoundReward (never ClaimReward)
+- Total Reward-Active Stakers = All wallets that have claimed OR compounded at least once
+
+**Reinvestment Rate:**
+```
+Reinvestment Rate = (Total Compounded SOL / Total Rewards SOL) × 100
+```
+Where:
+- Total Compounded SOL = Sum of all SOL amounts from CompoundReward instructions
+- Total Rewards SOL = Total Compounded SOL + Total Claimed SOL
+
+**Staker Behavior Segments:**
+
+Stakers are classified into exactly one category based on their transaction history:
+
+- **Compound-only**: Executed ≥1 CompoundReward, 0 ClaimReward transactions
+- **Claim-only**: Executed ≥1 ClaimReward, 0 CompoundReward transactions
+- **Mixed**: Executed ≥1 of both ClaimReward AND CompoundReward transactions
+
+**Stake Size Tiers:**
+
+Stakers are grouped by their staked TUNA balance into tiers such as: less than 1K, 1K-10K, 10K-100K, 100K+. The Inverse Whale Chart shows the compound percentage for each tier:
+```
+Tier Compound % = (Compound-only + Mixed Stakers in Tier) / (Total Stakers in Tier) × 100
+```
+
+**Staker Population Context**
+
+- **Current Active Stakers**: Wallets with non-zero staking balance on the most recent date (from daily staker snapshots)
+- **Reward Active Stakers**: Subset of active stakers who have claimed OR compounded at least once during the analysis period
+
+Not all active stakers have reward activity - some may have staked recently and haven't accumulated enough rewards yet, or their rewards are still unclaimed.
+
+**Date Range**
+
+Analysis covers the period dynamically shown in the data (typically from when reward tracking began to the most recent data update). The date range is displayed in the methodology section.
+
+**Reward Extraction**
+
+Reward amounts are extracted from transaction logs:
+- **ClaimReward instructions**: SOL amount sent to wallet (extracted from logs)
+- **CompoundReward instructions**: SOL amount reinvested as TUNA stake (extracted from logs)
+
+Both instruction types credit the wallet with SOL rewards, but CompoundReward immediately converts to additional TUNA stake while ClaimReward sends SOL to the wallet.
+
+**Important Distinctions**
+
+- **Claiming ≠ Extracting/Selling**: Stakers who claim rewards receive SOL but this doesn't mean they're leaving the protocol or selling. Many claim to optimize timing - they may want to buy TUNA when prices are more favorable, use SOL for other opportunities, or maintain liquidity flexibility while remaining protocol believers.
+- **Compound-only = Highest Conviction**: These stakers have never claimed rewards, automatically reinvesting all earnings back into TUNA stake, demonstrating maximum protocol belief and long-term commitment.
+- **Mixed Strategy = Tactical Approach**: May be the most sophisticated - compound when APR is high to maximize returns, claim when they need liquidity, expect TUNA price appreciation, or want to time their TUNA purchases strategically. This behavior doesn't necessarily indicate lower conviction, just different liquidity management.
+
+**Relationship to Other Views**
+
+This conviction analysis complements:
+- **[Stakers](/analysis/defituna/usage-statistics/usage-statistics-stakers)**: Shows all active stakers ranked by activity frequency
+- **[Staking Overview](/analysis/defituna/staked-tuna)**: Shows total staked/unstaked treasury allocation
+- **[Wallet Timeline](/analysis/defituna/staking/wallet-timeline)**: Shows individual wallet's complete staking history
+
+**Update Frequency**
+
+Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- Only tracks stakers who have claimed OR compounded at least once (no reward activity = not included)
+- Doesn't track unclaimed rewards still accumulating in staking contracts
+- Wallet-level tracking (multi-wallet stakers counted separately)
+- Historical data only (no predictive modeling of future behavior)
+- Claiming behavior may be influenced by factors outside protocol conviction (tax planning, liquidity needs, market timing, etc.)
+
+</details>

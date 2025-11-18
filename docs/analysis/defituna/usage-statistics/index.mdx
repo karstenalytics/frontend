@@ -1,0 +1,182 @@
+---
+id: usage-statistics-overview
+title: Wallet Usage
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Wallet Usage
+
+Tracks unique wallets interacting with the DefiTuna protocol through revenue-generating actions. Daily metrics capture single-day activity, while weekly metrics show rolling 7-day participation to identify sustained engagement patterns.
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '800px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const UsageTimeSeriesChart = require('@site/src/components/Usage/UsageTimeSeriesChart').default;
+    const UsageTopAddresses = require('@site/src/components/Usage/UsageTopAddresses').default;
+    const { useUsageMetrics } = require('@site/src/hooks/useUsageMetrics');
+
+    function UsageStatisticsPage() {
+      const { data, loading, error } = useUsageMetrics();
+
+      if (loading) {
+        return <LoadingSpinner />;
+      }
+
+      if (error || !data) {
+        return (
+          <div style={{
+            padding: '32px',
+            background: 'var(--ifm-background-surface-color)',
+            border: '1px solid var(--ifm-color-danger)',
+            borderRadius: 'var(--ifm-global-radius)',
+            color: 'var(--ifm-color-danger)',
+          }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '8px' }}>Error Loading Usage Metrics</div>
+            <p>{error || 'Unknown error'}</p>
+          </div>
+        );
+      }
+
+      const { summary, daily_users, weekly_users } = data;
+
+      // Filter out treasury infrastructure wallet
+      const filteredTopWallets = daily_users.top_wallets.filter(
+        wallet => !wallet.address.startsWith('9j6d')
+      );
+
+      return (
+        <>
+          <UsageTimeSeriesChart
+            title="Daily Active Wallets"
+            data={daily_users.daily_counts}
+            yAxisLabel="Daily active wallets"
+            description="Number of distinct wallets that executed fee-generating actions each day."
+          />
+
+          <UsageTimeSeriesChart
+            title="Weekly Active Wallets"
+            data={weekly_users.rolling_counts}
+            yAxisLabel="Active wallets (7-day)"
+            description="Rolling 7-day union of active addresses. This metric identifies sustained protocol use beyond single-day spikes."
+          />
+
+          <div style={{ marginTop: '48px' }}>
+            <h2 id="top-daily-wallets">Top Daily Wallets</h2>
+            <p style={{ marginBottom: '16px' }}>
+              Wallets ranked by the number of distinct days they executed fee-generating transactions.
+              This metric identifies the most consistently active wallets across the entire measurement period.
+            </p>
+            <UsageTopAddresses
+              title=""
+              rows={filteredTopWallets}
+              description=""
+            />
+          </div>
+        </>
+      );
+    }
+
+    return <UsageStatisticsPage />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Track protocol adoption**: Monitor growth in unique wallets using the protocol daily
+- **Identify engagement patterns**: Compare daily spikes with sustained weekly activity to distinguish one-time users from regular participants
+- **Assess user retention**: Weekly active wallet trends reveal whether users return after their first interaction
+- **Evaluate protocol changes**: Identify the impact of feature launches, parameter updates, or integrations on usage numbers by comparing activity before and after changes
+- **Benchmark growth**: Use daily and weekly metrics to measure protocol health over time
+- **Identify power users**: Use the Top Daily Wallets table to find the most consistently engaged wallets
+
+## How to Read These Charts
+
+**Daily Active Wallets Chart:**
+- **X-axis**: Date (UTC days)
+- **Y-axis**: Number of unique wallets executing fee-generating actions each day
+- **Spikes**: May indicate marketing campaigns, token launches, or protocol events
+- **Baseline**: Represents core user base executing regular transactions
+
+**Weekly Active Wallets Chart:**
+- **X-axis**: Date (UTC days)
+- **Y-axis**: Rolling 7-day union of active wallets (counts each wallet once even if active on multiple days)
+- **Smooths volatility**: Filters out single-day spikes to show sustained engagement trends
+- **Lag effect**: Changes appear gradually due to 7-day rolling window
+
+**Top Daily Wallets Table:**
+- **Wallet Address**: Solana address (links to Solscan)
+- **Days Active**: Total distinct days the wallet executed fee-generating transactions
+- **Transactions**: Total number of fee-generating transactions across all days
+- **First/Last Seen**: Date range of wallet activity
+- **Staking Timeline**: Link to view detailed staking activity for each wallet
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Data Sources**
+
+- **Transaction logs**: On-chain fee-generating transactions from DefiTuna protocol
+- **Wallet identification**: Unique Solana addresses executing protocol instructions
+- **Activity tracking**: Daily records of which wallets executed fee-generating actions
+
+For complete pipeline details, see [Data Pipeline](/analysis/methodology).
+
+**Fee-Generating Actions**
+
+A wallet is counted as active when it executes transactions that generate protocol fees. This includes:
+
+- **Liquidity operations**: Swaps, adding/removing liquidity
+- **Position management**: Opening, closing, or adjusting positions
+- **Liquidations**: Liquidating underwater positions
+- **Other revenue-generating activities**: Any operation that contributes to treasury revenue
+
+**Excluded activities:**
+- Staking/unstaking operations (tracked separately in [Stakers](/analysis/defituna/usage-statistics/usage-statistics-stakers))
+- Failed transactions
+- System transactions without fee generation
+
+**Daily Active Wallets Calculation**
+
+For each UTC day:
+1. Collect all successful fee-generating transactions
+2. Extract unique wallet addresses from transaction signers
+3. Count distinct addresses per day
+
+This provides a **snapshot count** of unique participants each day, with wallets counted once per day regardless of transaction frequency.
+
+**Weekly Active Wallets Calculation**
+
+For each UTC day:
+1. Collect all unique daily active wallets from the past 7 days (including current day)
+2. Count distinct addresses across the 7-day window
+3. Each wallet counted once even if active on multiple days within the window
+
+This **rolling 7-day union** smooths daily volatility and highlights sustained participation patterns.
+
+**Top Daily Wallets Ranking**
+
+The Top Daily Wallets table ranks by:
+- **Activity frequency**: Number of distinct calendar days (UTC) the wallet executed fee-generating transactions
+- **Not by transaction volume**: A wallet with 100 transactions on 1 day ranks below a wallet with 10 transactions on 10 different days
+- **Purpose**: Identifies consistently engaged users rather than high-volume traders
+
+**Update Frequency**
+
+Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- Only tracks fee-generating activities; non-revenue operations excluded
+- Multi-wallet users (same person controlling multiple addresses) are counted separately
+- Does not measure transaction size or volume, only participation
+- Single-day spike can inflate weekly metric for up to 7 days due to rolling window
+- Cross-protocol users (using multiple protocols) appear as separate wallets per protocol
+
+</details>

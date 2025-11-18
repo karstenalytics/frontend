@@ -1,0 +1,368 @@
+---
+title: TUNA Staking APR
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# TUNA Staking APR
+
+Historical Annual Percentage Rate (APR) for TUNA staking, calculated from DefiTuna treasury revenue. Shows both Reference APR (based on current market price from on-chain swap data) and personalized APR based on your entry price. 30-day rolling window reveals how protocol revenue translates to staker yields.
+
+## Data
+
+<BrowserOnly fallback={<LoadingSpinner />}>
+  {() => {
+    const { useEffect, useState } = require('react');
+    const { useAprData } = require('@site/src/hooks/useAprData');
+
+    function AprSummaryStats() {
+      const { data, loading } = useAprData();
+      const [userEntryPrice, setUserEntryPrice] = useState(null);
+
+      useEffect(() => {
+        // Load user entry price from localStorage, default to 0.05 (public pre-sale price)
+        const saved = localStorage.getItem('tunaEntryPrice');
+        if (saved && !isNaN(parseFloat(saved))) {
+          setUserEntryPrice(parseFloat(saved));
+        } else {
+          setUserEntryPrice(0.05);
+        }
+
+        // Listen for storage changes to sync across components
+        const handleStorageChange = () => {
+          const newSaved = localStorage.getItem('tunaEntryPrice');
+          if (newSaved && !isNaN(parseFloat(newSaved))) {
+            setUserEntryPrice(parseFloat(newSaved));
+          } else {
+            setUserEntryPrice(null);
+          }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        // Also listen for custom event for same-page updates
+        window.addEventListener('tunaEntryPriceChanged', handleStorageChange);
+
+        return () => {
+          window.removeEventListener('storage', handleStorageChange);
+          window.removeEventListener('tunaEntryPriceChanged', handleStorageChange);
+        };
+      }, []);
+
+      if (loading) {
+        return <div style={{ padding: '24px', textAlign: 'center', color: 'var(--ifm-color-secondary)' }}>Loading summary statistics...</div>;
+      }
+
+      if (!data || !data.summary || Object.keys(data.summary).length === 0) {
+        return <div style={{ padding: '24px', textAlign: 'center', color: 'var(--ifm-color-secondary)' }}>No summary statistics available</div>;
+      }
+
+      const summary = data.summary;
+
+      // Calculate custom APR stats if user entry price differs from default
+      let customStats = null;
+      if (userEntryPrice !== null && userEntryPrice > 0 && userEntryPrice !== 0.05 && data.daily_apr) {
+        const customAprValues = data.daily_apr
+          .filter(d => d.revenue_per_tuna_usdc)
+          .map(d => (d.revenue_per_tuna_usdc / userEntryPrice) * 100);
+
+        if (customAprValues.length > 0) {
+          // Calculate 30-day average (last 30 values)
+          const last30Values = customAprValues.slice(-30);
+
+          customStats = {
+            thirty_day_average: last30Values.reduce((a, b) => a + b, 0) / last30Values.length,
+            historical_average: customAprValues.reduce((a, b) => a + b, 0) / customAprValues.length,
+          };
+        }
+      }
+
+      const StatCard = ({ label, referenceValue, yourValue, customValue, showIndicators }) => {
+        const entryPrice = userEntryPrice || 0.05;
+        const aprValue = customValue !== null && customValue !== undefined ? customValue : yourValue;
+
+        // Format entry price without trailing zeroes
+        const formatPrice = (price) => {
+          return parseFloat(price.toFixed(4)).toString();
+        };
+
+        return (
+          <div style={{
+            padding: '16px 20px',
+            background: 'var(--ifm-background-surface-color)',
+            border: '1px solid var(--ifm-toc-border-color)',
+            borderRadius: 'var(--ifm-global-radius)',
+            boxShadow: '0 4px 16px rgba(15, 20, 27, 0.05)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+          }}>
+            {/* Row 1: Label with optional teal line indicator */}
+            <div style={{ fontSize: '16px', color: 'var(--ifm-color-secondary)', fontWeight: '600' }}>
+              {label}{showIndicators && (
+                <span style={{ marginLeft: '8px' }}>
+                  (<span style={{
+                    display: 'inline-block',
+                    position: 'relative',
+                    width: '35px',
+                    height: '2px',
+                    backgroundColor: 'rgba(0, 163, 180, 1)',
+                    verticalAlign: 'middle'
+                  }}>
+                    <span style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      width: '6px',
+                      height: '6px',
+                      backgroundColor: 'rgba(0, 163, 180, 0.8)',
+                      borderRadius: '50%'
+                    }}></span>
+                  </span>)
+                </span>
+              )}
+            </div>
+
+            {/* Row 2: Reference APR */}
+            <div style={{ fontSize: '32px', fontWeight: '600', color: 'var(--accent)' }}>
+              {referenceValue?.toFixed(2)}%
+            </div>
+
+            {/* Row 3: Entry Price APR with optional green line indicator */}
+            <div style={{ fontSize: '14px', color: 'var(--ifm-color-emphasis-600)' }}>
+              APR with ${formatPrice(entryPrice)} TUNA entry price: <strong style={{ color: 'var(--ifm-color-emphasis-600)' }}>{aprValue?.toFixed(2)}%</strong>{showIndicators && (
+                <span style={{ marginLeft: '6px' }}>
+                  (<span style={{
+                    display: 'inline-block',
+                    position: 'relative',
+                    width: '30px',
+                    height: '2px',
+                    backgroundColor: 'rgba(34, 197, 94, 1)',
+                    verticalAlign: 'middle'
+                  }}>
+                    <span style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      width: '5px',
+                      height: '5px',
+                      backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                      borderRadius: '50%'
+                    }}></span>
+                  </span>)
+                </span>
+              )}
+            </div>
+          </div>
+        );
+      };
+
+      return (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '16px',
+          marginBottom: '32px',
+        }}>
+          <StatCard
+            label="30-day Average APR"
+            referenceValue={summary.thirty_day_average_reference_apr}
+            yourValue={summary.thirty_day_average_your_apr}
+            customValue={customStats?.thirty_day_average}
+            showIndicators={true}
+          />
+          <StatCard
+            label="All-time Average APR"
+            referenceValue={summary.historical_average_reference_apr}
+            yourValue={summary.historical_average_your_apr}
+            customValue={customStats?.historical_average}
+            showIndicators={false}
+          />
+        </div>
+      );
+    }
+
+    return <AprSummaryStats />;
+  }}
+</BrowserOnly>
+
+<BrowserOnly fallback={<LoadingSpinner />}>
+  {() => {
+    const AprChart = require('@site/src/components/Dashboard/AprChart').default;
+    return <AprChart />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Track staking yields**: Monitor how protocol revenue translates to APR for TUNA stakers
+- **Calculate personalized returns**: Compare your actual APR based on entry price vs. market reference APR
+- **Evaluate investment timing**: See how early entry prices result in higher effective yields
+- **Analyze APR trends**: Identify whether staking yields are increasing, stable, or declining over time
+- **Benchmark revenue performance**: Understand protocol revenue trends through the lens of staker returns
+- **Plan entry strategies**: Compare potential APR at different TUNA price points
+
+## How to Read This Chart
+
+**Summary Statistics Cards:**
+- **30-day Average APR**: Rolling 30-day average yield (includes line indicators matching chart traces)
+- **All-time Average APR**: Historical average since staking launch
+- **Reference APR** (large teal number): APR based on current market TUNA price from on-chain swap data
+- **Entry Price APR** (smaller text below): Your personalized APR based on entry price (default $0.05)
+
+**APR Chart:**
+- **X-axis**: Date
+- **Y-axis**: Annual Percentage Rate (%)
+- **Teal line with dots**: Reference APR (based on on-chain TUNA market price)
+- **Green dashed line with dots**: Your/Custom APR (based on entry price you set)
+- **Hidden trace**: TUNA Reference Price (click legend to show) - derived from on-chain swap volume-weighted prices
+
+**Entry Price Input (below chart):**
+Enter your actual TUNA purchase price to calculate your personalized APR. The chart and summary cards update in real-time. Your entry price is saved across sessions.
+
+**Interactive Features:**
+- **Hover on chart**: See detailed breakdown including both APR values, rolling revenue (SOL/USD), days in window, and TUNA price
+- **Click legend**: Show/hide traces (e.g., reveal TUNA Reference Price)
+- **Entry price input**: Immediately updates all statistics and chart traces
+- **Line indicators in cards**: Show which line corresponds to which APR value (teal = Reference, green = Entry Price)
+
+**Why Two APR Values?**
+
+If you bought TUNA below the current market price, your effective APR is higher:
+- **Reference APR**: What the market sees based on current TUNA price
+- **Your APR**: What you actually earn based on your lower cost basis
+- **Example**: $0.012 revenue per TUNA ÷ $0.05 entry = 24% APR vs. ÷ $0.20 market = 6% APR
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+The TUNA staking APR is calculated using the following approach:
+
+**Key Parameters**
+
+- **TUNA Supply**: Fixed at 1,000,000,000 tokens
+- **Rolling Window**: Up to 30 days of historical revenue data
+- **Revenue Source**: Treasury WSOL inflows (validated against DefiTuna data)
+- **TUNA Reference Price**:
+  - **Source**: Daily `assets.json` files - derived from on-chain TUNA/WSOL swap transaction data
+  - **Calculation**: Weighted average price based on swap volumes, converted to USD
+- **Default Entry Price**: $0.05 (public pre-sale price)
+- **USD/SOL Rates**: Daily spot rates from DefiTuna staking revenue data
+
+**Calculation Formula**
+
+The APR calculation follows these steps:
+
+1. **Rolling Revenue Sum**: Sum of treasury WSOL inflows over the last 30 days (or fewer for early dates)
+
+2. **Annualized Revenue (USD)**:
+   ```
+   Annualized Revenue USD = (Rolling Revenue Sum USD / Days in Window) × 365
+   ```
+
+3. **Revenue per TUNA (USD)**:
+   ```
+   Revenue per TUNA USD = Annualized Revenue USD / 1,000,000,000
+   ```
+
+4. **Reference APR** (based on TUNA Reference Price):
+   ```
+   Reference APR (%) = (Revenue per TUNA USD / TUNA Reference Price USD) × 100
+   ```
+
+5. **Entry Price APR** (based on your entry price):
+   ```
+   Entry Price APR (%) = (Revenue per TUNA USD / Your Entry Price USD) × 100
+   ```
+
+**Example Calculation**
+
+<BrowserOnly fallback={<div>Loading example...</div>}>
+  {() => {
+    const { useEffect, useState } = require('react');
+    const { useAprData } = require('@site/src/hooks/useAprData');
+
+    function ExampleCalculation() {
+      const { data: aprData, loading } = useAprData();
+      const [data, setData] = useState(null);
+
+      useEffect(() => {
+        if (aprData?.daily_apr) {
+          // Get the last entry (most recent date with full 30-day window)
+          const fullWindowData = aprData.daily_apr.filter(d => d.rolling_days === 30);
+          if (fullWindowData.length > 0) {
+            setData(fullWindowData[fullWindowData.length - 1]);
+          }
+        }
+      }, [aprData]);
+
+      if (!data) {
+        return <div style={{ padding: '16px', color: 'var(--ifm-color-secondary)' }}>Loading calculation example...</div>;
+      }
+
+      const formatCurrency = (val) => val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const formatPrice = (val) => val.toFixed(4);
+
+      return (
+        <div>
+          <p>Using actual data from {data.date}:</p>
+          <ul>
+            <li>30-day rolling revenue: ${formatCurrency(data.rolling_revenue_usdc)} USDC ({formatCurrency(data.rolling_revenue_sol)} SOL)</li>
+            <li>TUNA Reference Price: ${formatPrice(data.tuna_price_usd)} USD (from on-chain swap data)</li>
+            <li>Your entry price: $0.05 USD (default)</li>
+          </ul>
+
+          <p>The APR would be calculated as:</p>
+          <pre style={{ background: 'var(--ifm-code-background)', padding: '16px', borderRadius: 'var(--ifm-global-radius)', overflow: 'auto' }}>
+{`Annualized Revenue = ($${formatCurrency(data.rolling_revenue_usdc)} / ${data.rolling_days}) × 365 = $${formatCurrency(data.annualized_revenue_usdc)} USDC
+Revenue per TUNA = $${formatCurrency(data.annualized_revenue_usdc)} / 1,000,000,000 = $${formatPrice(data.revenue_per_tuna_usdc)} USDC
+
+Reference APR = ($${formatPrice(data.revenue_per_tuna_usdc)} / $${formatPrice(data.tuna_price_usd)}) × 100 = ${data.reference_apr_percent.toFixed(2)}%
+Entry Price APR = ($${formatPrice(data.revenue_per_tuna_usdc)} / $0.05) × 100 = ${data.your_apr_percent.toFixed(2)}%`}
+          </pre>
+
+          <p>This shows how early investors with a lower entry price achieve higher APR on the same protocol revenue.</p>
+        </div>
+      );
+    }
+
+    return <ExampleCalculation />;
+  }}
+</BrowserOnly>
+
+**USD Conversion Methodology**
+
+USD values are calculated using **daily spot market rates** from DefiTuna's staking revenue data. This ensures the USD calculations match the protocol's official values with 100% accuracy.
+
+- **Rate Source**: Daily USD/SOL conversion rates from DefiTuna
+- **Rate Calculation**: For each day, USD/SOL rate = (daily USD deposits) / (daily SOL deposits)
+- **Accuracy**: 100% match with DefiTuna data (verified daily)
+
+**Example**: On a given day with a spot rate of $181.11/SOL, 926.36 SOL revenue = $167,771.22 USD.
+
+**Data Notes**
+
+- **Early History**: For dates with less than 30 days of historical data, the APR is calculated using all available days and annualized accordingly.
+- **Price Data Source**: Daily `assets.json` files containing TUNA prices derived from on-chain swap transaction data
+- **Revenue Validation**: All revenue figures are validated against data made available by DefiTuna to ensure 100% accuracy.
+- **USD Values**: Calculated using daily spot market rates from DefiTuna, ensuring exact match with protocol's official USD values.
+
+**APR Fluctuation Factors**
+
+The APR naturally fluctuates based on:
+- **Treasury Revenue**: Higher protocol activity increases treasury inflows
+- **TUNA Price**: Price movements affect the Reference APR calculation
+- **Your Entry Price**: Lower entry prices result in higher Your APR for the same revenue
+- **Historical Window**: Early days with less historical data may show higher volatility
+
+**Data Update Frequency**
+
+APR data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
+
+</details>

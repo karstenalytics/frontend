@@ -1,0 +1,119 @@
+---
+sidebar_position: 6
+title: Revenue by Wallet
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Revenue by Wallet
+
+This page provides wallet-level revenue analysis, attributing protocol revenue to individual user wallets based on transaction initiators (feePayer).
+
+## Overview
+
+Revenue is attributed to wallets that initiate transactions generating protocol fees. This analysis helps identify:
+
+- **Revenue distribution** across the wallet population
+- **Power users** contributing significant protocol revenue
+- **Whale behavior** through individual wallet timelines
+- **Transaction patterns** of high-revenue wallets
+
+## Wallet Revenue Distribution
+
+The histogram below shows how many wallets fall into each revenue cohort. The logarithmic ranges help visualize the distribution from small contributors to high-revenue users.
+
+**Use the "Exclude Liquidations" filter** to see revenue distribution from non-liquidation activities only.
+
+## Individual Wallet Analysis
+
+Enter any wallet address to see its complete revenue timeline, including:
+
+- **Cumulative revenue** over time
+- **Transaction events** with type, amount, and Solscan links
+- **Revenue breakdown** by transaction type
+- **Activity period** (first and last transactions)
+
+<BrowserOnly fallback={<LoadingSpinner />}>
+  {() => {
+    const WalletRevenueBreakdown = require('@site/src/components/Dashboard/WalletRevenueBreakdown').default;
+    const useBaseUrl = require('@docusaurus/useBaseUrl').default;
+    const dataUrl = useBaseUrl('/data/wallet_revenue_attribution.json');
+    return <WalletRevenueBreakdown dataUrl={dataUrl} />;
+  }}
+</BrowserOnly>
+
+## Methodology
+
+### Revenue Attribution Method
+
+This analysis attributes revenue to **position owners** - the wallets whose LP positions generate protocol fees or are liquidated.
+
+**Attribution Logic:**
+1. **Identify Position Owner**: Wallet that sends tokens to the treasury (highest outflow)
+2. **Liquidations**: Attributes revenue to the liquidation victim, not the liquidator
+3. **LP Operations**: Attributes revenue to the wallet opening/managing the position
+
+**Exclusions:**
+- **`collect_protocol_fees`**: Excluded because these are aggregate fee collections from multiple positions, not attributable to individual owners
+
+**Example:** If a liquidator bot liquidates a user's position generating 10 SOL revenue, the **user wallet** (position owner) is attributed the 10 SOL, not the bot.
+
+### What This Analysis Shows
+
+This attribution answers: **"Which wallets own positions that generate protocol revenue?"**
+
+- Shows actual users whose capital generates fees
+- Liquidation victims whose positions contribute to treasury
+- LP providers earning fees for the protocol
+
+### Data Scope
+
+- **Revenue Calculation**: Direct WSOL inflows to treasury only
+- **Token Conversion**: Non-WSOL tokens not included (requires price conversion)
+- **Multiple Wallets**: No cross-wallet aggregation for users with multiple addresses
+
+### Cohort Ranges
+
+Cohort ranges are automatically determined based on actual revenue distribution to ensure meaningful bucketing across the wallet population.
+
+## Interpretation Guide
+
+### High-Revenue Wallets
+
+Wallets in the top cohorts (100+ SOL) typically represent:
+- Active liquidity providers
+- Frequent position adjusters
+- Long-term protocol users
+
+### Timeline Patterns
+
+- **Steep increases**: Large transactions or high-activity periods
+- **Flat periods**: Wallet inactivity
+- **Liquidation events**: Red markers indicate liquidation-based revenue
+
+### Filtering Liquidations
+
+The "Exclude Liquidations" filter helps distinguish:
+- **Organic revenue**: From user-initiated trading activities
+- **Forced revenue**: From automated liquidations
+
+## Use Cases
+
+### Protocol Analysis
+
+1. **User Segmentation**: Identify different tiers of protocol users
+2. **Retention Analysis**: Track wallet activity duration and patterns
+3. **Whale Tracking**: Monitor high-revenue wallet behavior
+
+### Business Insights
+
+1. **Revenue Concentration**: Understand what percentage of revenue comes from top wallets
+2. **User Value**: Quantify lifetime value per wallet
+3. **Engagement Metrics**: Correlate transaction frequency with revenue contribution
+
+## Related Pages
+
+- [Revenue by Type](./by-type) - Transaction type breakdown
+- [Revenue by Pool](./by-pool) - Pool-level analysis
+- [Revenue by Token](./by-token) - Token-specific revenue

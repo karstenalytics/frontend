@@ -1,0 +1,114 @@
+/**
+ * Navbar Tabs - Separate sticky row below header
+ * Intro, Articles, Analysis navigation tabs
+ */
+
+.navbar-tabs {
+  position: sticky;
+  top: 56px; /* Stick below the navbar */
+  z-index: 99; /* Search dropdown has z-index: 10000, so it will appear above */
+  margin-top: -1px; /* Pull up to overlap navbar by 1px for seamless blur */
+  background: var(--navbar-tabs-bg-transparent); /* More transparent for glassmorphism effect */
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-bottom: 1px solid var(--ifm-toc-border-color); /* Only bottom border under tabs */
+  display: flex;
+  justify-content: center;
+  overflow: visible !important; /* Must be visible to allow search dropdown to show */
+  width: 100%;
+}
+
+.navbar-tabs__inner {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  max-width: var(--max-content-width);
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--page-gutter);
+  gap: 0;
+}
+
+.navbar-tabs__link {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 20px;
+  height: 45px;
+  padding: 0 16px;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  color: var(--ifm-color-secondary);
+  text-decoration: none;
+  transition: color 120ms ease, border-color 120ms ease;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+
+.navbar-tabs__link:hover {
+  color: var(--ifm-font-color-base);
+  text-decoration: none;
+}
+
+.navbar-tabs__link--active {
+  color: var(--ifm-font-color-base);
+  border-bottom-color: var(--accent);
+}
+
+.navbar-tabs__icon {
+  color: var(--ifm-color-secondary);
+  transition: color 120ms ease;
+}
+
+.navbar-tabs__link:hover .navbar-tabs__icon {
+  color: var(--ifm-font-color-base);
+}
+
+.navbar-tabs__link--active .navbar-tabs__icon {
+  color: var(--accent);
+}
+
+/* Disabled state */
+.navbar-tabs__link--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.navbar-tabs__link--disabled:hover {
+  color: var(--ifm-color-secondary);
+}
+
+.navbar-tabs__link--disabled .navbar-tabs__icon {
+  opacity: 0.4;
+}
+
+/* Responsive adjustments */
+/* Tablet viewports: Remove max-width constraint to allow tabs to move left */
+@media (min-width: 997px) and (max-width: 1199px) {
+  .navbar-tabs__inner {
+    max-width: none !important;
+  }
+}
+
+/* Desktop: Restore max-width constraint above 1200px */
+@media (min-width: 1200px) {
+  .navbar-tabs__inner {
+    max-width: var(--max-content-width) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-tabs {
+    height: 48px;
+    top: 48px; /* Stick below the navbar on mobile */
+    margin-top: -1px; /* Pull up to overlap navbar by 1px for seamless blur */
+  }
+
+  .navbar-tabs__link {
+    height: 48px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+}

@@ -1,0 +1,191 @@
+---
+title: Revenue by Token
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Revenue Breakdown by Token
+
+Displays protocol revenue contribution across different tokens, showing which assets generate treasury inflows. Revenue comes from two sources: "SOL (direct)" represents native SOL/WSOL received directly, while other tokens (USDC, JUP, TUNA, etc.) are converted to SOL via on-chain swaps. Click on a token bar to display the top 10 contributing transactions for that token.
+
+## Data
+
+<BrowserOnly fallback={<LoadingSpinner />}>
+  {() => {
+    const { useState } = require('react');
+    const { useDashboardData } = require('@site/src/components/Dashboard/useDashboardData');
+    const BreakdownChart = require('@site/src/components/Dashboard/BreakdownChart').default;
+    const TopTransactionsTable = require('@site/src/components/Dashboard/TopTransactionsTable').default;
+
+    function RevenueDashboard() {
+      const data = useDashboardData();
+      const [selectedId, setSelectedId] = useState(null);
+      const [selectedLabel, setSelectedLabel] = useState(null);
+
+      const handleBarClick = (id, label) => {
+        setSelectedId(id);
+        setSelectedLabel(label);
+      };
+
+      const clearFilter = () => {
+        setSelectedId(null);
+        setSelectedLabel(null);
+      };
+
+      if (data.loading) {
+        return <LoadingSpinner />;
+      }
+
+      if (data.error) {
+        return (
+          <div style={{
+            padding: '32px',
+            background: 'var(--ifm-background-surface-color)',
+            border: '1px solid var(--ifm-color-danger)',
+            borderRadius: 'var(--ifm-global-radius)',
+            color: 'var(--ifm-color-danger)',
+          }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '8px' }}>Error Loading Dashboard</div>
+            <p>{data.error}</p>
+          </div>
+        );
+      }
+
+      const summary = data.summary;
+      if (!summary) {
+        return <div>No data available</div>;
+      }
+
+      return (
+        <div>
+          {/* Chart Section */}
+          <BreakdownChart
+            summary={summary}
+            groupMode="token"
+            onBarClick={handleBarClick}
+          />
+
+          {/* Table Section - appears under "Top Transactions Table" heading below */}
+          <div id="transactions-table-section" style={{ marginTop: '32px' }}>
+            <h2 id="top-transactions">Top Transactions Table</h2>
+
+            <p style={{ marginBottom: '16px' }}>
+              The table displays individual transactions contributing to treasury revenue.
+              By default, it shows all transactions across all tokens, sorted by SOL amount.
+            </p>
+
+            <p style={{ marginBottom: '16px' }}>
+              <strong>Filtering</strong>: Click any bar in the chart above to filter the table to that specific token's transactions.
+            </p>
+
+            {selectedLabel && (
+              <div style={{
+                marginBottom: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <span style={{ fontSize: '14px', color: 'var(--ifm-color-secondary)' }}>
+                  Filtered by: <strong>{selectedLabel}</strong>
+                </span>
+                <button
+                  onClick={clearFilter}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '13px',
+                    background: 'var(--ifm-color-emphasis-200)',
+                    border: '1px solid var(--ifm-toc-border-color)',
+                    borderRadius: 'var(--ifm-global-radius)',
+                    cursor: 'pointer',
+                    color: 'var(--ifm-font-color-base)',
+                  }}
+                >
+                  Clear Filter
+                </button>
+              </div>
+            )}
+
+            <TopTransactionsTable
+              topTransactionsToken={data.topTransactionsToken}
+              topTransactionsType={data.topTransactionsType}
+              topTransactionsPool={data.topTransactionsPool}
+              groupMode="token"
+              selectedFilter={selectedId}
+              selectedFilterLabel={selectedLabel}
+              summary={summary}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    return <RevenueDashboard />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This chart helps you:
+
+- **Analyze revenue composition**: Track which tokens contribute to treasury inflows over time
+- **Investigate specific tokens**: Click bars to examine individual transactions for any token
+- **Compare token contributions**: Evaluate relative contribution across different token mints
+- **Cross-reference revenue sources**: Link token data with [transaction type](./by-type) and [pool](./by-pool) breakdowns
+- **Export transaction details**: Use the table to identify and investigate specific revenue events
+
+## How to Read This Chart
+
+- **Bar height**: Each token's total revenue contribution in SOL
+- **X-axis**: Token mints (labels may be truncated for display)
+- **Y-axis**: Revenue amount in SOL
+- **"SOL (direct)" label**: Native SOL or WSOL received directly by the treasury, as opposed to other tokens that were swapped to SOL
+- **Interactions**:
+  - Click on bars to filter the transaction table below
+  - Hover over bars to see exact SOL amounts and token identifiers
+  - Transaction signatures and token addresses in the table link to Solscan for detailed exploration
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Data Sources**
+
+- **Treasury transactions**: On-chain data from DefiTuna treasury PDA (`G9XfJoY81n8A9bZKaJFhJYomRrcvFkuJ22em2g8rZuCh`)
+- **Token conversions**: Conversion rates from actual on-chain swap transactions
+- **Classification**: Log-based transaction analysis with [100% attribution accuracy](/analysis/data-quality)
+
+For complete pipeline details, see [Data Pipeline](/analysis/methodology).
+
+**Token-to-SOL Conversion**
+
+All token revenues are converted to SOL equivalents using **same-day pricing** from actual swap transactions:
+
+1. **Token accumulates**: Treasury receives revenue tokens (USDC, JUP, etc.) from fees or operations
+2. **SwapReward converts**: When tokens are swapped to SOL, the actual on-chain rate is recorded
+3. **Attribution back to source**: The converted SOL is attributed to the original transaction type that earned the tokens
+
+This approach ensures conversion rates reflect real market conditions when transactions occurred, not theoretical prices from external APIs.
+
+**Pending Conversions**
+
+Tokens not yet swapped to SOL remain tracked in their native denomination but are excluded from SOL-normalized totals until conversion occurs on-chain. This ensures reported values reflect realized amounts rather than estimates.
+
+**Revenue Classification**
+
+Each transaction is classified using log-based pattern matching. The [revenue attribution system](/analysis/methodology#token-normalization) achieves 100% accuracy by reconciling two independent accounting methods.
+
+**Update Frequency**
+
+Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- Conversion rates based on treasury swap prices (may differ from market mid-price by a few basis points)
+- Tokens not yet swapped remain pending until conversion occurs
+- Tokens with little revenue contribution may be grouped into "Other" category
+- Chart shows cumulative data; individual transaction dates available in the table
+- Does not include unrealized gains from currently held token positions
+
+</details>

@@ -1,0 +1,71 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--ifm-background-surface-color);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.content {
+  text-align: center;
+  max-width: 280px;
+  width: 100%;
+  padding: 1.5rem 1rem;
+  background: var(--ifm-background-color);
+  border-radius: var(--ifm-global-radius, 12px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: var(--ifm-font-color-base);
+}
+
+.message {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: var(--ifm-color-emphasis-700);
+  line-height: 1.4;
+}
+
+.suggestion {
+  font-size: 0.9rem;
+  margin-top: 0.75rem;
+  color: var(--ifm-color-emphasis-800);
+  line-height: 1.5;
+}
+
+.suggestion strong {
+  color: var(--accent, #00A3B4);
+  font-weight: 600;
+}
+
+/* Ensure the overlay works properly in dark mode */
+html[data-theme='dark'] .content {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}

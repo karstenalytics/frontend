@@ -1,0 +1,26 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.docItemContainer header + *,
+.docItemContainer article > *:first-child {
+  margin-top: 0;
+}
+
+/* Only apply 75% max-width on large desktops where TOC is visible */
+@media (min-width: 1200px) {
+  .docItemCol {
+    max-width: 75% !important;
+  }
+}
+
+/* On tablets, allow content to use full width */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .docItemCol {
+    max-width: 100% !important;
+  }
+}
+

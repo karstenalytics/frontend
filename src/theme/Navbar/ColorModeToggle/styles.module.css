@@ -1,0 +1,65 @@
+/* Three-icon theme switcher container */
+.themeSwitcher {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: transparent;
+  border-radius: 8px;
+}
+
+/* Individual theme button */
+.themeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ifm-color-secondary);
+  cursor: pointer;
+  transition: all 120ms ease;
+  outline: none;
+}
+
+.themeButton:hover {
+  background: var(--ifm-toc-border-color);
+  color: var(--ifm-font-color-base);
+}
+
+.themeButton:active {
+  transform: scale(0.95);
+}
+
+/* Active state */
+.themeButtonActive {
+  background: var(--accent);
+  color: #FFFFFF;
+}
+
+.themeButtonActive:hover {
+  background: var(--accent-hover);
+  color: #FFFFFF;
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .themeButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .themeButtonActive {
+  background: var(--accent);
+  color: #FFFFFF;
+}
+
+[data-theme='dark'] .themeButtonActive:hover {
+  background: var(--accent-hover);
+}
+
+/* Legacy dark navbar support (if needed) */
+.darkNavbarColorModeToggle:hover {
+  background: var(--ifm-color-gray-800);
+}

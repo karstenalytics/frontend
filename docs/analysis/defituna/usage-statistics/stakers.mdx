@@ -1,0 +1,151 @@
+---
+id: usage-statistics-stakers
+title: Active Stakers
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Active Stakers
+
+Tracks the number of unique wallets holding active TUNA stakes over time. The count increases when wallets stake and decreases when wallets fully unstake, providing a view of protocol adoption and participant retention.
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '800px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const UsageTimeSeriesChart = require('@site/src/components/Usage/UsageTimeSeriesChart').default;
+    const UsageTopAddresses = require('@site/src/components/Usage/UsageTopAddresses').default;
+    const { useStakingMetrics } = require('@site/src/hooks/useStakingMetrics');
+    const { useUsageMetrics } = require('@site/src/hooks/useUsageMetrics');
+
+    function StakerUsagePage() {
+      const { data: stakingData, loading: stakingLoading, error: stakingError } = useStakingMetrics();
+      const { data: usageData, loading: usageLoading, error: usageError } = useUsageMetrics();
+
+      const loading = stakingLoading || usageLoading;
+      const error = stakingError || usageError;
+      const data = stakingData && usageData ? { staking: stakingData, usage: usageData } : null;
+
+      if (loading) {
+        return <LoadingSpinner />;
+      }
+
+      if (error || !data) {
+        return (
+          <div style={{
+            padding: '32px',
+            background: 'var(--ifm-background-surface-color)',
+            border: '1px solid var(--ifm-color-danger)',
+            borderRadius: 'var(--ifm-global-radius)',
+            color: 'var(--ifm-color-danger)',
+          }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '8px' }}>Error Loading Staker Metrics</div>
+            <p>{error || 'Unknown error'}</p>
+          </div>
+        );
+      }
+
+      const { staking, usage } = data;
+      const activeStakersData = staking.active_stakers?.daily_counts || [];
+
+      return (
+        <>
+          <UsageTimeSeriesChart
+            title="Active Stakers"
+            data={activeStakersData}
+            yAxisLabel="Wallets with Active Stakes"
+            description="Number of unique wallets with staked TUNA balance > 0 at the end of each UTC day."
+          />
+
+          <div style={{ marginTop: '48px' }}>
+            <h2 id="most-active-staker-wallets">Most Active Staker Wallets</h2>
+            <p style={{ marginBottom: '16px' }}>
+              Wallets ranked by the number of distinct days they executed staking instructions (including staking, unstaking, claiming rewards, and compounding).
+              This metric identifies the most consistently engaged stakers rather than those with the largest positions.
+            </p>
+            <UsageTopAddresses
+              title=""
+              rows={usage.stakers.top_wallets}
+              description=""
+            />
+          </div>
+        </>
+      );
+    }
+
+    return <StakerUsagePage />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This chart helps you:
+
+- **Track protocol adoption**: Monitor growth in the number of wallets participating in TUNA staking
+- **Assess user retention**: Identify periods of staker growth vs. churn (unstaking)
+- **Evaluate engagement trends**: Compare active staker counts with [usage statistics](/analysis/defituna/usage-statistics/) for daily and weekly active users
+- **Identify committed participants**: Use the Most Active Staker Wallets table to find the most consistently engaged stakers
+- **Correlate with revenue**: Cross-reference staker growth with [revenue trends](/analysis/defituna/revenue-breakdown/by-type) to understand protocol health
+
+## How to Read This Chart
+
+**Active Stakers Time Series:**
+- **X-axis**: Date (UTC days)
+- **Y-axis**: Number of unique wallets with staked TUNA balance > 0
+- **Line trend**: Shows cumulative count of wallets holding active stakes at the end of each day
+- **Increases**: New stakers or wallets that restaked
+- **Decreases**: Wallets that fully unstaked all their positions
+
+**Most Active Staker Wallets Table:**
+- **Wallet Address**: Solana address of the staker (links to Solscan)
+- **Ranking metric**: Sorted by number of distinct days the wallet executed staking instructions (staking, unstaking, claiming rewards, compounding)
+- **Purpose**: Identifies the most consistently active stakers, not necessarily the largest stake holders
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Data Sources**
+
+- **Staking transactions**: On-chain staking instructions from DefiTuna staking program
+- **Balance snapshots**: Daily end-of-day snapshots of staked TUNA balances per wallet
+- **Activity tracking**: Daily records of which wallets executed staking-related instructions
+
+For complete pipeline details, see [Data Pipeline](/analysis/methodology).
+
+**Active Staker Calculation**
+
+A wallet is counted as an **active staker** on a given day if:
+1. Its staked TUNA balance > 0 at 23:59:59 UTC
+2. The balance is checked via snapshot after processing all transactions for the day
+
+**Counting Logic:**
+- **New staker**: Wallet stakes for the first time or restakes after previously unstaking fully
+- **Continuing staker**: Wallet already had a staked balance and it remains > 0
+- **Removed staker**: Wallet unstakes all TUNA, reducing balance to exactly 0
+
+This approach provides a **point-in-time count** rather than cumulative totals, reflecting the actual number of participants with active stakes.
+
+**Most Active Staker Wallets Ranking**
+
+The Most Active Staker Wallets table ranks by:
+- **Activity frequency**: Number of distinct calendar days (UTC) the wallet executed staking instructions (staking, unstaking, claiming rewards, compounding)
+- **Not by stake size**: Large stake holders who rarely interact may not appear in top ranks
+- **Purpose**: Highlights committed, consistently engaged participants
+
+This metric complements stake size analysis (available in [Staker Conviction](/analysis/defituna/staker-conviction)) by focusing on behavioral engagement.
+
+**Update Frequency**
+
+Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- Point-in-time snapshots don't capture intra-day staking/unstaking activity
+- Wallets that stake and unstake on the same day may not appear in counts if balance is 0 at end of day
+- Multi-wallet users (same person controlling multiple addresses) are counted separately
+- Does not account for stake size, only presence/absence of active stake
+
+</details>
