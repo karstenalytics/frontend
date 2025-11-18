@@ -7,7 +7,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Transaction Types per Day
 
-Daily time-series view of protocol revenue showing how transaction types evolve over time. The stacked area chart reveals daily patterns in protocol operations, compositional shifts between revenue sources, and the impact of protocol events on treasury inflows.
+Daily time-series view of protocol revenue showing how revenue and transaction type revenue contribution evolve over time. The stacked area chart reveals daily patterns in protocol operations, compositional shifts between revenue sources, and potentially the impact of events (e.g. volatility) on treasury inflows.
 
 ## Data
 
@@ -59,7 +59,7 @@ This page helps you:
 - **Detect protocol impact**: Validate expected outcomes from protocol changes, new features, or pool launches
 - **Spot seasonal patterns**: Identify cyclical or seasonal trends in protocol activity
 - **Assess revenue stability**: Evaluate whether revenue is consistent or volatile across different periods
-- **Correlate with events**: Link revenue patterns to external market events or protocol milestones
+- **Correlate with events**: Link revenue patterns to external market events or protocol milestones (e.g. October 10th, 2025)
 
 ## How to Read This Chart
 
@@ -138,7 +138,6 @@ Data is automatically updated once a day. Check the "Last updated" timestamp in 
 **Known Limitations**
 
 - Chart shows realized revenue only (excludes unrealized gains from held positions)
-- Days with extremely high volatility may appear compressed in the default zoom level
 - Very small transaction types may not be visible in the stacked areas
 - Token conversion rates based on treasury swap prices (may differ from market mid-price by a few basis points)
 

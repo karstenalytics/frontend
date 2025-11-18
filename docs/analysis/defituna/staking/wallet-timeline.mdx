@@ -7,7 +7,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Staking Wallet Timeline
 
-Detailed staking history for individual wallet addresses showing balance evolution, realized rewards, and all staking operations over time. Enter any wallet address to view their staked/unstaked TUNA balances, cumulative SOL rewards (claimed + compounded), and complete transaction history with interactive charts and sortable tables.
+Detailed staking history for individual wallet addresses showing balance evolution, realized rewards, and all staking operations over time. Enter any wallet address to view their staked/unstaked TUNA balances, cumulative SOL rewards (claimed + compounded), and complete transaction history with interactive charts.
 
 ## Data
 
@@ -437,10 +437,10 @@ This page helps you:
 
 - **Track individual wallet behavior**: Monitor any wallet's staking activity, commitment level, and reward strategies over time
 - **Analyze whale patterns**: Study large stakers to understand their behavior, when they stake/unstake, and how they manage rewards
-- **Review your own portfolio**: Analyze your wallet's performance, engagement patterns, and reward accumulation
-- **Identify staker archetypes**: Distinguish between compounders (reinvest rewards), claimers (extract rewards), HODLers (long-term holds), and active traders (frequent operations)
-- **Benchmark performance**: Compare wallet strategies against successful patterns or your own approach
 - **Share wallet analysis**: Use URL parameters (?wallet=ADDRESS) to share pre-filled analysis links with others
+- **Review your own portfolio**: Analyze your wallet's performance, engagement patterns, and reward accumulation
+- **Identify staker archetypes**: Distinguish between compounders (reinvest rewards), claimers (extract rewards) and HODLers (long-term holds with less activity)
+- **Benchmark performance**: Compare wallet strategies against successful patterns or your own approach
 - **Investigate transactions**: Click any operation in the table to view the full transaction on Solscan
 
 ## How to Read This Chart
@@ -495,7 +495,7 @@ This page helps you:
 
 **Data Sources**
 
-- **Staker cache**: Compressed snapshot of all staking positions and operations (`staker_cache.json.gz`)
+- **Staker cache**: Compressed snapshot of all staking positions and operations
 - **On-chain transactions**: Staking instructions from DefiTuna staking program
 - **Balance tracking**: Daily snapshots of staked and unstaked TUNA balances
 - **Reward calculations**: Realized rewards from claim and compound operations
@@ -549,16 +549,9 @@ This wallet-level detail complements:
 **Date Range and Limitations**
 
 - **Data start**: 2025-07-25 (when staker cache tracking began)
-- **Pre-existing positions**: Wallets with stakes before 2025-07-25 may show incomplete balance history
-- **Cache size**: 7,861 wallets tracked (wallets with at least one operation since 2025-07-25)
-- **Update frequency**: Data refreshes when staker cache is rebuilt (not real-time)
+- **Update frequency**: Data refreshes when staker cache is rebuilt (once a day)
 - **Realized rewards only**: Shows claimed + compounded SOL; unclaimed rewards not included
 - **Operation granularity**: Each transaction counted as one operation regardless of size
-
-**Known Limitations**
-
-- Balance history for wallets staking before 2025-07-25 may not show full position size at cache start
-- Unclaimed rewards not tracked (requires additional on-chain queries)
 - Multi-wallet users (same person, multiple addresses) counted separately
 - No cross-wallet aggregation for institutional holders
 - Pagination limited to 10 transactions per page for performance

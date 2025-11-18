@@ -7,7 +7,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Vesting Timeline
 
-Tracks TUNA tokens locked in vesting schedules and their unlock timeline. The chart shows how locked TUNA decreases over time as unlock events occur, reveals the next upcoming unlocks, and displays all active vesting schedules with their cliff periods and unlock frequencies.
+Tracks TUNA tokens locked in vesting schedules and their unlock timeline. The chart shows how locked TUNA decreases over time as unlock events occur, reveals the next upcoming unlocks, and displays all active vesting schedules with their cliff periods and unlock frequencies. Also shows how much TUNA is currently held in wallets with vesting schedules.
 
 ## Data
 
@@ -301,7 +301,7 @@ Shows upcoming unlock events sorted by date, including:
 
 **Data Sources**
 
-- **Vesting instructions**: On-chain `SetVestingStrategy` instructions from TUNA unstake program (`tUnst2Y2sbmgSgARBpSBZhqPzpoy2iUsdCwb5ToYVJa`)
+- **Vesting instructions**: On-chain `SetVestingStrategy` instructions from DefiTuna staking program (`tUnst2Y2sbmgSgARBpSBZhqPzpoy2iUsdCwb5ToYVJa`)
 - **Schedule parameters**: Cliff period, unlock period, unlock rate, and total locked amount for each vesting contract
 - **Transaction signatures**: On-chain transaction records linking to Solscan for verification
 
@@ -356,8 +356,7 @@ Data is automatically updated once a day. Check the "Last updated" timestamp in 
 **Known Limitations**
 
 - Only tracks vesting schedules created via on-chain instructions (manual arrangements not included)
-- Past unlock events are calculated but not verified against actual claim transactions
-- Chart shows scheduled unlocks, not actual claims (tokens may remain unclaimed past unlock date)
+- Chart shows scheduled unlocks, not actual claims (tokens may remain in wallet past unlock date)
 - Unlock calculations assume schedules haven't been modified or cancelled on-chain
 - Very long schedules with many small unlocks may create visual clutter in the timeline
 

@@ -7,7 +7,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Staking Overview
 
-Daily time-series view of treasury TUNA allocation showing the split between staked and unstaked tokens. The chart tracks how the treasury allocates its TUNA holdings over time, whether staked TUNA is at all-time high (ATH), and identifies the most active stakers and withdrawers in recent periods.
+Daily time-series view of treasury TUNA allocation showing the split between staked and unstaked tokens. The chart tracks how the how much staked or unstaked TUNA the treasury holds over time, whether staked TUNA is at all-time high (ATH), and identifies the most important stakers and withdrawers in recent periods.
 
 ## Data
 
@@ -41,7 +41,7 @@ Daily time-series view of treasury TUNA allocation showing the split between sta
           <div style={{ marginTop: '32px' }}>
             <h2 id="top-stakers-withdrawers">Recent Activity</h2>
             <p style={{ marginBottom: '16px' }}>
-              The tables below show the most active stakers and withdrawers over the last 7 days, ranked by TUNA amount.
+              The tables below show the most relevant stakers and withdrawers over the last 7 days, ranked by TUNA amount.
               Click "Staking Timeline" to view detailed staking history for each wallet.
             </p>
             <StakingTopTables topStakers={top_stakers_7d} topWithdrawers={top_withdrawers_7d} />
@@ -58,7 +58,7 @@ Daily time-series view of treasury TUNA allocation showing the split between sta
 
 This page helps you:
 
-- **Track amount of unstaked TUNA**: See how the treasury is composed of liquid vs. staked TUNA over time
+- **Track amount of (un)staked TUNA**: See how the treasury is composed of liquid vs. staked TUNA over time
 - **Monitor staking commitment**: Check if staked TUNA is at ATH or has declined from peak levels
 - **Identify active participants**: Find the most active stakers and withdrawers in recent days (all protocol participants, not just treasury)
 - **Compare staking patterns**: Link staking activity to protocol events or market conditions
@@ -138,7 +138,7 @@ The 7-day activity tables show:
 - Includes all withdrawal operations (unstaking, claiming)
 - Sorted by descending amount
 
-These tables help identify the most active participants in recent staking activity.
+These tables help identify the most impactful participants in recent staking activity.
 
 **Relationship to Other Views**
 
@@ -153,7 +153,7 @@ Data is automatically updated once a day. Check the "Last updated" timestamp in 
 
 **Known Limitations**
 
-- Shows treasury allocation only (does not include all protocol participants)
+- Shows treasury allocation only (does not include TUNA held outside of the treasury)
 - Daily snapshots may miss intraday fluctuations
 - Recent activity tables limited to 7-day window
 - Does not show staking APR or rewards earned (see [Staking APR](/analysis/defituna/staking-apr) for that)

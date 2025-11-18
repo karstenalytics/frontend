@@ -7,7 +7,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Staker Conviction
 
-Protocol loyalty analysis through reward behavior patterns showing how stakers manage their rewards. Tracks the split between compounders (reinvest rewards as TUNA), claimers (extract rewards as SOL), and mixed strategists, revealing conviction levels, reinvestment rates, and loyalty trends across different stake sizes and time periods.
+Protocol loyalty analysis through reward behavior patterns showing how stakers manage their rewards. Tracks the split between compounders (reinvest rewards as TUNA), claimers (claim rewards as SOL), and mixed strategists, potentially revealing conviction levels, reinvestment rates, and loyalty trends across different stake sizes.
 
 ## Data
 
@@ -131,9 +131,9 @@ For complete pipeline details, see [Data Pipeline](/analysis/data-pipeline).
 
 **Metric Calculations**
 
-**Loyalty Score:**
+**Compound-Only Rate:**
 ```
-Loyalty Score = (Compound-only Stakers / Total Reward-Active Stakers) × 100
+Compound-Only Rate = (Compound-only Stakers / Total Reward-Active Stakers) × 100
 ```
 Where:
 - Compound-only Stakers = Wallets that have ONLY executed CompoundReward (never ClaimReward)

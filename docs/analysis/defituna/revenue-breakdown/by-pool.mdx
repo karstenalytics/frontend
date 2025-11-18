@@ -7,7 +7,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Revenue Breakdown by Pool
 
-Displays protocol revenue categorized by liquidity pool, showing which LP positions generate treasury inflows. Revenue primarily comes from Orca Whirlpools and Fusion pools, with additional revenue not tied to specific pools shown as "Other." Click on a pool bar to display the top 10 contributing transactions for that pool.
+Displays protocol revenue categorized by liquidity pool, showing which LP positions generate treasury inflows. Revenue currently comes from Orca Whirlpools or Fusion pools. Click on a pool bar to display the top 10 contributing transactions for that pool.
 
 ## Data
 
@@ -141,7 +141,7 @@ Displays protocol revenue categorized by liquidity pool, showing which LP positi
 
 This chart helps you:
 
-- **Assess pool concentration**: Determine if revenue is too dependent on specific pools or venues
+- **Assess pool concentration**: Determine if revenue is driven by specific pools or venues
 - **Cross-reference pool activity**: Link pool data with [token](./by-token) and [transaction type](./by-type) breakdowns
 - **Investigate specific pools**: Click bars to examine individual transactions for any pool
 
@@ -165,7 +165,7 @@ This chart helps you:
 
 - **Treasury transactions**: On-chain data from DefiTuna treasury PDA (`G9XfJoY81n8A9bZKaJFhJYomRrcvFkuJ22em2g8rZuCh`)
 - **Pool attribution**: Multi-source matching system (registry lookups + auto labels) reconciled against the revenue totals described in [Data Quality](/analysis/data-quality); flows that cannot be confidently matched remain in “Other” until labeled
-- **Pool labels**: Manually curated pool names maintained in the backend
+- **Pool labels**: Automatically created and manually curated pool names maintained in the backend
 
 For complete pipeline details, see [Data Pipeline](/analysis/data-pipeline).
 
@@ -194,7 +194,6 @@ When new pools are encountered, they receive generated labels and can be promote
 
 - **Orca Whirlpools**: Concentrated liquidity pools on the Orca DEX (e.g., SOL-USDC, SOL-CBBTC)
 - **Fusion Pools**: DefiTuna's native liquidity pools (e.g., WSOL-USDC, USDC-TUNA)
-- **Other / Not Applicable**: Revenue not attributed to specific pools
 
 **Integration with Revenue Attribution**
 

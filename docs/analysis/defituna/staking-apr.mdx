@@ -7,7 +7,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # TUNA Staking APR
 
-Historical Annual Percentage Rate (APR) for TUNA staking, calculated from DefiTuna treasury revenue. Shows both Reference APR (based on current market price from on-chain swap data) and personalized APR based on your entry price. 30-day rolling window reveals how protocol revenue translates to staker yields.
+Historical Annual Percentage Rate (APR) for TUNA staking, calculated from DefiTuna treasury revenue. Shows both Reference APR (based on current market price from on-chain swap data) and personalized APR based on individual entry price. 30-day rolling window reveals how protocol revenue translates to staker yields.
 
 ## Data
 
@@ -342,7 +342,6 @@ USD values are calculated using **daily spot market rates** from DefiTuna's stak
 
 - **Rate Source**: Daily USD/SOL conversion rates from DefiTuna
 - **Rate Calculation**: For each day, USD/SOL rate = (daily USD deposits) / (daily SOL deposits)
-- **Accuracy**: 100% match with DefiTuna data (verified daily)
 
 **Example**: On a given day with a spot rate of $181.11/SOL, 926.36 SOL revenue = $167,771.22 USD.
 
@@ -350,15 +349,14 @@ USD values are calculated using **daily spot market rates** from DefiTuna's stak
 
 - **Early History**: For dates with less than 30 days of historical data, the APR is calculated using all available days and annualized accordingly.
 - **Price Data Source**: Daily `assets.json` files containing TUNA prices derived from on-chain swap transaction data
-- **Revenue Validation**: All revenue figures are validated against data made available by DefiTuna to ensure 100% accuracy.
 - **USD Values**: Calculated using daily spot market rates from DefiTuna, ensuring exact match with protocol's official USD values.
 
 **APR Fluctuation Factors**
 
 The APR naturally fluctuates based on:
-- **Treasury Revenue**: Higher protocol activity increases treasury inflows
+- **Treasury Revenue**: Revenue spikes increase Annualized Revenue
 - **TUNA Price**: Price movements affect the Reference APR calculation
-- **Your Entry Price**: Lower entry prices result in higher Your APR for the same revenue
+- **Your Entry Price**: Lower TUNA entry prices result in higher APR for the same revenue
 - **Historical Window**: Early days with less historical data may show higher volatility
 
 **Data Update Frequency**
