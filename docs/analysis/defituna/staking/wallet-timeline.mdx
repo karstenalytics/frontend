@@ -125,7 +125,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
               fontSize: '13px',
               color: 'var(--ifm-color-secondary)',
             }}>
-              Enter any wallet address from the staking cache ({loading ? '...' : '7,861 wallets available'}). No idea which address to enter? Check <a href="/analysis/defituna/staked-tuna" style={{ color: 'var(--accent)', textDecoration: 'none' }}>recent stakers/withdrawers</a> or <a href="https://defituna.com/stake" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>DefiTuna Leaderboard</a>.
+              Enter any wallet address from the staking cache ({loading ? '...' : '7,861 wallets available'}). No idea which address to enter? Check <a href="/analysis/defituna/staking/staked-tuna" style={{ color: 'var(--accent)', textDecoration: 'none' }}>recent stakers/withdrawers</a> or <a href="https://defituna.com/stake" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>DefiTuna Leaderboard</a>.
             </p>
           </div>
 
@@ -500,7 +500,7 @@ This page helps you:
 - **Balance tracking**: Daily snapshots of staked and unstaked TUNA balances
 - **Reward calculations**: Realized rewards from claim and compound operations
 
-For complete pipeline details, see [Data Pipeline](/analysis/methodology).
+For complete pipeline details, see [Data Pipeline](/analysis/data-pipeline).
 
 **Wallet Lookup Process**
 
@@ -542,9 +542,9 @@ Each transaction is classified as one of these types:
 **Relationship to Other Views**
 
 This wallet-level detail complements:
-- **[Stakers](/analysis/defituna/usage-statistics/usage-statistics-stakers)**: Shows all active stakers ranked by activity
-- **[Staking Overview](/analysis/defituna/staked-tuna)**: Shows treasury's total staked/unstaked allocation
-- **[Staker Conviction](/analysis/defituna/staker-conviction)**: Analyzes long-term staker behavior patterns
+- **[Stakers](/analysis/defituna/usage-statistics/active-stakers)**: Shows all active stakers ranked by activity
+- **[Staking Overview](/analysis/defituna/staking/staked-tuna)**: Shows treasury's total staked/unstaked allocation
+- **[Staker Conviction](/analysis/defituna/staking/staker-conviction)**: Analyzes long-term staker behavior patterns
 
 **Date Range and Limitations**
 

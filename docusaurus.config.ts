@@ -50,11 +50,11 @@ const config: Config = {
           },
           {
             from: '/analysis/usage-statistics/usage-statistics-overview',
-            to: '/analysis/defituna/usage-statistics/',
+            to: '/analysis/defituna/usage-statistics/wallet-usage',
           },
           {
             from: '/analysis/usage-statistics/usage-statistics-stakers',
-            to: '/analysis/defituna/usage-statistics/usage-statistics-stakers',
+            to: '/analysis/defituna/usage-statistics/active-stakers',
           },
           {
             from: '/analysis/defituna/orca-vs-fusion',
@@ -120,12 +120,7 @@ const config: Config = {
         indexBlog: false,
         indexPages: true,
         docsRouteBasePath: '/',
-        ignoreFiles: [
-          'internal/CHART_DESIGN_GUIDELINES.md',
-          'internal/SECURITY_HEADERS.md',
-          'internal/SOCIAL_SHARING_GUIDE.md',
-          'analysis/coming-soon.md',
-        ],
+        ignoreFiles: [],
       },
     ],
   ],

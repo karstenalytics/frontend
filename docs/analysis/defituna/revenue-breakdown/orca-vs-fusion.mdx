@@ -80,7 +80,9 @@ Cumulative revenue comparison between Orca Whirlpools and DefiTuna's Fusion AMM.
               topTransactionsToken={data.topTransactionsToken}
               topTransactionsType={data.topTransactionsType}
               topTransactionsPool={data.topTransactionsPool}
+              topTransactionsPoolType={data.topTransactionsPoolType}
               groupMode={controls.groupMode}
+              summary={data.summary}
               showProtocolToggle={true}
             />
           </div>
@@ -148,7 +150,7 @@ This page helps you:
 - **Pool attribution**: Multi-source matching system (registry + auto labels) reconciled against the revenue totals described in [Data Quality](/analysis/data-quality); flows without confident matches remain in “Other” until labeled
 - **Ecosystem classification**: Pools categorized as Orca Whirlpools, Fusion AMM, or Other
 
-For complete pipeline details, see [Data Pipeline](/analysis/methodology).
+For complete pipeline details, see [Data Pipeline](/analysis/data-pipeline).
 
 **Cumulative Revenue Calculation**
 

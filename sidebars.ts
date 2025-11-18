@@ -11,7 +11,7 @@ const sidebars: SidebarsConfig = {
   // Analysis sidebar
   analysisSidebar: [
     'analysis/overview',
-    'analysis/methodology',
+    'analysis/data-pipeline',
     'analysis/data-quality',
     {
       type: 'html',
@@ -51,8 +51,8 @@ const sidebars: SidebarsConfig = {
             icon: 'ChartLineUp',
           },
           items: [
-            'analysis/defituna/usage-statistics/usage-statistics-overview',
-            'analysis/defituna/usage-statistics/usage-statistics-stakers',
+            'analysis/defituna/usage-statistics/wallet-usage',
+            'analysis/defituna/usage-statistics/active-stakers',
           ],
         },
         {
@@ -62,10 +62,10 @@ const sidebars: SidebarsConfig = {
             icon: 'Stack',
           },
           items: [
-            'analysis/defituna/staked-tuna',
-            'analysis/defituna/vesting-timeline',
+            'analysis/defituna/staking/staked-tuna',
+            'analysis/defituna/staking/vesting-timeline',
             'analysis/defituna/staking/wallet-timeline',
-            'analysis/defituna/staker-conviction',
+            'analysis/defituna/staking/staker-conviction',
           ],
         },
         'analysis/defituna/staking-apr',

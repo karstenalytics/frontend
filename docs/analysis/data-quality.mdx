@@ -10,6 +10,8 @@ Data Quality isn't just about accuracy—it's about user confidence. When every 
 
 From my professional experience, data quality is rarely 100% perfect. So I expect to find issues going forward. This is also why I sense-check every number I see. But something might slip. Feel free to drop me a comment if you see a number that doesn't make sense to you!
 
+Data Quality measures are constantly improving, below is a brief summary of what is in place for DefiTuna.
+
 ---
 
 ## Automated Quality Checks
@@ -67,7 +69,7 @@ Pipeline smoke tests verify:
 
 **Chronological Processing**
 - Transactions processed in timestamp order to maintain correct attribution
-- Ensures SwapReward conversions correctly attribute to earlier token accumulations
+- Ensures Treasury token swap correctly attribute to earlier token accumulations
 
 ### Completeness Standards
 
@@ -96,8 +98,8 @@ These tools exist for deep auditing but require manual execution:
 ### Verification Scripts
 
 **Comprehensive SOL Check**
-- Compares daily realized SOL against test fixtures
-- Validates total realized SOL against official DefiTuna numbers
+- Compares daily realized Treasury token against test fixtures
+- Validates total realized SOL against official numbers
 - Identifies coverage gaps and missing date ranges
 - Expected output: Confirmation of 100% accuracy with zero unattributed amounts
 
@@ -132,12 +134,12 @@ Cache validation tools verify:
 
 **Unattributed Revenue**
 - **Symptom**: Discrepancy between raw tracking and type attribution
-- **Causes**: SwapReward attribution errors, ledger persistence issues, missing token conversions
-- **Resolution**: Review ledger carryforward and SwapReward attribution logic
+- **Causes**: Treasury token swap attribution errors, ledger persistence issues, missing token conversions
+- **Resolution**: Review ledger carryforward and Treasury token swap attribution logic
 
 **Over-Attribution**
 - **Symptom**: Type attribution exceeds raw tracking (triggers ERROR log)
-- **Causes**: Double-counting SwapReward transactions, including non-revenue transactions, incorrect attribution logic
+- **Causes**: Double-counting Treasury token swap transactions, including non-revenue transactions, incorrect attribution logic
 - **Resolution**: Verify revenue filtering excludes non-revenue transaction types
 
 ### Completeness Issues

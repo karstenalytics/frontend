@@ -36,7 +36,7 @@ graph LR
 1. **Data Collection** - Enumerate transaction signatures for monitored accounts, fetch full transaction data with logs via Helius RPC, and store in compressed daily cache files
 2. **Transaction Classification** - Parse program execution logs to identify what each transaction represents (fees, swaps, liquidations, etc.) and map to human-readable names using configuration files
 3. **Multi-Dimensional Attribution** - Attribute each classified transaction across multiple dimensions simultaneously (token, transaction type, liquidity pool, wallet, time) enabling flexible analysis
-4. **Token Normalization** - Track token accumulation in treasury accounts, apply same-day conversion rates from actual on-chain swaps, and attribute converted SOL back to originating transaction types
+4. **Token Normalization** - Track token accumulation in accounts, apply same-day conversion rates from actual on-chain swaps, and attribute converted SOL back to originating transaction types
 5. **Frontend Presentation** - Aggregate attributed data into dimension-specific JSON files, host as static assets, and render through interactive Plotly charts with filtering
 
 **Processing Model:**
@@ -82,7 +82,7 @@ On-chain transactions contain a lot of information. I try to get as much informa
 
 ### Update Cadence
 
-Data updates usually run daily via automated GitHub Actions workflow (.github/workflows/daily-data.yml), When analytical methods improve, the entire dataset is reprocessed to maintain uniform standards.
+Data updates run daily via automated GitHub Actions workflow in the backend repository. When analytical methods change or improve, the entire dataset is reprocessed.
 
 ---
 
