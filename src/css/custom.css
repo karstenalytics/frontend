@@ -667,10 +667,23 @@ figure,
 .modebar-group {
   display: flex !important;
   flex-wrap: nowrap !important;
+  align-items: center !important;
+  padding: 0px 1px 3px 1px !important;
 }
 
 .js-plotly-plot .plotly .modebar {
-  top: -10px;
+  top: -10px !important;
+}
+
+/* Fix vertical centering of modebar button icons */
+.modebar-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.modebar-btn svg {
+  vertical-align: middle !important;
 }
 
 /* ========================
