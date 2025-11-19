@@ -191,8 +191,28 @@ export interface DailyCount {
   count: number;
 }
 
+export interface TopWallet {
+  address: string;
+  tx_count: number;
+  days_active: number;
+  first_seen: string;
+  last_seen: string;
+  active_weeks?: number;
+}
+
 export interface StakersData {
   daily_counts: DailyCount[];
+  top_wallets: TopWallet[];
+}
+
+export interface DailyUsersData {
+  daily_counts: DailyCount[];
+  top_wallets: TopWallet[];
+}
+
+export interface WeeklyUsersData {
+  rolling_counts: DailyCount[];
+  top_wallets: TopWallet[];
 }
 
 export interface UsageMetricsData {
@@ -200,16 +220,49 @@ export interface UsageMetricsData {
   date_range: DateRange;
   summary: UsageSummary;
   stakers: StakersData;
+  daily_users: DailyUsersData;
+  weekly_users: WeeklyUsersData;
 }
 
 // ============================================================================
 // Staker Loyalty Data (staker_loyalty.json)
 // ============================================================================
 
-export interface StakerLoyaltyMetrics {
-  total_stakers: number;
-  behavior_distribution: Record<string, number>;
-  conviction_levels: Record<string, number>;
+export interface LoyaltySummary {
+  total_users: number;
+  compound_only_users: number;
+  claim_only_users: number;
+  mixed_users: number;
+  avg_actions_per_user: number;
+  median_actions_per_user: number;
+}
+
+export interface SegmentData {
+  count: number;
+  percentage: number;
+  avg_actions?: number;
+}
+
+export interface UserSegments {
+  by_behavior: Record<string, SegmentData>;
+  by_reward_size: Record<string, SegmentData>;
+  by_stake_size?: Record<string, SegmentData>;
+}
+
+export interface WeeklyTrend {
+  week_start: string;
+  week_end: string;
+  compound_count: number;
+  claim_count: number;
+  unique_users: number;
+}
+
+export interface StakerLoyaltyData {
+  generated_at: string;
+  date_range: DateRange;
+  summary: LoyaltySummary;
+  user_segments: UserSegments;
+  weekly_trends: WeeklyTrend[];
 }
 
 // ============================================================================
@@ -234,14 +287,12 @@ export interface AprDataPoint {
 }
 
 export interface AprSummary {
+  thirty_day_average_reference_apr: number;
+  thirty_day_average_your_apr: number;
+  historical_average_reference_apr: number;
+  historical_average_your_apr: number;
   current_reference_apr: number;
   current_your_apr: number;
-  average_reference_apr: number;
-  average_your_apr: number;
-  max_reference_apr: number;
-  max_your_apr: number;
-  min_reference_apr: number;
-  min_your_apr: number;
 }
 
 export interface AprData {
@@ -256,21 +307,43 @@ export interface AprData {
 
 export interface StakingDataPoint {
   date: string;
-  staked_balance: number;
-  circulating_supply: number;
-  percent_staked: number;
-  staker_count?: number;
+  staked: number;
+  unstaked: number;
+  total: number;
+  staked_delta: number;
+  total_delta: number;
+}
+
+export interface TopStaker {
+  address: string;
+  amount: number;
+  tx_count: number;
+}
+
+export interface ActiveStakersData {
+  daily_counts: DailyCount[];
+  top_wallets: Array<{
+    address: string;
+    tx_count: number;
+    days_active: number;
+    first_seen: string;
+    last_seen: string;
+  }>;
 }
 
 export interface StakingData {
-  data: StakingDataPoint[];
-  latest: {
-    date: string;
-    staked_balance: number;
-    circulating_supply: number;
+  generated_at: string;
+  date_range: DateRange;
+  supply: {
+    total: number;
+    staked: number;
+    unstaked: number;
     percent_staked: number;
-    staker_count: number;
   };
+  daily: StakingDataPoint[];
+  top_stakers_7d: TopStaker[];
+  top_withdrawers_7d: TopStaker[];
+  active_stakers?: ActiveStakersData;
 }
 
 // ============================================================================
