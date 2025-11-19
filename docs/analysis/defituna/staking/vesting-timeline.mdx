@@ -357,7 +357,7 @@ Data is automatically updated once a day. Check the "Last updated" timestamp in 
 
 - Only tracks vesting schedules created via on-chain instructions (manual arrangements not included)
 - Chart shows scheduled unlocks, not actual claims (tokens may remain in wallet past unlock date)
-- Unlock calculations assume schedules haven't been modified or cancelled on-chain
+- Schedule modifications are captured (latest `set_vesting_strategy` transaction is used); no cancel instruction exists in the program
 - Very long schedules with many small unlocks may create visual clutter in the timeline
 
 </details>
