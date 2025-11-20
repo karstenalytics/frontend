@@ -6,10 +6,12 @@ import BreakdownChart from './BreakdownChart';
 import TopTransactionsTable from './TopTransactionsTable';
 import DailyStackedChart from './DailyStackedChart';
 import CumulativeChart from './CumulativeChart';
+import { useTokenIcons, getTokenIconPath } from '@site/src/hooks/useTokenIcons';
 import type { DashboardControls } from './types';
 
 export default function Dashboard(): React.ReactElement {
   const data = useDashboardData();
+  const { icons } = useTokenIcons();
 
   const [controls, setControls] = useState<DashboardControls>({
     startDate: '',
@@ -137,7 +139,7 @@ export default function Dashboard(): React.ReactElement {
               <tr style={{ borderBottom: '2px solid var(--ifm-toc-border-color)' }}>
                 <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Rank</th>
                 <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Token</th>
-                <th style={{ textAlign: 'right', padding: '12px 8px', fontWeight: 600 }}>Total SOL</th>
+                <th style={{ textAlign: 'right', padding: '12px 8px', fontWeight: 600 }}>Total SOL ▼</th>
               </tr>
             </thead>
             <tbody>
@@ -159,17 +161,36 @@ export default function Dashboard(): React.ReactElement {
                     #{idx + 1}
                   </td>
                   <td style={{ padding: '12px 8px' }}>
-                    <div style={{ fontWeight: 500 }}>{token.name}</div>
-                    <div style={{
-                      fontSize: '12px',
-                      color: 'var(--ifm-color-secondary)',
-                      fontFamily: 'var(--ifm-font-family-monospace)',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      maxWidth: '300px',
-                    }}>
-                      {token.mint}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {(() => {
+                        const iconPath = getTokenIconPath(token.mint, icons);
+                        return iconPath ? (
+                          <img
+                            src={iconPath}
+                            alt=""
+                            width={24}
+                            height={24}
+                            style={{ borderRadius: '50%', flexShrink: 0 }}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        ) : null;
+                      })()}
+                      <div>
+                        <div style={{ fontWeight: 500 }}>{token.name}</div>
+                        <div style={{
+                          fontSize: '12px',
+                          color: 'var(--ifm-color-secondary)',
+                          fontFamily: 'var(--ifm-font-family-monospace)',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          maxWidth: '300px',
+                        }}>
+                          {token.mint}
+                        </div>
+                      </div>
                     </div>
                   </td>
                   <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 500 }}>

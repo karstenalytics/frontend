@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
-import { getPlotlyTemplate, defaultPlotlyConfig } from '@site/src/utils/plotlyTheme';
+import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
 import type { UsageDailyRecord } from '@site/src/hooks/useUsageMetrics';
 
@@ -107,7 +107,7 @@ export default function UsageTimeSeriesChart({
             },
             hovermode: 'x',
           }}
-          config={defaultPlotlyConfig}
+          config={getResponsivePlotlyConfig()}
           style={{ width: '100%', height: '100%' }}
         />
       )}

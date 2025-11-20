@@ -1,7 +1,7 @@
 import React from 'react';
 import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
-import { getPlotlyTemplate, defaultPlotlyConfig } from '@site/src/utils/plotlyTheme';
+import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 
 interface PositionMetric {
   date: string;
@@ -112,7 +112,7 @@ export default function PositionGrowthChart({ data }: PositionGrowthChartProps):
             bgcolor: 'rgba(0,0,0,0)',
           },
         }}
-        config={defaultPlotlyConfig}
+        config={getResponsivePlotlyConfig()}
         style={{ width: '100%', height: '500px' }}
         useResizeHandler={true}
       />

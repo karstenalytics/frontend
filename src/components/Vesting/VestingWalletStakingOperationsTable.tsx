@@ -216,10 +216,10 @@ export default function VestingWalletStakingOperationsTable({
           <table style={{ ...tableStyles.table, minWidth: '900px' }}>
             <thead>
               <tr style={tableStyles.headerRow}>
-                <th style={tableStyles.headerCell}>Date</th>
+                <th style={tableStyles.headerCell}>Date{sortBy === 'timestamp' ? (sortOrder === 'desc' ? ' ▼' : ' ▲') : ''}</th>
                 <th style={tableStyles.headerCell}>Wallet</th>
                 <th style={tableStyles.headerCell}>Type</th>
-                <th style={tableStyles.headerCell}>Amount (TUNA)</th>
+                <th style={tableStyles.headerCell}>Amount (TUNA){sortBy === 'amount' ? (sortOrder === 'desc' ? ' ▼' : ' ▲') : ''}</th>
                 <th style={tableStyles.headerCell}>Pool ID</th>
                 <th style={tableStyles.headerCell}>Transaction</th>
               </tr>

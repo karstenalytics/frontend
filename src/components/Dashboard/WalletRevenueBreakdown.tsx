@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
-import { getPlotlyTemplate, defaultPlotlyConfig } from '@site/src/utils/plotlyTheme';
+import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
 
 interface WalletRevenueData {
@@ -329,7 +329,7 @@ export default function WalletRevenueBreakdown({ dataUrl }: WalletRevenueBreakdo
               <tr style={{ borderBottom: '2px solid var(--ifm-toc-border-color)' }}>
                 <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Rank</th>
                 <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Wallet Address</th>
-                <th style={{ textAlign: 'right', padding: '12px 8px', fontWeight: 600 }}>Revenue (SOL)</th>
+                <th style={{ textAlign: 'right', padding: '12px 8px', fontWeight: 600 }}>Revenue (SOL) ▼</th>
                 <th style={{ textAlign: 'right', padding: '12px 8px', fontWeight: 600 }}>Transactions</th>
                 <th style={{ textAlign: 'center', padding: '12px 8px', fontWeight: 600 }}>Actions</th>
               </tr>
@@ -431,7 +431,7 @@ export default function WalletRevenueBreakdown({ dataUrl }: WalletRevenueBreakdo
               margin: { l: 70, r: 40, t: 20, b: 60 },
               hovermode: 'closest',
             }}
-            config={defaultPlotlyConfig}
+            config={getResponsivePlotlyConfig()}
             style={{ width: '100%', height: '400px' }}
             useResizeHandler={true}
           />
@@ -600,7 +600,7 @@ export default function WalletRevenueBreakdown({ dataUrl }: WalletRevenueBreakdo
                     },
                     margin: { l: 70, r: 200, t: 20, b: 60 },
                   }}
-                  config={defaultPlotlyConfig}
+                  config={getResponsivePlotlyConfig()}
                   style={{ width: '100%', height: '500px' }}
                   useResizeHandler={true}
                 />

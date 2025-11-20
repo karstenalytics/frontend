@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
-import { getPlotlyTemplate, defaultPlotlyConfig } from '@site/src/utils/plotlyTheme';
+import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
 import type { Visualizations } from '@site/src/hooks/useStakerLoyalty';
 
@@ -231,7 +231,7 @@ export default function CompoundVsStakeScatter({
           margin: { l: 80, r: 40, t: 20, b: 100 },
           height: 600,
         }}
-        config={defaultPlotlyConfig}
+        config={getResponsivePlotlyConfig()}
         style={{ width: '100%' }}
       />
 

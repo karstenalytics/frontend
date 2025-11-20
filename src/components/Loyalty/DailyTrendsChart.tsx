@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
-import { getPlotlyTemplate, defaultPlotlyConfig } from '@site/src/utils/plotlyTheme';
+import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
 import type { DailyTrend } from '@site/src/hooks/useStakerLoyalty';
 
@@ -92,7 +92,7 @@ export default function DailyTrendsChart({
           height: 400,
           hovermode: 'x unified',
         }}
-        config={defaultPlotlyConfig}
+        config={getResponsivePlotlyConfig()}
         style={{ width: '100%' }}
       />
     </div>

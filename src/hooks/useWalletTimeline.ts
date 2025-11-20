@@ -48,7 +48,42 @@ export interface TimelinePoint {
   date: string;
   staked: number;
   unstaked: number;
+  locked: number;  // Locked TUNA from vesting schedules
   realized_rewards: number;
+}
+
+// Vesting schedule for tracking locked amounts
+interface VestingSchedule {
+  startTime: Date;
+  lockedTuna: number;
+  cliffHours: number;
+  unlockPeriodHours: number;
+  unlockRateTuna: number;
+}
+
+/**
+ * Calculate remaining locked amount for a vesting schedule at a given time
+ */
+function calculateLockedAmount(schedule: VestingSchedule, currentTime: Date): number {
+  const elapsedMs = currentTime.getTime() - schedule.startTime.getTime();
+  const elapsedHours = elapsedMs / (1000 * 60 * 60);
+
+  // Still in cliff period
+  if (elapsedHours < schedule.cliffHours) {
+    return schedule.lockedTuna;
+  }
+
+  // Calculate hours since cliff ended
+  const hoursSinceCliff = elapsedHours - schedule.cliffHours;
+
+  // Calculate number of complete unlock periods
+  const unlockPeriods = Math.floor(hoursSinceCliff / schedule.unlockPeriodHours);
+
+  // Calculate total unlocked
+  const totalUnlocked = unlockPeriods * schedule.unlockRateTuna;
+
+  // Return remaining locked (minimum 0)
+  return Math.max(0, schedule.lockedTuna - totalUnlocked);
 }
 
 export interface Operation {
@@ -64,6 +99,7 @@ export interface WalletSummary {
   total_operations: number;
   current_staked: number;
   current_unstaked: number;
+  current_locked: number;  // Currently locked in vesting
   realized_rewards: number;
   first_stake_date: string;
   last_activity_date: string;
@@ -88,18 +124,23 @@ const EVENT_TYPES: Record<number, [string, string]> = {
   3: ['withdraw', 'Withdraw'],
   4: ['compound', 'Compound'],
   5: ['claim', 'Claim Rewards'],
+  6: ['set_vesting', 'Set Vesting Strategy'],
 };
 
 /**
  * Build timeline from wallet events
+ * Returns [timeline, operations, vestingSchedules]
  */
-function buildBalanceTimeline(events: StakerEvent[]): [TimelinePoint[], Operation[]] {
+function buildBalanceTimeline(events: StakerEvent[]): [TimelinePoint[], Operation[], VestingSchedule[]] {
   const timeline: TimelinePoint[] = [];
   const operations: Operation[] = [];
 
   let staked = 0.0;
   let unstaked = 0.0; // This is "pending" in the cache
   let realized_rewards = 0.0; // Cumulative claimed + compounded (in SOL)
+
+  // Track ALL vesting schedules (wallet can have multiple positions, each with own vesting)
+  const vestingSchedules: VestingSchedule[] = [];
 
   for (const event of events) {
     if (event.length < 11) continue;
@@ -119,32 +160,87 @@ function buildBalanceTimeline(events: StakerEvent[]): [TimelinePoint[], Operatio
 
     const [type_id, type_label] = EVENT_TYPES[op_type] || ['unknown', 'Unknown'];
 
-    // Apply balance deltas
-    staked += d_stake;
-    unstaked += d_pending;
-
     // Track rewards and operation amounts
     let amount = 0.0;
     if (op_type === 0) { // Initialize position (includes initial stake)
       amount = Math.abs(d_stake);
+      staked += d_stake;
+      unstaked += d_pending;
     } else if (op_type === 1) { // Stake
       amount = Math.abs(d_stake);
+      staked += d_stake;
+      unstaked += d_pending;
     } else if (op_type === 2) { // Unstake
       amount = Math.abs(d_stake); // Show amount unstaked (positive value)
+      staked += d_stake;
+      unstaked += d_pending;
     } else if (op_type === 3) { // Withdraw
       amount = Math.abs(d_pending); // Show amount withdrawn (positive value)
+      staked += d_stake;
+      unstaked += d_pending;
     } else if (op_type === 4) { // Compound
       amount = reward_sol; // Show SOL rewards compounded
       realized_rewards += reward_sol;
+      staked += d_stake;
+      unstaked += d_pending;
     } else if (op_type === 5) { // Claim
       amount = reward_sol; // Show SOL rewards claimed
       realized_rewards += reward_sol;
+      staked += d_stake;
+      unstaked += d_pending;
+    } else if (op_type === 6) { // Set vesting strategy
+      amount = Math.abs(d_stake); // Show locked_tuna amount (stored in d_stake field)
+      // Vesting doesn't change balances - it just sets a lock on existing stake
+
+      // Extract vesting parameters from extended event fields
+      // Event structure for vesting: [..., treasury_balance, cliff_hours, unlock_period_hours, unlock_rate_tuna]
+      const cliffHours = (event[12] as number) || 0;
+      const unlockPeriodHours = (event[13] as number) || 0;
+      const unlockRateTuna = (event[14] as number) || 0;
+
+      // Add or update vesting schedules array (wallet can have multiple positions with vesting)
+      // If we see the same lockedTuna amount, it's an update to an existing schedule (not a new one)
+      if (amount > 0 && unlockPeriodHours > 0 && unlockRateTuna > 0) {
+        const newSchedule = {
+          startTime: new Date(timestamp),
+          lockedTuna: amount,
+          cliffHours,
+          unlockPeriodHours,
+          unlockRateTuna,
+        };
+
+        // Check if this is an update to an existing schedule (same lockedTuna amount)
+        const existingIndex = vestingSchedules.findIndex(s => s.lockedTuna === amount);
+        if (existingIndex >= 0) {
+          // Replace the existing schedule with updated parameters
+          vestingSchedules[existingIndex] = newSchedule;
+        } else {
+          // New vesting schedule for a different position
+          vestingSchedules.push(newSchedule);
+        }
+      }
+    } else {
+      // Unknown event type - still apply deltas
+      staked += d_stake;
+      unstaked += d_pending;
     }
+
+    // Calculate locked amount by summing across ALL vesting schedules
+    // Vesting is purely time-based and not affected by withdrawals
+    const eventTime = new Date(timestamp);
+    let rawLocked = 0;
+    for (const schedule of vestingSchedules) {
+      rawLocked += calculateLockedAmount(schedule, eventTime);
+    }
+
+    // Cap locked to not exceed staked (locked is a subset of staked)
+    const locked = Math.min(rawLocked, staked);
 
     timeline.push({
       date: timestamp,
       staked: Math.round(staked * 1000000) / 1000000,
       unstaked: Math.round(unstaked * 1000000) / 1000000,
+      locked: Math.round(locked * 1000000) / 1000000,
       realized_rewards: Math.round(realized_rewards * 1000000) / 1000000,
     });
 
@@ -158,7 +254,7 @@ function buildBalanceTimeline(events: StakerEvent[]): [TimelinePoint[], Operatio
     });
   }
 
-  return [timeline, operations];
+  return [timeline, operations, vestingSchedules];
 }
 
 /**
@@ -204,7 +300,7 @@ function parseWalletTimeline(walletAddress: string, cache: StakerCache): WalletT
   }
 
   // Build timeline
-  const [timeline, operations] = buildBalanceTimeline(walletEvents);
+  const [timeline, operations, vestingSchedules] = buildBalanceTimeline(walletEvents);
 
   if (timeline.length === 0) {
     return {
@@ -214,21 +310,103 @@ function parseWalletTimeline(walletAddress: string, cache: StakerCache): WalletT
     };
   }
 
-  // Extend timeline to cache end date if needed
+  // Insert vesting unlock events and extend to cache end date
   const cacheEndDate = meta.end;
-  if (cacheEndDate && timeline.length > 0) {
+  if (cacheEndDate && timeline.length > 0 && vestingSchedules.length > 0) {
+    const cacheEndTimestamp = `${cacheEndDate}T23:59:59Z`;
+    const cacheEndTime = new Date(cacheEndTimestamp);
+
+    // Collect all unlock times from ALL vesting schedules
+    const unlockTimes: Date[] = [];
+    for (const schedule of vestingSchedules) {
+      const startMs = schedule.startTime.getTime();
+      const cliffMs = schedule.cliffHours * 60 * 60 * 1000;
+      const periodMs = schedule.unlockPeriodHours * 60 * 60 * 1000;
+      const totalPeriods = Math.ceil(schedule.lockedTuna / schedule.unlockRateTuna);
+
+      for (let i = 0; i <= totalPeriods; i++) {
+        let unlockTime: Date;
+        if (i === 0) {
+          unlockTime = new Date(startMs + cliffMs); // Cliff end
+        } else {
+          unlockTime = new Date(startMs + cliffMs + (i * periodMs));
+        }
+        if (unlockTime <= cacheEndTime) {
+          unlockTimes.push(unlockTime);
+        }
+      }
+    }
+
+    // Add unlock points that don't coincide with existing events
+    const existingDates = new Set(timeline.map(p => p.date));
+
+    for (const unlockTime of unlockTimes) {
+      const unlockDateStr = unlockTime.toISOString();
+
+      // Skip if we already have this exact timestamp
+      if (existingDates.has(unlockDateStr)) continue;
+
+      // Find the previous event to get staked/unstaked/rewards values
+      // Don't break early since timeline isn't sorted yet (added unlocks are at the end)
+      let prevPoint = timeline[0];
+      for (const point of timeline) {
+        if (point.date <= unlockDateStr && point.date > prevPoint.date) {
+          prevPoint = point;
+        }
+      }
+
+      // Calculate locked at this unlock time by summing across ALL schedules
+      let lockedAtUnlock = 0;
+      for (const schedule of vestingSchedules) {
+        lockedAtUnlock += calculateLockedAmount(schedule, unlockTime);
+      }
+      // Cap locked to not exceed staked
+      const cappedLocked = Math.min(lockedAtUnlock, prevPoint.staked);
+
+      timeline.push({
+        date: unlockDateStr,
+        staked: prevPoint.staked,
+        unstaked: prevPoint.unstaked,
+        locked: Math.round(cappedLocked * 1000000) / 1000000,
+        realized_rewards: prevPoint.realized_rewards,
+      });
+    }
+
+    // Add final point at cache end
+    const lastPoint = timeline.reduce((latest, p) => p.date > latest.date ? p : latest);
+    if (cacheEndTimestamp > lastPoint.date) {
+      // Sum locked across ALL schedules at cache end
+      let lockedAtEnd = 0;
+      for (const schedule of vestingSchedules) {
+        lockedAtEnd += calculateLockedAmount(schedule, cacheEndTime);
+      }
+      // Cap locked to not exceed staked
+      lockedAtEnd = Math.min(lockedAtEnd, lastPoint.staked);
+
+      timeline.push({
+        date: cacheEndTimestamp,
+        staked: lastPoint.staked,
+        unstaked: lastPoint.unstaked,
+        locked: Math.round(lockedAtEnd * 1000000) / 1000000,
+        realized_rewards: lastPoint.realized_rewards,
+      });
+    }
+
+    // Sort timeline chronologically
+    timeline.sort((a, b) => a.date.localeCompare(b.date));
+
+  } else if (cacheEndDate && timeline.length > 0) {
+    // No vesting schedule - just extend to cache end
     const lastTimelineDate = timeline[timeline.length - 1].date;
-    // Convert cache end date (YYYY-MM-DD) to ISO timestamp
     const cacheEndTimestamp = `${cacheEndDate}T23:59:59Z`;
 
-    // Only add if cache end is after last transaction
     if (cacheEndTimestamp > lastTimelineDate) {
-      // Add a final point with same balances as last transaction
       const lastPoint = timeline[timeline.length - 1];
       timeline.push({
         date: cacheEndTimestamp,
         staked: lastPoint.staked,
         unstaked: lastPoint.unstaked,
+        locked: lastPoint.locked,
         realized_rewards: lastPoint.realized_rewards,
       });
     }
@@ -250,11 +428,13 @@ function parseWalletTimeline(walletAddress: string, cache: StakerCache): WalletT
   const current = addrData.current || [0, 0, 0, 0, 0];
   const currentStaked = current[0] !== undefined ? current[0] : timeline[timeline.length - 1].staked;
   const currentUnstaked = current[1] !== undefined ? current[1] : timeline[timeline.length - 1].unstaked;
+  const currentLocked = timeline[timeline.length - 1].locked;
 
   const summary: WalletSummary = {
     total_operations: operations.length,
     current_staked: Math.round(currentStaked * 1000000) / 1000000,
     current_unstaked: Math.round(currentUnstaked * 1000000) / 1000000,
+    current_locked: Math.round(currentLocked * 1000000) / 1000000,
     realized_rewards: timeline[timeline.length - 1].realized_rewards,
     first_stake_date: firstDate,
     last_activity_date: lastDate,

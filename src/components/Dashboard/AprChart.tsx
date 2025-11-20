@@ -3,7 +3,7 @@ import Plot from 'react-plotly.js';
 import type { Data } from 'plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import { getPlotlyTemplate, defaultPlotlyConfig } from '@site/src/utils/plotlyTheme';
+import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
 import { trackCustomEvent } from '@site/src/utils/analytics';
@@ -93,6 +93,18 @@ export default function AprChart(): React.ReactElement {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [entryPriceInput, setEntryPriceInput] = useState<string>('0.05');
+  const [showTunaPrice, setShowTunaPrice] = useState(false);
+
+  // Detect mobile viewport
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 996);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Chart tracking
   const plotRef = useRef<HTMLDivElement>(null);
@@ -281,13 +293,21 @@ export default function AprChart(): React.ReactElement {
     mode: 'lines',
     name: 'TUNA Reference Price',
     yaxis: 'y2',
-    visible: 'legendonly',  // Hidden by default
+    visible: showTunaPrice ? true : 'legendonly',
     line: {
       color: 'rgba(239, 68, 68, 0.6)',  // Red/orange, semi-transparent
       width: 1.5,
     },
     hovertemplate: '<b>TUNA Reference Price:</b> $%{y:.4f}<br><i>Derived from on-chain swap data</i><extra></extra>',
   });
+
+  const handleLegendClick = (event: Readonly<any>) => {
+    if (typeof event?.curveNumber === 'number' && event.curveNumber === traces.length - 1) {
+      setShowTunaPrice(prev => !prev);
+      return false;
+    }
+    return undefined;
+  };
 
   const handleEntryPriceChange = (value: string) => {
     // Allow clearing the input
@@ -373,15 +393,21 @@ export default function AprChart(): React.ReactElement {
               rangemode: 'tozero',
             },
             yaxis2: {
-              title: {
+              title: showTunaPrice ? {
                 text: 'TUNA Reference Price (USD)',
                 font: { size: 12 },
-              },
+              } : undefined,
               overlaying: 'y',
               side: 'right',
               showgrid: false,
+              showticklabels: showTunaPrice,
+              ticks: '',
+              tickfont: template.layout?.yaxis?.tickfont ?? { size: 12 },
               rangemode: 'tozero',
-              automargin: true,
+              automargin: showTunaPrice,
+              showline: false,
+              zeroline: false,
+              visible: showTunaPrice,
             },
             showlegend: true,
             legend: {
@@ -391,10 +417,19 @@ export default function AprChart(): React.ReactElement {
               xanchor: 'center',
             },
             hovermode: 'closest',
+            ...(isMobile && {
+              margin: {
+                l: 40,
+                r: 10,
+                t: 40,
+                b: 80,
+              },
+            }),
           }}
-          config={defaultPlotlyConfig}
+          config={getResponsivePlotlyConfig()}
           style={{ width: '100%', height: '500px' }}
           useResizeHandler={true}
+          onLegendClick={handleLegendClick}
         />
       </div>
 

@@ -304,7 +304,7 @@ export default function TopTransactionsTable({
         <thead>
           <tr style={{ borderBottom: '2px solid var(--ifm-toc-border-color)' }}>
             <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Rank</th>
-            <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Amount</th>
+            <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Amount ▼</th>
             <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Date</th>
             {groupMode === 'token' && <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Token</th>}
             {groupMode === 'type' && <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Type</th>}

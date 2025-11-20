@@ -18,7 +18,7 @@ function renderTable(title: string, rows: StakingTopEntry[], emptyMessage: strin
             <tr style={{ borderBottom: '2px solid var(--ifm-toc-border-color)' }}>
               <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Rank</th>
               <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Address</th>
-              <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>{columnName}</th>
+              <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>{columnName} ▼</th>
               <th style={{ textAlign: 'center', padding: '12px 8px', fontWeight: 600 }}>Staking Timeline</th>
             </tr>
           </thead>

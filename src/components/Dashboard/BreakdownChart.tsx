@@ -1,8 +1,8 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import type { Data } from 'plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
-import { getPlotlyTemplate, defaultPlotlyConfig } from '@site/src/utils/plotlyTheme';
+import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
 import type { SummaryData, GroupMode } from './types';
 
@@ -24,6 +24,17 @@ export default function BreakdownChart({ summary, groupMode, onBarClick }: Break
     trackClick: true,
     trackZoom: true,
   });
+
+  // Detect mobile viewport
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 996);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Helper function to format pool labels (prefer swapping pair/protocol for pools)
   const formatPoolLabel = (label: string): string => {
@@ -167,7 +178,7 @@ export default function BreakdownChart({ summary, groupMode, onBarClick }: Break
           xaxis: {
             ...template.layout.xaxis,
             title: '',
-            tickangle: 0,
+            tickangle: isMobile ? -90 : 0,
           },
           yaxis: {
             ...template.layout.yaxis,
@@ -178,9 +189,17 @@ export default function BreakdownChart({ summary, groupMode, onBarClick }: Break
           },
           showlegend: false,
           hovermode: 'closest',
+          ...(isMobile && {
+            margin: {
+              l: 60,
+              r: 10,
+              t: 30,
+              b: 120, // Increased bottom margin for vertical labels on mobile
+            },
+          }),
         }}
-        config={defaultPlotlyConfig}
-        style={{ width: '100%', height: '450px' }}
+        config={getResponsivePlotlyConfig()}
+        style={{ width: '100%', height: isMobile ? '400px' : '450px' }}
         useResizeHandler={true}
         onClick={(event: React.MouseEvent) => {
           if (event.points && event.points.length > 0 && onBarClick) {

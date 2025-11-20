@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import { getPlotlyTemplate, defaultPlotlyConfig } from '@site/src/utils/plotlyTheme';
+import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
 
 interface UnlockTimelineChartProps {
@@ -283,7 +283,7 @@ export default function UnlockTimelineChart({
                 } : undefined,
                 margin: { l: 80, r: 40, t: 20, b: 60 },
               }}
-              config={defaultPlotlyConfig}
+              config={getResponsivePlotlyConfig()}
               style={{ width: '100%', height: '450px' }}
             />
           </div>

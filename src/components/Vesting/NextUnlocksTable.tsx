@@ -121,7 +121,7 @@ export default function NextUnlocksTable({
         <table style={{ ...tableStyles.table, minWidth: '600px' }}>
           <thead>
             <tr style={tableStyles.headerRow}>
-              <th style={tableStyles.headerCell}>Unlock Date</th>
+              <th style={tableStyles.headerCell}>Unlock Date ▲</th>
               <th style={tableStyles.headerCell}>Total Amount (TUNA)</th>
               <th style={tableStyles.headerCell}>Days Until</th>
               <th style={tableStyles.headerCell}>Schedules</th>

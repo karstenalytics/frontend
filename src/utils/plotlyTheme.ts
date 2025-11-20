@@ -148,3 +148,20 @@ export const defaultPlotlyConfig = {
   doubleClick: false, // Disable double-click to isolate trace message
 } as const;
 
+/**
+ * Get responsive Plotly config that hides modebar on mobile
+ * @param mobileBreakpoint - Screen width below which to hide modebar (default: 550px)
+ */
+export function getResponsivePlotlyConfig(mobileBreakpoint: number = 550) {
+  if (typeof window === 'undefined') {
+    return defaultPlotlyConfig;
+  }
+
+  const isMobile = window.innerWidth < mobileBreakpoint;
+
+  return {
+    ...defaultPlotlyConfig,
+    displayModeBar: isMobile ? false : 'hover',
+  };
+}
+

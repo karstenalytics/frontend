@@ -3,7 +3,7 @@ import Plot from 'react-plotly.js';
 import type { Data } from 'plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import { getPlotlyTemplate, defaultPlotlyConfig } from '@site/src/utils/plotlyTheme';
+import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
 
 interface PoolTypeData {
@@ -66,6 +66,17 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
 
   const [data, setData] = useState<PoolTypeData[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Detect mobile viewport
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 996);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const plotRef = useRef<HTMLDivElement>(null);
   useChartTracking(plotRef, {
@@ -190,7 +201,7 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
   // Calculate the actual range needed to show all bars fully
   const maxX = cumulativeX;
 
-  // Create annotations for all pools (45° rotated labels)
+  // Create annotations for all pools (90° rotated on mobile, 45° on desktop)
   const annotations = poolPositions.map((poolPos) => {
     // Remove line breaks for rotated labels
     const labelText = poolPos.pool.replace(/<br>/g, ' ');
@@ -201,7 +212,7 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
       yref: 'paper',
       text: labelText,
       showarrow: false,
-      textangle: -45,
+      textangle: isMobile ? -90 : -45,
       font: { size: 11 },
       xanchor: 'right',
       yanchor: 'top',
@@ -298,8 +309,8 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
           xaxis: {
             ...template.layout.xaxis,
             title: {
-              text: 'Liquidity Pools (width = share of total revenue)',
-              standoff: 120,  // Add more space between axis and title
+              text: 'Liquidity Pools (width = share of revenue)',
+              standoff: 140,  // Add more space between axis and title
             },
             showticklabels: false,  // Hide tick labels, using annotations instead
             range: [0, maxX],
@@ -314,15 +325,24 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
           showlegend: false,
           hovermode: 'closest',
           annotations: annotations,
-          margin: {
-            l: 60,
-            r: 40,
-            t: 60,
-            b: 140,  // Increased bottom margin for diagonal labels
-          },
+          ...(isMobile ? {
+            margin: {
+              l: 60,
+              r: 10,
+              t: 30,
+              b: 160,  // More space for 90° labels on mobile
+            },
+          } : {
+            margin: {
+              l: 60,
+              r: 10,
+              t: 30,
+              b: 140,  // Standard space for 45° labels on desktop
+            },
+          }),
         }}
-        config={defaultPlotlyConfig}
-        style={{ width: '100%', height: '600px' }}
+        config={getResponsivePlotlyConfig()}
+        style={{ width: '100%', height: isMobile ? '500px' : '600px' }}
         useResizeHandler={true}
         onClick={(event: React.MouseEvent) => {
           if (event.points && event.points.length > 0 && onSegmentClick) {

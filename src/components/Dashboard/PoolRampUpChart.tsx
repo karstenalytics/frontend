@@ -3,7 +3,7 @@ import Plot from 'react-plotly.js';
 import type { Data } from 'plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import { getPlotlyTemplate, defaultPlotlyConfig } from '@site/src/utils/plotlyTheme';
+import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
 import LoadingSpinner from '../common/LoadingSpinner';
 
@@ -240,17 +240,43 @@ export default function PoolRampUpChart(): React.ReactElement {
             },
             yaxis: {
               ...template.layout.yaxis,
-              title: 'Cumulative Revenue (SOL)',
+              title: {
+                text: 'Cumulative Revenue (SOL)',
+                standoff: 10,
+              },
             },
             showlegend: true,
             legend: {
               orientation: 'v',
               y: 1,
-              x: 1.02,
+              x: 1,
               xanchor: 'left',
               yanchor: 'top',
               font: { size: 11 },
+              itemwidth: 10,
             },
+            margin: {
+              l: 50,
+              r: 10,
+              t: 50,
+              b: 50,
+            },
+            annotations: [
+              {
+                text: 'Default: Main SOL-USDC pools and pools with <5 SOL cumulative revenue are hidden',
+                xref: 'paper',
+                yref: 'paper',
+                x: 0.6,
+                y: 1.015,
+                xanchor: 'center',
+                yanchor: 'bottom',
+                showarrow: false,
+                font: {
+                  size: 10,
+                  color: 'var(--ifm-color-secondary-dark)',
+                },
+              },
+            ],
             hovermode: 'closest',
             // Enable hover highlighting
             hoverlabel: {
@@ -260,7 +286,7 @@ export default function PoolRampUpChart(): React.ReactElement {
             },
           }}
           config={{
-            ...defaultPlotlyConfig,
+            ...getResponsivePlotlyConfig(),
             // Enable double-click to isolate traces
             doubleClick: 'reset',
           }}

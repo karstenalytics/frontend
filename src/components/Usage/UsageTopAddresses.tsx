@@ -58,7 +58,7 @@ export default function UsageTopAddresses({
               <tr style={tableStyles.headerRow}>
                 <th style={tableStyles.headerCell}>Rank</th>
                 <th style={tableStyles.headerCell}>Address</th>
-                <th style={tableStyles.headerCell}>Days Active</th>
+                <th style={tableStyles.headerCell}>Days Active ▼</th>
                 {showWeeks && <th style={tableStyles.headerCell}>Active Weeks</th>}
                 {showMonths && <th style={tableStyles.headerCell}>Active Months</th>}
                 <th style={tableStyles.headerCell}>Tx Count</th>

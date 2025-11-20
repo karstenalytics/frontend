@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
-import { getPlotlyTemplate, defaultPlotlyConfig } from '@site/src/utils/plotlyTheme';
+import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
 import type { UserSegments } from '@site/src/hooks/useStakerLoyalty';
 
@@ -14,6 +14,17 @@ export default function InverseWhaleChart({
 }: InverseWhaleChartProps): React.ReactElement {
   const { colorMode } = useColorMode();
   const template = getPlotlyTemplate(colorMode === 'dark');
+
+  // Detect mobile viewport
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 996);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const plotRef = useRef<HTMLDivElement>(null);
   useChartTracking(plotRef, {
@@ -171,7 +182,7 @@ export default function InverseWhaleChart({
             },
             text: compoundOnlyPct.map(pct => pct > 5 ? `${pct.toFixed(0)}%` : ''),
             textposition: 'inside',
-            insidetextanchor: 'middle',
+            insidetextanchor: 'end',
             hovertemplate:
               '<b>Stake Tier: %{customdata.tier}</b><br>' +
               '─────────────────────<br>' +
@@ -200,7 +211,7 @@ export default function InverseWhaleChart({
             },
             text: mixedPct.map(pct => pct > 5 ? `${pct.toFixed(0)}%` : ''),
             textposition: 'inside',
-            insidetextanchor: 'middle',
+            insidetextanchor: 'end',
             hovertemplate:
               '<b>Stake Tier: %{customdata.tier}</b><br>' +
               '─────────────────────<br>' +
@@ -229,7 +240,7 @@ export default function InverseWhaleChart({
             },
             text: claimOnlyPct.map(pct => pct > 5 ? `${pct.toFixed(0)}%` : ''),
             textposition: 'inside',
-            insidetextanchor: 'middle',
+            insidetextanchor: 'end',
             hovertemplate:
               '<b>Stake Tier: %{customdata.tier}</b><br>' +
               '─────────────────────<br>' +
@@ -260,20 +271,25 @@ export default function InverseWhaleChart({
           yaxis: {
             title: '',
             automargin: true,
+            tickfont: {
+              size: isMobile ? 11 : 12,
+            },
           },
           showlegend: true,
           legend: {
             orientation: 'h',
             yanchor: 'bottom',
-            y: -0.4,
+            y: isMobile ? -0.6 : -0.4,
             xanchor: 'center',
             x: 0.5,
             traceorder: 'normal',
           },
-          margin: { l: 150, r: 150, t: 20, b: 120 },
+          margin: isMobile
+            ? { l: 80, r: 20, t: 20, b: 140 }
+            : { l: 160, r: 20, t: 20, b: 100 },
           height: Math.max(400, labels.length * 60),
           annotations: totalRewards.map((reward, idx) => ({
-            x: 101,
+            x: 102,
             y: labels[idx],
             xref: 'x',
             yref: 'y',
@@ -281,12 +297,12 @@ export default function InverseWhaleChart({
             showarrow: false,
             xanchor: 'left',
             font: {
-              size: 11,
+              size: isMobile ? 9 : 10,
               color: 'var(--ifm-color-emphasis-700)',
             },
           })),
         }}
-        config={defaultPlotlyConfig}
+        config={getResponsivePlotlyConfig()}
         style={{ width: '100%' }}
       />
     </div>

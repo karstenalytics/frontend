@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
-import { getPlotlyTemplate, defaultPlotlyConfig } from '@site/src/utils/plotlyTheme';
+import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
 import type { UserSegments } from '@site/src/hooks/useStakerLoyalty';
 
@@ -18,6 +18,17 @@ export default function BehaviorPieChart({
 }: BehaviorPieChartProps): React.ReactElement {
   const { colorMode } = useColorMode();
   const template = getPlotlyTemplate(colorMode === 'dark');
+
+  // Detect mobile viewport
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 996);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const plotRef1 = useRef<HTMLDivElement>(null);
   const plotRef2 = useRef<HTMLDivElement>(null);
@@ -84,11 +95,13 @@ export default function BehaviorPieChart({
               xanchor: 'center',
               x: 0.5,
             },
-            margin: { l: 20, r: 20, t: 20, b: 80 },
+            margin: { l: 10, r: 10, t: 20, b: 80 },
             height: 400,
+            autosize: true,
           }}
-          config={defaultPlotlyConfig}
-          style={{ width: '100%' }}
+          config={getResponsivePlotlyConfig()}
+          style={{ width: '100%', height: '400px' }}
+          useResizeHandler={true}
         />
 
         <p style={{ color: 'var(--ifm-color-emphasis-700)', marginTop: '16px', marginBottom: 0 }}>
@@ -111,10 +124,15 @@ export default function BehaviorPieChart({
     >
       <h3 style={{ marginTop: 0, textAlign: 'center' }}>How Stakers Manage Their Rewards</h3>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '48px', alignItems: 'center' }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr' : '1fr auto 1fr',
+        gap: isMobile ? '24px' : '48px',
+        alignItems: 'center'
+      }}>
         {/* Left Pie: Overall Activity Split */}
         <div ref={plotRef1}>
-          <h4 style={{ textAlign: 'center', marginTop: 0, marginBottom: '16px', fontSize: '16px' }}>
+          <h4 style={{ textAlign: 'center', marginTop: 0, marginBottom: '16px', fontSize: isMobile ? '14px' : '16px' }}>
             All Active Stakers
           </h4>
           <Plot
@@ -131,6 +149,9 @@ export default function BehaviorPieChart({
                 insidetextorientation: 'horizontal',
                 rotation: 120,
                 direction: 'clockwise',
+                textfont: {
+                  size: 14, 
+                },
                 hovertemplate: '<b>%{label}</b><br>' +
                   '%{value} stakers (%{percent})<br>' +
                   '<extra></extra>',
@@ -139,11 +160,13 @@ export default function BehaviorPieChart({
             layout={{
               ...template.layout,
               showlegend: false,
-              margin: { l: 20, r: 20, t: 10, b: 40 },
-              height: 350,
+              margin: { l: 10, r: 10, t: 10, b: 40 },
+              height: 450,
+              autosize: true,
             }}
-            config={defaultPlotlyConfig}
-            style={{ width: '100%' }}
+            config={getResponsivePlotlyConfig()}
+            style={{ width: '100%', height: '450px' }}
+            useResizeHandler={true}
           />
           <p style={{
             textAlign: 'center',
@@ -156,49 +179,46 @@ export default function BehaviorPieChart({
           </p>
         </div>
 
-        {/* Arrow Indicator */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '0 16px',
-        }}>
-          <svg width="60" height="32" viewBox="0 0 60 32">
-            <defs>
-              <marker
-                id="arrowhead"
-                markerWidth="12"
-                markerHeight="12"
-                refX="10"
-                refY="6"
-                orient="auto"
-                fill="#00A3B4"
-              >
-                <polygon points="0 0, 12 6, 0 12" />
-              </marker>
-            </defs>
-            <line
-              x1="0"
-              y1="16"
-              x2="56"
-              y2="16"
-              stroke="#00A3B4"
-              strokeWidth="3"
-              markerEnd="url(#arrowhead)"
-            />
-          </svg>
-        </div>
+        {/* Arrow Indicator - hidden on mobile */}
+        {!isMobile && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0 16px',
+          }}>
+            <svg width="60" height="32" viewBox="0 0 60 32">
+              <defs>
+                <marker
+                  id="arrowhead"
+                  markerWidth="12"
+                  markerHeight="12"
+                  refX="10"
+                  refY="6"
+                  orient="auto"
+                  fill="#00A3B4"
+                >
+                  <polygon points="0 0, 12 6, 0 12" />
+                </marker>
+              </defs>
+              <line
+                x1="0"
+                y1="16"
+                x2="56"
+                y2="16"
+                stroke="#00A3B4"
+                strokeWidth="3"
+                markerEnd="url(#arrowhead)"
+              />
+            </svg>
+          </div>
+        )}
 
         {/* Right Pie: Reward Activity Breakdown */}
         <div
           ref={plotRef2}
-          style={{
-            border: '2px solid #00A3B4',
-            borderRadius: '16px',
-            padding: '16px',
-          }}
         >
-          <h4 style={{ textAlign: 'center', marginTop: 0, marginBottom: '16px', fontSize: '16px' }}>
+          <h4 style={{ textAlign: 'center', marginTop: 0, marginBottom: '16px', fontSize: isMobile ? '14px' : '16px' }}>
             Stakers Actively Managing Rewards
           </h4>
           <Plot
@@ -216,6 +236,9 @@ export default function BehaviorPieChart({
                 },
                 textinfo: 'label+percent',
                 textposition: 'auto',
+                textfont: {
+                  size: 14,
+                },
                 hovertemplate: '<b>%{label}</b><br>' +
                   '%{value} stakers (%{percent})<br>' +
                   '<extra></extra>',
@@ -224,11 +247,13 @@ export default function BehaviorPieChart({
             layout={{
               ...template.layout,
               showlegend: false,
-              margin: { l: 20, r: 20, t: 10, b: 40 },
-              height: 350,
+              margin: { l: 10, r: 10, t: 10, b: 40 },
+              height: 450,
+              autosize: true,
             }}
-            config={defaultPlotlyConfig}
-            style={{ width: '100%' }}
+            config={getResponsivePlotlyConfig()}
+            style={{ width: '100%', height: '450px' }}
+            useResizeHandler={true}
           />
           <p style={{
             textAlign: 'center',
