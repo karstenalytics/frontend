@@ -139,6 +139,19 @@ export default function NavbarContent(): ReactNode {
               <SearchBar />
             </NavbarSearch>
           )}
+          {/* Indicator dot for mobile - only visible below 600px */}
+          {timestamp && (
+            <span
+              className={isLive ? styles.mobileIndicatorLive : styles.mobileIndicatorStale}
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                display: 'none',
+                marginRight: '8px',
+              }}
+            />
+          )}
           <a
             href="https://github.com/karstenalytics/frontend"
             target="_blank"

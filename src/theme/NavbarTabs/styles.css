@@ -172,3 +172,10 @@
     padding-left: 8px;
   }
 }
+
+@media (max-width: 600px) {
+  /* Hide timestamp completely - indicator moved to navbar next to Github icon */
+  .navbar-tabs__timestamp {
+    display: none !important;
+  }
+}

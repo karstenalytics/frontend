@@ -223,7 +223,7 @@ export default function DailyStackedBarChart({
           yaxis: {
             ...template.layout.yaxis,
             title: {
-              text: 'Daily Revenue<br>(SOL)',
+              text: 'Daily Revenue (SOL)',
             },
           },
           barmode: 'stack',

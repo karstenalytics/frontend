@@ -47,7 +47,7 @@ See https://github.com/facebook/docusaurus/pull/11142
   }
 
   .githubLink {
-    margin-left: 20px !important;
+    margin-left: 12px !important;
     padding: 6px !important;
   }
 
@@ -62,5 +62,54 @@ See https://github.com/facebook/docusaurus/pull/11142
   /* Decrease margin-top to move burger menu UP */
   :global(.navbar__toggle) {
     margin-top: 4px;
+  }
+
+  /* Reduce spacing between search and github on mobile */
+  :global(.navbar__items--right) {
+    gap: 0;
+    padding-right: 8px;
+  }
+}
+
+/* Mobile indicator colors */
+.mobileIndicatorLive {
+  background-color: #22c55e !important;
+  animation: blink 2s ease-in-out infinite;
+}
+
+.mobileIndicatorStale {
+  background-color: #eab308 !important;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Extra narrow screens - hide search, keep github icon only */
+@media (max-width: 600px) {
+  /* Hide search bar on very narrow screens */
+  :global(.navbar__search) {
+    display: none !important;
+  }
+
+  /* Show mobile indicator dot */
+  .mobileIndicatorLive,
+  .mobileIndicatorStale {
+    display: inline-block !important;
+  }
+
+  .githubLink {
+    margin-left: 0 !important;
+    padding: 4px !important;
+  }
+
+  /* Tighten spacing further on narrow screens */
+  :global(.navbar__items--right) {
+    padding-right: 4px;
   }
 }
