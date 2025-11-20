@@ -10,6 +10,7 @@ import {
   ChartBarIcon,
   NotepadIcon,
 } from '@phosphor-icons/react';
+import { useManifest } from '@site/src/hooks/useManifest';
 import './styles.css';
 
 interface NavTab {
@@ -44,8 +45,21 @@ const tabs: NavTab[] = [
 
 export default function NavbarTabs(): JSX.Element {
   const location = useLocation();
+  const timestamp = useManifest();
 
   const isTabActive = (tab: NavTab): boolean => tab.activePattern.test(location.pathname);
+
+  const isLive = React.useMemo(() => {
+    if (!timestamp) return false;
+    const dataDate = new Date(timestamp + 'T00:00:00Z');
+    const todayUTC = new Date();
+    todayUTC.setUTCHours(0, 0, 0, 0);
+    const yesterdayUTC = new Date(todayUTC);
+    yesterdayUTC.setUTCDate(yesterdayUTC.getUTCDate() - 1);
+
+    return dataDate.getTime() === todayUTC.getTime() ||
+           dataDate.getTime() === yesterdayUTC.getTime();
+  }, [timestamp]);
 
   return (
     <div className="navbar-tabs">
@@ -88,6 +102,14 @@ export default function NavbarTabs(): JSX.Element {
             </Link>
           );
         })}
+        {timestamp && (
+          <span className="navbar-tabs__timestamp">
+            <span
+              className={`navbar-tabs__indicator ${isLive ? 'navbar-tabs__indicator--live' : 'navbar-tabs__indicator--stale'}`}
+            />
+            Last full day available: {timestamp}
+          </span>
+        )}
       </div>
     </div>
   );

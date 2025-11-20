@@ -599,8 +599,8 @@ article {
 }
 @media (max-width: 996px) {
   article {
-    padding: 24px;
-    margin: 16px;
+    padding: 16px 0; /* Remove side padding, keep minimal top/bottom */
+    margin: 16px 0; /* Remove side margin */
   }
   main[class*="docMainContainer"] {
     margin-left: 0;
@@ -896,29 +896,287 @@ textarea:focus {
   }
   /* Dynamic padding/margin formulas handle responsive behavior automatically */
 }
-@media (max-width: 768px) {
+@media (max-width: 996px) {
   :root {
-    --ifm-navbar-height: 48px;
+    --ifm-navbar-height: 60px;
     /* Recalculate sticky offsets for mobile navbar */
-    --sidebar-sticky-top: calc(var(--ifm-navbar-height) + 34px); /* 48px + 34px = 82px */
-    --toc-sticky-top: calc(var(--ifm-navbar-height) + 76px); /* 48px + 76px = 124px */
-    --social-footer-height: 68px; /* Taller footer on mobile (increased padding) */
+    --sidebar-sticky-top: calc(var(--ifm-navbar-height) + 34px); /* 60px + 34px = 94px */
+    --toc-sticky-top: calc(var(--ifm-navbar-height) + 76px); /* 60px + 76px = 136px */
   }
   .navbar {
-    height: 48px;
+    height: 60px;
+  }
+
+  .navbar__logo {
+    height: 28px;
+    margin-right: 8px;
+    margin-top: -17px;
+  }
+
+  .navbar__logo img {
+    height: 56px;
+  }
+
+  .navbar__title {
+    font-size: 14px;
+  }
+
+  /* Remove padding from navbar inner to use full width */
+  .navbar__inner {
+    padding: 0;
+  }
+
+  /* Hide search keyboard shortcut (Ctrl K) on mobile */
+  .DocSearch-Button-Keys,
+  .DocSearch-Button-Key {
+    display: none !important;
+  }
+
+  /* Remove max-width and padding from content area for more space */
+  .main-wrapper [class*="docRoot"] {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  main[class*="docMainContainer"] > .container > .row > .col {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* Mobile sidebar styled like desktop sidebar */
+  .navbar-sidebar {
+    top: calc(60px + 48px) !important; /* Navbar height (60px) + Navbar tabs height (48px) */
+    height: calc(100vh - 60px - 48px) !important;
+    width: 100vw !important; /* Full screen width */
+    max-width: 100vw !important;
+    background: var(--ifm-background-surface-color);
+    --rail-position: var(--sidebar-rail-offset);
+    --ifm-navbar-sidebar-width: 100vw !important; /* Override Docusaurus default to use full width */
+    z-index: 90 !important; /* Below navbar tabs (z-index: 99) */
+  }
+
+  /* Hide backdrop overlay when sidebar is open */
+  .navbar-sidebar__backdrop {
+    display: none !important;
+  }
+
+  /* No header */
+  .navbar-sidebar__brand {
+    display: none;
+  }
+
+  /* Style like desktop sidebar with rail */
+  .navbar-sidebar .navbar-sidebar__items {
+    padding: 28px 16px 0 16px; /* Remove bottom padding to prevent cutoff */
+    position: relative;
+  }
+
+  /* Scrollable container */
+  .navbar-sidebar .navbar-sidebar__item {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* Menu styling to match desktop sidebar exactly */
+  .navbar-sidebar .menu {
+    padding: 0;
+    margin: 0;
+  }
+
+  .navbar-sidebar .menu__list {
+    padding: 0;
+    margin: 0;
+    position: relative;
+  }
+
+  /* Add the primary vertical rail on the first menu list - aligns with teal active marker */
+  .navbar-sidebar .menu > .menu__list::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: var(--sidebar-rail-offset); /* 18px - aligns 1px to the right of teal marker at 17px */
+    width: 1px;
+    background: var(--ifm-toc-border-color);
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Nested menu items */
+  .navbar-sidebar .menu__list .menu__list {
+    --rail-position: calc(var(--rail-position, var(--sidebar-rail-offset)) + var(--sidebar-rail-step));
+    position: relative;
+    margin: 0 0 0 var(--sidebar-rail-step);
+    padding: 0;
+  }
+
+  /* Nested rail line */
+  .navbar-sidebar .menu__list .menu__list::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: var(--rail-position, var(--sidebar-rail-offset)); /* Same as desktop - no subtraction */
+    width: 1px;
+    background: var(--ifm-toc-border-color);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .navbar-sidebar .menu__list .menu__list .menu__link {
+    padding-left: calc(var(--rail-position, var(--sidebar-rail-offset)) + 14px);
+  }
+
+  .navbar-sidebar .menu__link {
+    position: relative;
+    border-radius: 0;
+    padding: 8px 40px 8px calc(var(--sidebar-rail-offset) + 14px); /* Increased right padding for caret space */
+    color: var(--sidebar-link-color);
+    font-size: 14px;
+    font-weight: 400;
+    transition: color 120ms ease;
+    background: transparent !important;
+    z-index: 0;
+  }
+
+  /* Ensure caret is positioned on the right */
+  .navbar-sidebar .menu__caret {
+    position: absolute;
+    right: 16px;
+    padding: 0;
+  }
+
+  .navbar-sidebar .menu__link:hover {
+    color: var(--sidebar-link-color);
+    text-decoration: none;
+    background: transparent !important;
+  }
+
+  .navbar-sidebar .menu__link--active {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* Active item icon color */
+  .navbar-sidebar .menu__link--active svg {
+    color: var(--accent);
+  }
+
+  /* Active item indicator bar */
+  .navbar-sidebar .menu__link--active:not(.menu__link--sublist)::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    left: calc(var(--sidebar-rail-offset) - 1px);
+    width: 3px;
+    border-radius: 2px;
+    background: var(--accent);
+    z-index: 1;
+  }
+
+  /* Hover background highlight - only show on hover, not on active */
+  .navbar-sidebar .menu__link:not(.menu__link--sublist)::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: calc(var(--sidebar-rail-offset) + 1px);
+    right: 12px;
+    background: transparent;
+    border-radius: 0 12px 12px 0;
+    opacity: 0;
+    transition: background 140ms ease, opacity 140ms ease;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .navbar-sidebar .menu__link:not(.menu__link--sublist):hover::after {
+    background: var(--ifm-menu-color-background-hover);
+    opacity: 1;
+  }
+
+  /* Section headings in mobile sidebar (like "DEFITUNA") - match desktop styling */
+  .navbar-sidebar .sidebar-heading {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    font-weight: 600;
+    color: var(--ifm-font-color-base);
+    margin: 20px 0 12px;
+    padding-left: calc(var(--sidebar-rail-offset) + 16px);
+  }
+
+  .navbar-sidebar .sidebar-heading + .menu__list {
+    margin-top: 4px;
+  }
+
+  /* Sublist items (with caret) - separate styling */
+  .navbar-sidebar .menu__link--sublist::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: calc(var(--sidebar-rail-offset) + 1px);
+    right: 12px;
+    background: transparent;
+    border-radius: 0 12px 12px 0;
+    opacity: 0;
+    transition: background 140ms ease, opacity 140ms ease;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .navbar-sidebar .menu__link--sublist:hover::before {
+    background: var(--ifm-menu-color-background-hover);
+    opacity: 1;
+  }
+
+  /* Show carets for nested menus */
+  .navbar-sidebar .menu__link--sublist-caret::after {
+    display: inline-block !important;
+    margin-left: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --ifm-navbar-height: 60px; /* Keep consistent with 996px breakpoint */
+    --social-footer-height: 52px; /* Same as desktop - icons only */
   }
   body {
-    padding-bottom: 96px;
+    padding-bottom: 64px;
   }
   .main-wrapper {
-    padding-bottom: 96px;
+    padding-bottom: 64px;
   }
   .social-footer__content {
-    padding: 14px 18px;
-    gap: 16px;
+    padding: 12px 18px;
+    gap: 24px;
+    justify-content: center;
   }
-  /* Dynamic padding/margin formulas handle responsive behavior automatically */
+
+  /* Hide text labels on mobile, show only icons */
+  .social-footer__link span,
+  .social-footer__donate span {
+    display: none;
+  }
+
+  /* Make icons bigger on mobile */
+  .social-footer__link svg,
+  .social-footer__donate svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  /* Adjust mobile sidebar for smaller screens (48px tabs instead of 45px) */
+  .navbar-sidebar {
+    top: calc(60px + 48px) !important; /* Navbar height (60px) + Navbar tabs height (48px) */
+    height: calc(100vh - 60px - 48px) !important;
+  }
 }
+
 /* ========================
    Utilities
    ======================== */
@@ -973,6 +1231,12 @@ textarea:focus {
   gap: 24px;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   margin-bottom: 32px;
+}
+
+@media (max-width: 996px) {
+  .staking-top-grid {
+    grid-template-columns: 1fr; /* Single column on mobile - stack vertically */
+  }
 }
 .staking-top-table {
   background: var(--ifm-background-surface-color);
@@ -1258,8 +1522,8 @@ textarea:focus {
 
 @media (max-width: 996px) {
   .blog-layout article {
-    padding: 24px;
-    margin: 16px;
+    padding: 16px 0; /* Remove side padding, keep minimal top/bottom */
+    margin: 16px 0; /* Remove side margin */
   }
 
   .blog-layout .theme-doc-sidebar-container {

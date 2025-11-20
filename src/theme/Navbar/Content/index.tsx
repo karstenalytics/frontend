@@ -143,6 +143,7 @@ export default function NavbarContent(): ReactNode {
             href="https://github.com/karstenalytics/frontend"
             target="_blank"
             rel="noopener noreferrer"
+            className={styles.githubLink}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -166,8 +167,8 @@ export default function NavbarContent(): ReactNode {
             }}
             title="View source on GitHub"
           >
-            <GithubLogo size={18} weight="regular" />
-            <span>GitHub Repo</span>
+            <GithubLogo size={20} weight="regular" className={styles.githubIcon} />
+            <span className={styles.githubText}>GitHub Repo</span>
           </a>
         </>
       }

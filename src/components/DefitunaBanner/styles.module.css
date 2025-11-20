@@ -12,3 +12,10 @@
 .separator {
   margin: 0 16px;
 }
+
+/* Hide banner on mobile */
+@media (max-width: 996px) {
+  .banner {
+    display: none;
+  }
+}

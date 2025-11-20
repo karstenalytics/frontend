@@ -33,3 +33,34 @@ See https://github.com/facebook/docusaurus/pull/11142
     opacity: 0.3;
   }
 }
+
+/* Mobile navbar adjustments */
+@media (max-width: 996px) {
+  /* Hide timestamp on mobile (shown in navbar tabs instead) */
+  .timestamp {
+    display: none !important;
+  }
+
+  /* Hide GitHub text on mobile, keep icon */
+  .githubText {
+    display: none;
+  }
+
+  .githubLink {
+    margin-left: 20px !important;
+    padding: 6px !important;
+  }
+
+  /* Make GitHub icon bigger on mobile */
+  .githubIcon {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  /* Align burger menu with logo - adjust this value to fine-tune */
+  /* Increase margin-top to move burger menu DOWN */
+  /* Decrease margin-top to move burger menu UP */
+  :global(.navbar__toggle) {
+    margin-top: 4px;
+  }
+}

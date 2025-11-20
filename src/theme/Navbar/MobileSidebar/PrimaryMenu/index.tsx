@@ -8,12 +8,11 @@ function useNavbarItems() {
   return useThemeConfig().navbar.items as NavbarItemConfig[];
 }
 
-// The primary menu displays the navbar items
+// The primary menu displays the navbar tabs (Intro, Analysis, etc.)
 export default function NavbarMobilePrimaryMenu(): ReactNode {
   const mobileSidebar = useNavbarMobileSidebar();
 
-  // TODO how can the order be defined for mobile?
-  // Should we allow providing a different list of items?
+  // Show navbar tabs in mobile menu
   const items = useNavbarItems();
 
   return (

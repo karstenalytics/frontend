@@ -2,6 +2,7 @@ import React, {type ReactNode} from 'react';
 import {useNavbarMobileSidebar} from '@docusaurus/theme-common/internal';
 import {translate} from '@docusaurus/Translate';
 import IconMenu from '@theme/Icon/Menu';
+import IconClose from '@theme/Icon/Close';
 
 export default function MobileSidebarToggle(): ReactNode {
   const {toggle, shown} = useNavbarMobileSidebar();
@@ -17,7 +18,7 @@ export default function MobileSidebarToggle(): ReactNode {
       aria-expanded={shown}
       className="navbar__toggle clean-btn"
       type="button">
-      <IconMenu />
+      {shown ? <IconClose /> : <IconMenu />}
     </button>
   );
 }
