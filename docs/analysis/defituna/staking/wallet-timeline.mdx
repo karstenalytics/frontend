@@ -17,6 +17,69 @@ Detailed staking history for individual wallet addresses showing balance evoluti
     const { useWalletTimeline } = require('@site/src/hooks/useWalletTimeline');
     const WalletTimelineChart = require('@site/src/components/Staking/WalletTimelineChart').default;
 
+    // Notable wallets with display names
+    const notableWallets = [
+      { address: '2ynatrVRWC4QqjnfFYUy7q2yQyDT5EySSh8o2yWrxyFb', name: 'Protocol Treasury' },
+      { address: 'ECyvtxvY4KNBt5vfLtdsMrp77mKjL3JD6aha9m3aXBvd', name: 'The White Whale' },
+      { address: '63jfXXj98msQDKFJKXACpeY1uQ228CyjZeyzbFeDq7iM', name: 'DefiTuna Founder Dhirk' },
+    ];
+
+    // Wallets with vesting schedules
+    const vestingWallets = [
+      '2vAg5qYrpa4GV6Xio75TEzFocHV7MWLfitxipjY6H2EJ',
+      '2ynatrVRWC4QqjnfFYUy7q2yQyDT5EySSh8o2yWrxyFb',
+      '31bz9pFqHC6a5DFRk2DrXhzWghNSh6Ybb6D7dcPzvWw7',
+      '3fTrmoWk4DGVx6x1xDtKaJciRYCQ76wr28dEsMtdh3zM',
+      '3rJe7FAeMDxUYkLMYVcBj1ZPX4o8Ukt4h3mWgyS9a6Jy',
+      '4aUhpwZCrd3paaUEj4FEeEbpAq76kG4PmuDJp59fksrM',
+      '5A2gBoqU5GkBfFN7qQvp1RR2TTKXnFT2wt9w8e9RnXx5',
+      '5eXV2EHffops3QbxqsFCsARb9Lq6MtUnWL7bfw6cVnrw',
+      '5hF2H1wf2ZCpH8Row3y7c8AutLQKKrA1c8t52yxcAFJU',
+      '6CEJhr1Z5GWxLsk5GermUfPc1511EH1S4WJAaazN2xWm',
+      '6WSc4njiD9Y7bNeb1dVtW9UTjiYQHVirq6PsxPivzqDv',
+      '7iMWCxXH6hL1FuRse6vXLMYJd1i3KJrcWmpx19o69vQz',
+      '7tDZNLSbHappi8cE3ANXayodQRxrDZwJQGLi5HJKmp5X',
+      '8A5mDnwzGXFseoX34Ek5MkRnDA3QieqoW8DUMJbksJbS',
+      '8Ji51bchqqwZYCXAXVQAK3FwPsWnupZQa4jDeCVFqdmM',
+      '8mMMikQp5sFETSmWQfzrBbDSYUNW7UQrmUcW9yv2AvxB',
+      '8ogfg8uU66AASKwGbzZDTPasQ4QKt4rfnUZQ2TTDyeJy',
+      'A7UTmRy8AbHxEsEFJwUj7KQGK4SJ3EbBXdSkSgnDePDB',
+      'APN3kwv1TUxhadMyECFoBYGNYfjyXYsAuZyS6nY4LzY9',
+      'AbifZaK9yo1w8gfonT8TkZzefV47RSuJmpxpsusD5cV6',
+      'AgV713LkpRzfEwjK2WTsndp86QffuTxfRZ5SLukumbfc',
+      'Ah4LQvVDGGAbtqFoDZvNV4yRYMMhqZpJGLZWGnZA3rPP',
+      'BbJP5VT3nprTeMC2cZgHQiWiw2j9KQCTso3idWUXXp7z',
+      'BenGcYAaMnVReHwqRmqHtC2dX7nd88e3UtGHz3i6EN1U',
+      'C31s8y9zXnUbXzejPQ4ZaUj8JdR6j3zseAAcmDr8k51x',
+      'C4BWvTPm2nCbqhLSuyc7PPWUoVVe1pjrYhdco3MbZLaL',
+      'CpbBBcUv9ic5RbADfGLvGTqCnMCY7wmw2WijJcky6Qxf',
+      'D8zRsRRzBsZVaxDWz8L1NjdWzSuw7jjKz86wTnCQGMEM',
+      'DHeDGRTCaGTxaYkCVUZ6noNXQJ2pnk4QgeEJXJTCEUQe',
+      'DMbArkMKpMoctM57tnRfYLp1wVd7QCoBWnwETmLDCTDk',
+      'DeTu8nW3MWeWCDyvZnvVGkW9YAYrK7SZWw9hosYc8QNR',
+      'DhFW86DfdpbP83nMqLX75v3xNob35aQ7XbSpqyaon4G1',
+      'DnzRAvmGszi38jMcmCFJ5v7AhDa7hPzn6gD2Aqykjnc1',
+      'Dp1o9FTC5YBERrYq1MrqBTME55XG5PA2VfEx174jgsb9',
+      'Ds48oyaeRSGfoXGtGMqyVJZnmvq9qvhVLXy1LfjdTWfh',
+      'Dufg6HNpi5UJejoKFjgaumhLNWH9SrY21VyP3e9bs2y4',
+      'EN6xdJYF6SFWvc4t3LLcf1g2j7tWEBkMfdwXkpga8D34',
+      'FA8Kft2G8xGY8AhQEdPSSxpRnEoPpg4tm17nmS1hYJQf',
+      'FBTpfreTqcSkwgNEeRoyJZ23VWpGSa7bFq1KAnh1g5JR',
+      'FhExouC1cLVm6amPktrEHRvHoMUBmsjbTots8Scm2ny6',
+      'Fu3qo3RAYqE8yxmotNZMdqmTUXp71nHio6PBNdNYYmn7',
+      'GRowGA1cq9abztLhXJykXoD7sAnxUARQap2sRX2CZgpv',
+      'Grb7PngNe1yRmugepSNjiZvyEyTScbY4EDL2J2jAk3rC',
+      'Gyun5nDsDuLKK7cFbxENS7YsY1PrqCNAWyrnYfbRkDph',
+      'HAQSoQRbHxERiF7W2cnoG8SrxqLb1Vs1epX52i2FWzpY',
+      'HUST7np5e5dAvfXgrhVxCGXMGym9KuC7MLJAraj9795f',
+      'J2jmQPR1mdYxHBfSCLxFoy99uPxaxLYWcVmx48889Ls3',
+      'JBDKyJUDEkJauC56DryT11qsiTJKncWq1NeigLEbPDp3',
+      'Y8QqeC9nqD6Ai2YM1nxZaXdPZNWJmHSAJT4PiXrpdF3',
+      'tmnbW9cJJQCx9aDQxqmEDitdsFjsDtHxi2u6AJhAr18',
+      'upgMGFHGxJ58kBxpiEhLzV5AJ9SkZiGx3hxAxc7TZfn',
+      'xxxRS9VH9LRrxDqxBTd7mqWhSnTpebHnCo5KDHDciaf',
+    ];
+
     function WalletTimelinePage() {
       const [inputAddress, setInputAddress] = useState('');
       const [searchAddress, setSearchAddress] = useState(null);
@@ -42,6 +105,20 @@ Detailed staking history for individual wallet addresses showing balance evoluti
       // Reset pagination when searching new wallet
       useEffect(() => {
         setCurrentPage(0);
+      }, [searchAddress]);
+
+      // Update URL when wallet changes
+      useEffect(() => {
+        if (searchAddress) {
+          const url = new URL(window.location.href);
+          url.searchParams.set('wallet', searchAddress);
+          window.history.replaceState({}, '', url.toString());
+        } else {
+          // Clear the parameter if no wallet
+          const url = new URL(window.location.href);
+          url.searchParams.delete('wallet');
+          window.history.replaceState({}, '', url.toString());
+        }
       }, [searchAddress]);
 
       const handleSearch = () => {
@@ -121,12 +198,51 @@ Detailed staking history for individual wallet addresses showing balance evoluti
             </div>
             <p style={{
               marginTop: '12px',
-              marginBottom: 0,
+              marginBottom: '12px',
               fontSize: '13px',
               color: 'var(--ifm-color-secondary)',
             }}>
-              Enter any wallet address from the staking cache ({loading ? '...' : '7,861 wallets available'}). No idea which address to enter? Check <a href="/analysis/defituna/staking/staked-tuna" style={{ color: 'var(--accent)', textDecoration: 'none' }}>recent stakers/withdrawers</a> or <a href="https://defituna.com/stake" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>DefiTuna Leaderboard</a>.
+              Enter any wallet address from the staking cache ({loading ? '...' : '7,861 wallets available'}). No idea which address to enter? Check <a href="/analysis/defituna/staking/staked-tuna" style={{ color: 'var(--accent)', textDecoration: 'none' }}>recent stakers/withdrawers</a> or <a href="https://defituna.com/stake" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>DefiTuna Leaderboard</a> or use the notable wallets below.
             </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '12px', color: 'var(--ifm-color-secondary)' }}>
+                Quick select:
+              </span>
+              <select
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setInputAddress(e.target.value);
+                    setSearchAddress(e.target.value);
+                  }
+                }}
+                style={{
+                  padding: '6px 10px',
+                  fontSize: '12px',
+                  border: '1px solid var(--ifm-toc-border-color)',
+                  borderRadius: 'var(--ifm-global-radius)',
+                  background: 'var(--ifm-background-color)',
+                  color: 'var(--ifm-color-secondary)',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="">Select wallet...</option>
+                <optgroup label="Notable Wallets">
+                  {notableWallets.map((wallet) => (
+                    <option key={wallet.address} value={wallet.address}>
+                      {wallet.name}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Wallets with Vesting (52)">
+                  {vestingWallets.map((address) => (
+                    <option key={address} value={address}>
+                      {address.slice(0, 8)}...{address.slice(-4)}
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
+            </div>
           </div>
 
           {/* Loading State */}
@@ -187,6 +303,20 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                       {data.summary.current_staked.toLocaleString(undefined, { maximumFractionDigits: 2 })} TUNA
                     </div>
                   </div>
+
+                  {data.summary.current_locked > 0 && (
+                    <div>
+                      <div style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)', marginBottom: '4px' }}>
+                        Current Locked (Vesting)
+                      </div>
+                      <div style={{ fontSize: '20px', fontWeight: 600, color: '#EC4899' }}>
+                        {data.summary.current_locked.toLocaleString(undefined, { maximumFractionDigits: 2 })} TUNA
+                      </div>
+                      <div style={{ fontSize: '12px', color: 'var(--ifm-color-secondary)', marginTop: '4px' }}>
+                        Unlocks over time per vesting schedule
+                      </div>
+                    </div>
+                  )}
 
                   <div>
                     <div style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)', marginBottom: '4px' }}>
@@ -273,6 +403,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                   compound: '#3B82F6',
                   claim: '#F59E0B',
                   withdraw: '#F97316',
+                  set_vesting: '#EC4899',
                   unknown: '#6B7280',
                 };
 
@@ -296,6 +427,8 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                             const globalIdx = startIdx + idx;
                             const unit = (op.type === 'compound' || op.type === 'claim') ? 'SOL' : 'TUNA';
                             const decimals = (op.type === 'compound' || op.type === 'claim') ? 4 : 2;
+                            // Show "Locked" prefix for vesting operations
+                            const amountPrefix = op.type === 'set_vesting' ? 'Locked: ' : '';
 
                             return (
                               <tr
@@ -323,7 +456,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                                   </span>
                                 </td>
                                 <td style={{ ...tableStyles.cell, fontWeight: 600 }}>
-                                  {op.amount.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })} {unit}
+                                  {amountPrefix}{op.amount.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })} {unit}
                                 </td>
                                 <td style={tableStyles.addressCell}>
                                   <a
@@ -454,7 +587,8 @@ This page helps you:
 **URL Parameters**: Share direct links with pre-filled addresses using `?wallet=ADDRESS` or `?address=ADDRESS`
 
 **Wallet Summary Metrics:**
-- **Current Staked**: TUNA currently locked in staking positions
+- **Current Staked**: TUNA currently in staking positions
+- **Current Locked (Vesting)**: TUNA locked by vesting schedule (unlocks over time)
 - **Current Unstaked**: TUNA held liquid by the wallet
 - **Realized Rewards**: Cumulative SOL from claimed + compounded rewards (unclaimed rewards not shown)
 - **Total Operations**: Count of all staking transactions
@@ -462,15 +596,19 @@ This page helps you:
 - **Last Activity**: Most recent staking transaction date
 
 **Timeline Chart Elements:**
-- **Stacked Area (Teal + Gray)**: TUNA balance split between staked (bottom, teal) and unstaked (top, gray)
+- **Stacked Area (Three Colors)**: TUNA balance split into:
+  - Pink (bottom) = Staked TUNA (Vesting) - locked by vesting schedule
+  - Teal (middle) = Staked TUNA (Unlocked) - freely available staked tokens
+  - Gray (top) = Unstaked TUNA - pending withdrawal
 - **Dashed Gold Line (Right Y-axis)**: Cumulative realized rewards in SOL (claimed + compounded)
 - **Colored Dots**: Individual staking operations with distinct shapes and colors:
-  - 🟣 Purple diamond = Initialize Position
-  - 🟢 Green circle = Stake
-  - 🔴 Red circle = Unstake
-  - 🔵 Blue triangle = Compound
-  - 🟡 Gold star = Claim Rewards
-  - 🟠 Orange square = Withdraw
+  - Purple diamond = Initialize Position
+  - Green circle = Stake
+  - Red circle = Unstake
+  - Blue triangle = Compound
+  - Gold star = Claim Rewards
+  - Orange square = Withdraw
+  - Pink hexagram = Set Vesting Strategy
 
 **Wallet Transactions Table:**
 - Shows all staking operations sorted newest first (indicated by ▼)
@@ -519,6 +657,16 @@ Daily staked and unstaked balances are calculated by:
 4. **Compound handling**: Compounded rewards increase staked balance
 5. **Claim handling**: Claimed rewards tracked separately as realized SOL
 
+**Vesting/Locked Balance Calculation**
+
+When a wallet has a vesting schedule, the locked amount decreases over time:
+
+1. **Initial lock**: When SetVestingStrategy is called, the locked_tuna amount becomes fully locked
+2. **Cliff period**: During the cliff (e.g., 8160 hours / 11 months), full amount remains locked
+3. **Unlock periods**: After cliff, unlock_rate TUNA unlocks every unlock_period hours
+4. **Multiple schedules**: If wallet has multiple vesting schedules, locked amounts are summed
+5. **Timeline display**: At each event, locked amount is recalculated based on elapsed time
+
 **Realized Rewards Tracking**
 
 Realized rewards represent SOL that has been extracted or compounded:
@@ -538,6 +686,7 @@ Each transaction is classified as one of these types:
 - **Compound**: Reinvest rewards as additional stake
 - **Claim**: Extract rewards as SOL
 - **Withdraw**: Complete unstake and receive TUNA
+- **Set Vesting**: Configure vesting schedule for locked TUNA (shows locked amount, cliff period, and unlock schedule)
 
 **Relationship to Other Views**
 

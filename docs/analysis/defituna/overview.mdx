@@ -16,6 +16,7 @@ Before I talk about DefiTuna let's start with a summary of the key metrics that 
 <BrowserOnly fallback={<LoadingSpinner />}>
   {() => {
     const { useEffect, useState } = require('react');
+    const TokenDisplay = require('@site/src/components/common/TokenDisplay').default;
 
     function KeyMetricsDisplay() {
       const [data, setData] = useState(null);
@@ -49,7 +50,11 @@ Before I talk about DefiTuna let's start with a summary of the key metrics that 
         <div className="usage-summary-grid">
           <div className="usage-summary-card">
             <h3>30d Protocol Revenue</h3>
-            <p>{revenue_30d?.sol?.toLocaleString(undefined, { maximumFractionDigits: 0 }) || '—'} SOL</p>
+            <p>
+              {revenue_30d?.sol?.toLocaleString(undefined, { maximumFractionDigits: 0 }) || '—'}
+              {' '}
+              <TokenDisplay mint="SOL" size={16} />
+            </p>
             <div style={{ fontSize: '0.9rem', color: 'var(--ifm-color-emphasis-600)', marginTop: '4px' }}>
               ${revenue_30d?.usdc?.toLocaleString(undefined, { maximumFractionDigits: 0 }) || '—'}
             </div>
@@ -57,7 +62,11 @@ Before I talk about DefiTuna let's start with a summary of the key metrics that 
 
           <div className="usage-summary-card">
             <h3>Annualized Revenue</h3>
-            <p>{revenue_30d?.annualized_sol?.toLocaleString(undefined, { maximumFractionDigits: 0 }) || '—'} SOL</p>
+            <p>
+              {revenue_30d?.annualized_sol?.toLocaleString(undefined, { maximumFractionDigits: 0 }) || '—'}
+              {' '}
+              <TokenDisplay mint="SOL" size={16} />
+            </p>
             <div style={{ fontSize: '0.9rem', color: 'var(--ifm-color-emphasis-600)', marginTop: '4px' }}>
               ${revenue_30d?.annualized_usdc?.toLocaleString(undefined, { maximumFractionDigits: 0 }) || '—'}
             </div>
@@ -69,7 +78,8 @@ Before I talk about DefiTuna let's start with a summary of the key metrics that 
               ? `${((market_data?.fdv_usd || 0) / 1_000_000).toFixed(1)}M`
               : (market_data?.fdv_usd || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
             <div style={{ fontSize: '0.9rem', color: 'var(--ifm-color-emphasis-600)', marginTop: '4px' }}>
-              ${market_data?.tuna_price_usd?.toFixed(4) || '—'} per TUNA
+              ${market_data?.tuna_price_usd?.toFixed(4) || '—'} per{' '}
+              <TokenDisplay mint="TUNAfXDZEdQizTMTh3uEvNvYqJmqFHZbEJt8joP4cyx" size={14} symbol="TUNA" />
             </div>
           </div>
 
@@ -102,8 +112,9 @@ Before I talk about DefiTuna let's start with a summary of the key metrics that 
             <p>{metrics?.percent_staked?.toFixed(2) || '—'}%</p>
             <div style={{ fontSize: '0.9rem', color: 'var(--ifm-color-emphasis-600)', marginTop: '4px' }}>
               {(metrics?.total_staked_tuna || 0) >= 1_000_000
-                ? `${((metrics?.total_staked_tuna || 0) / 1_000_000).toFixed(0)}M TUNA`
+                ? `${((metrics?.total_staked_tuna || 0) / 1_000_000).toFixed(0)}M `
                 : (metrics?.total_staked_tuna || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              <TokenDisplay mint="TUNAfXDZEdQizTMTh3uEvNvYqJmqFHZbEJt8joP4cyx" size={14} symbol="TUNA" />
             </div>
           </div>
 
