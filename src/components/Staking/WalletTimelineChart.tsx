@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
@@ -25,12 +25,47 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
   const isDark = colorMode === 'dark';
   const template = getPlotlyTemplate(isDark);
 
+  // Mobile detection
+  // Initialize with actual window size to prevent hydration mismatch
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 996 : false
+  );
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 996);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+   // Helper function to truncate wallet address for display
+  function truncateAddress(address: string, startChars: number = 5, endChars: number = 5): string {
+    if (!address || address.length <= startChars + endChars) {
+      return address;
+    }
+    return `${address.slice(0, startChars)}...${address.slice(-endChars)}`;
+  }
+
   const plotRef = useRef<HTMLDivElement>(null);
   useChartTracking(plotRef, {
     chartName: 'Wallet Timeline',
     trackClick: true,
     trackZoom: true,
   });
+
+  // Measure container width for dynamic legend sizing
+  const [containerWidth, setContainerWidth] = useState(0);
+  useEffect(() => {
+    if (plotRef.current) {
+      const updateWidth = () => {
+        setContainerWidth(plotRef.current?.offsetWidth || 0);
+      };
+      updateWidth();
+      window.addEventListener('resize', updateWidth);
+      return () => window.removeEventListener('resize', updateWidth);
+    }
+  }, []);
 
   // Prepare chart data
   const chartData = useMemo(() => {
@@ -97,6 +132,26 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
   }
 
   const { dates, staked, locked, hasVesting, unlockedStaked, unstaked, rewards, opsByType } = chartData;
+
+  // Dynamic legend sizing calculations
+  // Count legend items: 3 area traces + 1 reward line + operation types
+  const numLegendItems = 3 + 1 + Object.keys(opsByType).length;
+
+  const effectiveWidth = containerWidth > 0 ? containerWidth : (typeof window !== 'undefined' ? window.innerWidth : 600);
+  const avgItemWidth = isMobile ? 150 : 200;
+  const availableWidth = effectiveWidth - (isMobile ? 50 : 80);
+  const estimatedColumns = Math.max(1, Math.floor(availableWidth / avgItemWidth));
+  const estimatedRows = Math.ceil(numLegendItems / estimatedColumns);
+  const rowHeight = isMobile ? 25 : 22;
+  const legendHeight = estimatedRows * rowHeight;
+
+  // Legend positioning and margins
+  const legendY = isMobile ? -0.15 : -0.2;
+  const bottomMargin = isMobile ? legendHeight + 10 : 100;
+
+  // Chart height calculation
+  const plotAreaBase = isMobile ? 350 : 500;
+  const chartHeight = isMobile ? 30 + plotAreaBase + bottomMargin : 600;
 
   // Build Plotly traces
   // Stack order: Locked/Vested (pink) -> Unlocked Staked (teal) -> Unstaked (gray)
@@ -194,43 +249,64 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
   const layout: any = {
     ...template.layout,
     title: {
-      text: `Wallet Staking Timeline`,
-      font: { size: 18, weight: 600 },
+      text: `Wallet Staking Timeline for ${truncateAddress(data.wallet)}`,
+      font: { size: isMobile ? 15 : 18, weight: 600 },
     },
     xaxis: {
       ...template.layout.xaxis,
-      title: 'Date',
+      title: isMobile ? '' : {
+        text: 'Date',
+        font: { size: 14 },
+      },
       type: 'date',
+      tickfont: { size: isMobile ? 9 : 12 },
     },
     yaxis: {
       ...template.layout.yaxis,
-      title: 'TUNA Balance',
+      title: isMobile ? '' : {
+        text: 'TUNA Balance',
+        font: { size: 14 },
+      },
       side: 'left',
       rangemode: 'tozero',
+      tickfont: { size: isMobile ? 8 : 12 },
     },
     yaxis2: {
-      title: 'Realized Rewards (SOL)',
+      title: isMobile ? '' : {
+        text: 'Realized Rewards (SOL)',
+        font: { size: 14, color: '#F59E0B' },
+      },
       side: 'right',
       overlaying: 'y',
       rangemode: 'tozero',
       showgrid: false,
-      titlefont: { color: '#F59E0B' },
-      tickfont: { color: '#F59E0B' },
+      tickfont: { size: isMobile ? 8 : 12, color: '#F59E0B' },
     },
     hovermode: 'closest',
     showlegend: true,
     legend: {
       orientation: 'h',
-      y: -0.2,
-      x: 0,
-      xanchor: 'left',
+      yanchor: 'top',
+      y: legendY,
+      xanchor: 'center',
+      x: 0.5,
+      font: { size: isMobile ? 10 : 12 },
     },
-    margin: {
-      l: 80,
-      r: 80,
-      t: 60,
-      b: 100,
-    },
+    ...(isMobile ? {
+      margin: {
+        l: 25,
+        r: 0,
+        t: 30,
+        b: bottomMargin,
+      },
+    } : {
+      margin: {
+        l: 80,
+        r: 80,
+        t: 60,
+        b: 100,
+      },
+    }),
   };
 
   return (
@@ -240,7 +316,7 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
         background: 'var(--ifm-background-surface-color)',
         border: '1px solid var(--ifm-toc-border-color)',
         borderRadius: 'var(--ifm-global-radius)',
-        padding: '16px',
+        padding: isMobile ? '16px 0px 16px 0px' : '16px',
         marginBottom: '24px',
       }}
     >
@@ -248,9 +324,21 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
         data={traces}
         layout={layout}
         config={getResponsivePlotlyConfig()}
-        style={{ width: '100%', height: '600px' }}
+        style={{ width: '100%', height: `${chartHeight}px` }}
         useResizeHandler={true}
       />
+      {isMobile && (
+        <div style={{
+          fontSize: '13px',
+          color: 'var(--ifm-color-secondary)',
+          marginTop: '0px',
+          marginLeft: '25px',
+          lineHeight: '1.6',
+        }}>
+          <div>↑ TUNA Balance (left) / Realized Rewards SOL (right)</div>
+          <div>→ Date</div>
+        </div>
+      )}
     </div>
   );
 }

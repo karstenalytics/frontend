@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import type { Data } from 'plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
@@ -60,12 +60,39 @@ export default function DailyStackedBarChart({
   const isDark = colorMode === 'dark';
   const template = getPlotlyTemplate(isDark);
 
+  // Detect mobile viewport
+  // Initialize with actual window size to prevent hydration mismatch
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 996 : false
+  );
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 996);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const plotRef = useRef<HTMLDivElement>(null);
   useChartTracking(plotRef, {
     chartName: 'Daily Revenue Bar',
     trackClick: true,
     trackZoom: true,
   });
+
+  // Measure container width for dynamic legend sizing
+  const [containerWidth, setContainerWidth] = useState(0);
+  useEffect(() => {
+    if (plotRef.current) {
+      const updateWidth = () => {
+        setContainerWidth(plotRef.current?.offsetWidth || 0);
+      };
+      updateWidth();
+      window.addEventListener('resize', updateWidth);
+      return () => window.removeEventListener('resize', updateWidth);
+    }
+  }, []);
 
   if (!data || data.length === 0) {
     return <div>No daily data available</div>;
@@ -153,6 +180,53 @@ export default function DailyStackedBarChart({
     return nonRedPalette[index % nonRedPalette.length];
   };
 
+  // Calculate dynamic legend positioning based on number of items and container width
+  const numLegendItems = hasOther ? 10 : top10Groups.length;
+
+  // Use viewport width as fallback if container not yet measured
+  const effectiveWidth = containerWidth > 0 ? containerWidth : (typeof window !== 'undefined' ? window.innerWidth : 600);
+
+  // Estimate columns based on container width and average legend item width
+  // Mobile: ~150px per item, Desktop: ~250px per item
+  const avgItemWidth = isMobile ? 150 : 250;
+  const availableWidth = effectiveWidth - (isMobile ? 50 : 80); // Account for margins
+  const estimatedColumns = Math.max(1, Math.floor(availableWidth / avgItemWidth));
+  const estimatedRows = Math.ceil(numLegendItems / estimatedColumns);
+
+  // Each row is ~20-25px tall
+  const rowHeight = isMobile ? 25 : 22;
+  const legendHeight = estimatedRows * rowHeight;
+
+  // Position legend close to chart (no bottom annotations in this chart)
+  const legendY = isMobile ? -0.1 : -0.2;
+
+  // Bottom margin needs space for legend
+  const bottomMargin = isMobile ? legendHeight + 10 : 80;
+
+  // Calculate total chart height
+  // Mobile: top margin + plot area + bottom margin (which includes legend)
+  const plotAreaBase = isMobile ? 350 : 450;
+  const chartHeight = isMobile ? 30 + plotAreaBase + bottomMargin : 500;
+
+  // DEBUG: Log layout calculations
+  console.log('=== DAILY STACKED BAR LAYOUT DEBUG ===');
+  console.log(`isMobile: ${isMobile}`);
+  console.log(`Viewport: ${typeof window !== 'undefined' ? window.innerWidth : 'N/A'}px`);
+  console.log(`Container Width: ${containerWidth}px`);
+  console.log(`Effective Width (used): ${effectiveWidth}px`);
+  console.log(`Available Width: ${availableWidth}px`);
+  console.log(`Avg Item Width: ${avgItemWidth}px`);
+  console.log(`Num Legend Items: ${numLegendItems}`);
+  console.log(`Estimated Columns: ${estimatedColumns}`);
+  console.log(`Estimated Rows: ${estimatedRows}`);
+  console.log(`Row Height: ${rowHeight}px`);
+  console.log(`Legend Height: ${legendHeight}px`);
+  console.log(`Legend Y: ${legendY}`);
+  console.log(`Bottom Margin (legend): ${bottomMargin}px`);
+  console.log(`Plot Area Base: ${plotAreaBase}px`);
+  console.log(`Chart Height (30 + ${plotAreaBase} + ${bottomMargin}): ${chartHeight}px`);
+  console.log('======================================');
+
   // Create traces for top 10 groups + "Other"
   const traces: Data[] = [];
 
@@ -204,7 +278,7 @@ export default function DailyStackedBarChart({
       background: 'var(--ifm-background-surface-color)',
       border: '1px solid var(--ifm-toc-border-color)',
       borderRadius: 'var(--ifm-global-radius)',
-      padding: '16px',
+      padding: isMobile ? '16px 0px 16px 0px' : '16px',
       marginBottom: '24px',
     }}>
       <Plot
@@ -213,34 +287,69 @@ export default function DailyStackedBarChart({
           ...template.layout,
           title: {
             text: title,
-            font: { size: 18, weight: 600 },
+            font: { size: isMobile ? 15 : 18, weight: 600 },
           },
           xaxis: {
             ...template.layout.xaxis,
             type: 'date',
-            tickangle: 0,
+            tickangle: isMobile ? 0 : 0,
+            title: isMobile ? '' : {
+              text: 'Date (UTC)',
+              font: { size: 14 },
+            },
+            tickfont: { size: isMobile ? 9 : 12 },
           },
           yaxis: {
             ...template.layout.yaxis,
-            title: {
+            title: isMobile ? '' : {
               text: 'Daily Revenue (SOL)',
+              font: { size: 14 },
             },
+            tickfont: { size: isMobile ? 8 : 12 },
           },
           barmode: 'stack',
           showlegend: true,
           legend: {
             orientation: 'h',
             yanchor: 'top',
-            y: -0.2,
+            y: legendY,
             xanchor: 'center',
             x: 0.5,
+            font: { size: isMobile ? 10 : 12 },
           },
           hovermode: 'closest',
+          ...(isMobile ? {
+            margin: {
+              l: 25,
+              r: 0,
+              t: 30,
+              b: bottomMargin,
+            },
+          } : {
+            margin: {
+              l: 60,
+              r: 20,
+              t: 50,
+              b: 80,
+            },
+          }),
         }}
         config={getResponsivePlotlyConfig()}
-        style={{ width: '100%', height: '500px' }}
+        style={{ width: '100%', height: `${chartHeight}px` }}
         useResizeHandler={true}
       />
+      {isMobile && (
+        <div style={{
+          fontSize: '13px',
+          color: 'var(--ifm-color-secondary)',
+          marginTop: '0px',
+          marginLeft: '25px',
+          lineHeight: '1.6',
+        }}>
+          <div>↑ Daily Revenue (SOL)</div>
+          <div>→ Date (UTC)</div>
+        </div>
+      )}
     </div>
   );
 }

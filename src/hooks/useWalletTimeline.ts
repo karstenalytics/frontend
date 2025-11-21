@@ -414,13 +414,15 @@ function parseWalletTimeline(walletAddress: string, cache: StakerCache): WalletT
 
   // Calculate summary
   const firstDate = timeline[0].date;
-  const lastDate = timeline[timeline.length - 1].date;
+  const lastDate = timeline[timeline.length - 1].date; // Full timeline range (includes vesting extension)
+  // Use the last OPERATION date (real activity), not the extended timeline date
+  const lastActivityDate = operations.length > 0 ? operations[operations.length - 1].date : timeline[0].date;
 
   let daysActive = timeline.length;
   try {
     const firstDt = new Date(firstDate);
-    const lastDt = new Date(lastDate);
-    daysActive = Math.floor((lastDt.getTime() - firstDt.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const lastActivityDt = new Date(lastActivityDate);
+    daysActive = Math.floor((lastActivityDt.getTime() - firstDt.getTime()) / (1000 * 60 * 60 * 24)) + 1;
   } catch (e) {
     // Keep default
   }
@@ -437,7 +439,7 @@ function parseWalletTimeline(walletAddress: string, cache: StakerCache): WalletT
     current_locked: Math.round(currentLocked * 1000000) / 1000000,
     realized_rewards: timeline[timeline.length - 1].realized_rewards,
     first_stake_date: firstDate,
-    last_activity_date: lastDate,
+    last_activity_date: lastActivityDate,
     days_active: daysActive,
   };
 

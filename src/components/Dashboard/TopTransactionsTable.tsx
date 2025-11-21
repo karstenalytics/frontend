@@ -197,6 +197,14 @@ export default function TopTransactionsTable({
     });
   };
 
+  // Helper to format SOL amounts with rounding indicator
+  const formatSolAmount = (amount: number): string => {
+    if (amount > 0 && amount < 0.005) {
+      return '~0 SOL';
+    }
+    return `${amount.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL`;
+  };
+
   // Helper to abbreviate mint addresses (first 5 + last 5 chars)
   const abbreviateMint = (mint: string): string => {
     if (!mint || mint.length <= 10) return mint;
@@ -331,7 +339,7 @@ export default function TopTransactionsTable({
                 #{idx + 1}
               </td>
               <td style={{ padding: '12px 8px', fontWeight: 600, color: 'var(--accent)' }}>
-                {tx.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL
+                {formatSolAmount(tx.amount)}
               </td>
               <td style={{ padding: '12px 8px', color: 'var(--ifm-color-secondary)', fontFamily: 'var(--ifm-font-family-base)' }}>
                 {formatDate(tx.timestamp)}

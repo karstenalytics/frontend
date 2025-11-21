@@ -68,7 +68,10 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
   const [loading, setLoading] = useState(true);
 
   // Detect mobile viewport
-  const [isMobile, setIsMobile] = useState(false);
+  // Initialize with actual window size to prevent hydration mismatch
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 996 : false
+  );
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 996);
@@ -79,11 +82,25 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
   }, []);
 
   const plotRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+
   useChartTracking(plotRef, {
     chartName: 'Pool Type Matrix',
     trackClick: true,
     trackZoom: true,
   });
+
+  // Measure container width for legend layout calculation
+  useEffect(() => {
+    if (plotRef.current) {
+      const updateWidth = () => {
+        setContainerWidth(plotRef.current?.offsetWidth || 0);
+      };
+      updateWidth();
+      window.addEventListener('resize', updateWidth);
+      return () => window.removeEventListener('resize', updateWidth);
+    }
+  }, []);
 
   // Helper function to format pool labels (prefer swapping pair/protocol for pools)
   const formatPoolLabel = (label: string): string => {
@@ -175,6 +192,29 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
     });
   });
 
+  // Calculate total revenue for each display name to determine top 10
+  const displayNameRevenue = new Map<string, number>();
+  displayNameGroups.forEach((technicalTypes, displayName) => {
+    let totalRevenue = 0;
+    data.forEach(pool => {
+      technicalTypes.forEach(technicalType => {
+        const typeData = pool.types.find(t => t.type === technicalType);
+        if (typeData) {
+          totalRevenue += typeData.sol_equivalent;
+        }
+      });
+    });
+    displayNameRevenue.set(displayName, totalRevenue);
+  });
+
+  // Sort by revenue and get top 10 display names
+  const top10DisplayNames = Array.from(displayNameRevenue.entries())
+    .sort((a, b) => b[1] - a[1])  // Sort descending by revenue
+    .slice(0, 10)
+    .map(([displayName]) => displayName);
+
+  const top10Set = new Set(top10DisplayNames);
+
   // Assign colors to each display name
   const displayNameToColor: Record<string, string> = {};
   let colorIndex = 0;
@@ -213,11 +253,66 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
       text: labelText,
       showarrow: false,
       textangle: isMobile ? -90 : -45,
-      font: { size: 11 },
+      font: { size: isMobile ? 9 : 11 },
       xanchor: 'right',
       yanchor: 'top',
     };
   });
+
+  // Calculate dynamic legend positioning based on number of items and container width
+  // Only showing top 10 types in legend
+  const numLegendItems = 10;
+
+  // Use viewport width as fallback if container not yet measured
+  const effectiveWidth = containerWidth > 0 ? containerWidth : (typeof window !== 'undefined' ? window.innerWidth : 600);
+
+  // Estimate columns based on container width and average legend item width
+  // Mobile: ~150px per item (reduced to fit more columns), Desktop: ~250px per item
+  const avgItemWidth = isMobile ? 150 : 250;
+  const availableWidth = effectiveWidth - (isMobile ? 50 : 80); // Account for margins
+  const estimatedColumns = Math.max(1, Math.floor(availableWidth / avgItemWidth));
+  const estimatedRows = Math.ceil(numLegendItems / estimatedColumns);
+
+  // Each row is ~20-25px tall
+  const rowHeight = isMobile ? 25 : 22;
+  const legendHeight = estimatedRows * rowHeight;
+
+  // Position legend below the rotated pool labels (110px space)
+  // y is relative to plot area height, so -110px / 350px = -0.314
+  // Use -0.32 to give small buffer below pool labels
+  const legendY = isMobile ? -0.32 : -0.25;
+
+  // Bottom margin needs space for pool labels (110px) + legend + small gap
+  const bottomMargin = isMobile ? 110 + legendHeight + 10 : 140;
+
+  // Axis notation sits at natural position below chart
+  const axisNotationMarginTop = isMobile ? '0px' : '0px';
+
+  // Calculate total chart height
+  // Mobile: top margin + plot area + bottom margin (which includes pool labels + legend)
+  const plotAreaBase = isMobile ? 350 : 500;
+  const chartHeight = isMobile ? 30 + plotAreaBase + bottomMargin : 600;
+
+  // DEBUG: Log layout calculations
+  // Always log to help diagnose issues
+  console.log('=== POOL TYPE MATRIX LAYOUT DEBUG ===');
+  console.log(`isMobile: ${isMobile}`);
+  console.log(`Viewport: ${typeof window !== 'undefined' ? window.innerWidth : 'N/A'}px`);
+  console.log(`Container Width: ${containerWidth}px`);
+  console.log(`Effective Width (used): ${effectiveWidth}px`);
+  console.log(`Available Width: ${availableWidth}px`);
+  console.log(`Avg Item Width: ${avgItemWidth}px`);
+  console.log(`Num Legend Items: ${numLegendItems}`);
+  console.log(`Estimated Columns: ${estimatedColumns}`);
+  console.log(`Estimated Rows: ${estimatedRows}`);
+  console.log(`Row Height: ${rowHeight}px`);
+  console.log(`Legend Height: ${legendHeight}px`);
+  console.log(`Legend Y: ${legendY}`);
+  console.log(`Bottom Margin (pool labels + legend): ${bottomMargin}px`);
+  console.log(`Plot Area Base: ${plotAreaBase}px`);
+  console.log(`Chart Height (30 + ${plotAreaBase} + ${bottomMargin}): ${chartHeight}px`);
+  console.log(`Axis Notation marginTop: ${axisNotationMarginTop}`);
+  console.log('=====================================');
 
   // Create traces for each display name (combining technical types with same display name)
   displayNameGroups.forEach((technicalTypes, displayName) => {
@@ -286,6 +381,7 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
         hovertemplate: '%{hovertext}<extra></extra>',
         hovertext: hoverTexts,
         customdata: customData,
+        showlegend: top10Set.has(displayName),  // Only show top 10 in legend
       });
     }
   });
@@ -295,8 +391,8 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
       background: 'var(--ifm-background-surface-color)',
       border: '1px solid var(--ifm-toc-border-color)',
       borderRadius: 'var(--ifm-global-radius)',
-      padding: '16px',
-      marginBottom: '24px',
+      padding: isMobile ? '16px 0px 16px 0px' : '16px',
+      marginBottom: '0px',
     }}>
       <Plot
         data={traces}
@@ -304,33 +400,48 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
           ...template.layout,
           title: {
             text: 'Revenue Distribution: Pools × Transaction Types',
-            font: { size: 18, weight: 600 },
+            font: { size: isMobile ? 15 : 18, weight: 600 },
           },
           xaxis: {
             ...template.layout.xaxis,
-            title: {
+            title: isMobile ? '' : {
               text: 'Liquidity Pools (width = share of revenue)',
-              standoff: 140,  // Add more space between axis and title
+              standoff: 140,
+              font: { size: 14 },
             },
             showticklabels: false,  // Hide tick labels, using annotations instead
             range: [0, maxX],
           },
           yaxis: {
             ...template.layout.yaxis,
-            title: 'Share of Pool Revenue (%)',
+            title: isMobile ? '' : {
+              text: 'Share of Pool Revenue (%)',
+              font: { size: 14 },
+            },
             range: [0, 105],
             ticksuffix: '%',
+            tickangle: 0,  // 0 = horizontal, -90 = vertical, -45 = diagonal
+            tickfont: { size: isMobile ? 8 : 12 },
           },
           barmode: 'stack',
-          showlegend: false,
+          showlegend: true,
+          legend: {
+            orientation: 'h',
+            yanchor: 'top',
+            y: legendY,
+            xanchor: 'center',
+            x: 0.5,
+            font: { size: isMobile ? 10 : 12 },
+            tracegroupgap: 5,
+          },
           hovermode: 'closest',
           annotations: annotations,
           ...(isMobile ? {
             margin: {
-              l: 60,
-              r: 10,
+              l: 25,
+              r: 0,
               t: 30,
-              b: 160,  // More space for 90° labels on mobile
+              b: bottomMargin,  // Space for rotated pool labels + legend
             },
           } : {
             margin: {
@@ -342,7 +453,7 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
           }),
         }}
         config={getResponsivePlotlyConfig()}
-        style={{ width: '100%', height: isMobile ? '500px' : '600px' }}
+        style={{ width: '100%', height: `${chartHeight}px` }}
         useResizeHandler={true}
         onClick={(event: React.MouseEvent) => {
           if (event.points && event.points.length > 0 && onSegmentClick) {
@@ -352,6 +463,18 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
           }
         }}
       />
+      {isMobile && (
+        <div style={{
+          fontSize: '13px',
+          color: 'var(--ifm-color-secondary)',
+          marginTop: axisNotationMarginTop,
+          marginLeft: '25px',
+          lineHeight: '1.6',
+        }}>
+          <div>↑ Share of pool revenue</div>
+          <div>→ Liquidity pools (width = share of revenue)</div>
+        </div>
+      )}
     </div>
   );
 }

@@ -24,6 +24,27 @@ Detailed staking history for individual wallet addresses showing balance evoluti
       { address: '63jfXXj98msQDKFJKXACpeY1uQ228CyjZeyzbFeDq7iM', name: 'DefiTuna Founder Dhirk' },
     ];
 
+    // Format date as YYYY/MM/DD
+    const formatDate = (dateStr) => {
+      const d = new Date(dateStr);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}/${month}/${day}`;
+    };
+
+    // Format datetime as YYYY/MM/DD HH:MM:SS
+    const formatDateTime = (dateStr) => {
+      const d = new Date(dateStr);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      const seconds = String(d.getSeconds()).padStart(2, '0');
+      return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+    };
+
     // Wallets with vesting schedules
     const vestingWallets = [
       '2vAg5qYrpa4GV6Xio75TEzFocHV7MWLfitxipjY6H2EJ',
@@ -353,7 +374,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                       Active Since
                     </div>
                     <div style={{ fontSize: '16px', fontWeight: 600 }}>
-                      {new Date(data.summary.first_stake_date).toLocaleDateString()}
+                      {formatDate(data.summary.first_stake_date)}
                     </div>
                     <div style={{ fontSize: '12px', color: 'var(--ifm-color-secondary)', marginTop: '4px' }}>
                       {data.summary.days_active} days
@@ -365,7 +386,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                       Last Activity
                     </div>
                     <div style={{ fontSize: '16px', fontWeight: 600 }}>
-                      {new Date(data.summary.last_activity_date).toLocaleDateString()}
+                      {formatDate(data.summary.last_activity_date)}
                     </div>
                   </div>
                 </div>
@@ -440,7 +461,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                                   #{globalIdx + 1}
                                 </td>
                                 <td style={{ ...tableStyles.dateCell, fontSize: '12px', fontFamily: 'var(--ifm-font-family-monospace)' }}>
-                                  {new Date(op.date).toLocaleString()}
+                                  {formatDateTime(op.date)}
                                 </td>
                                 <td style={tableStyles.cell}>
                                   <span style={{

@@ -149,7 +149,7 @@ export const defaultPlotlyConfig = {
 } as const;
 
 /**
- * Get responsive Plotly config that hides modebar on mobile
+ * Get responsive Plotly config that hides modebar on mobile and disables zoom/pan
  * @param mobileBreakpoint - Screen width below which to hide modebar (default: 550px)
  */
 export function getResponsivePlotlyConfig(mobileBreakpoint: number = 550) {
@@ -162,6 +162,10 @@ export function getResponsivePlotlyConfig(mobileBreakpoint: number = 550) {
   return {
     ...defaultPlotlyConfig,
     displayModeBar: isMobile ? false : 'hover',
+    // Disable zoom and pan interactions on mobile
+    scrollZoom: isMobile ? false : undefined,
+    doubleClick: false,
+    staticPlot: isMobile ? true : false,
   };
 }
 
