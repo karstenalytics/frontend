@@ -102,12 +102,12 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
       ctx.font = '16px Inter, Arial, sans-serif';
       ctx.fillText('karstenalytics.com', 200, 655);
 
-      // Add timestamp
-      const now = new Date().toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      });
+      // Add timestamp (YYYY/MM/DD format)
+      const nowDate = new Date();
+      const year = nowDate.getFullYear();
+      const month = String(nowDate.getMonth() + 1).padStart(2, '0');
+      const day = String(nowDate.getDate()).padStart(2, '0');
+      const now = `${year}/${month}/${day}`;
       ctx.fillStyle = '#CCCCCC';
       ctx.font = '14px Inter, Arial, sans-serif';
       ctx.textAlign = 'right';

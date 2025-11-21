@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
@@ -18,6 +18,20 @@ export default function StakingBalanceChart({
   const template = getPlotlyTemplate(colorMode === 'dark');
   const isDark = colorMode === 'dark';
 
+  // Mobile detection
+  // Initialize with actual window size to prevent hydration mismatch
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 996 : false
+  );
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 996);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Plotly doesn't support CSS variables, use actual hex values
   const accentColor = isDark ? '#14BCCD' : '#00A3B4';
   const accentTransparent = isDark ? 'rgba(20, 188, 205, 0.2)' : 'rgba(0, 163, 180, 0.2)';
@@ -30,6 +44,19 @@ export default function StakingBalanceChart({
     trackClick: true,
     trackZoom: true,
   });
+
+  // Measure container width for dynamic legend sizing
+  const [containerWidth, setContainerWidth] = useState(0);
+  useEffect(() => {
+    if (plotRef.current) {
+      const updateWidth = () => {
+        setContainerWidth(plotRef.current?.offsetWidth || 0);
+      };
+      updateWidth();
+      window.addEventListener('resize', updateWidth);
+      return () => window.removeEventListener('resize', updateWidth);
+    }
+  }, []);
 
   const sorted = [...(data || [])].sort((a, b) => a.date.localeCompare(b.date));
   const x = sorted.map((point) => point.date);
@@ -50,6 +77,24 @@ export default function StakingBalanceChart({
   const latest = hasData ? sorted[sorted.length - 1] : null;
   const deviation = latest ? ((latest.staked - maxStaked) / maxStaked) * 100 : 0;
 
+  // Dynamic legend sizing calculations
+  const numLegendItems = 3; // Staked TUNA, Unstaked TUNA, Max Staked
+  const effectiveWidth = containerWidth > 0 ? containerWidth : (typeof window !== 'undefined' ? window.innerWidth : 600);
+  const avgItemWidth = isMobile ? 150 : 200;
+  const availableWidth = effectiveWidth - (isMobile ? 50 : 80);
+  const estimatedColumns = Math.max(1, Math.floor(availableWidth / avgItemWidth));
+  const estimatedRows = Math.ceil(numLegendItems / estimatedColumns);
+  const rowHeight = isMobile ? 25 : 22;
+  const legendHeight = estimatedRows * rowHeight;
+
+  // Legend positioning and margins (close to chart - no bottom annotations)
+  const legendY = isMobile ? -0.1 : -0.15;
+  const bottomMargin = isMobile ? legendHeight + 10 : 32;
+
+  // Chart height calculation
+  const plotAreaBase = isMobile ? 350 : 370;
+  const chartHeight = isMobile ? 30 + plotAreaBase + bottomMargin : 420;
+
   return (
     <div
       ref={plotRef}
@@ -57,13 +102,13 @@ export default function StakingBalanceChart({
         background: 'var(--ifm-background-surface-color)',
         border: '1px solid var(--ifm-toc-border-color)',
         borderRadius: 'var(--ifm-global-radius)',
-        padding: '24px',
+        padding: isMobile ? '16px 0px 16px 0px' : '24px',
         marginBottom: '24px',
       }}
     >
-      <h3 style={{ marginTop: 0 }}>Treasury TUNA Allocation</h3>
+      <h3 style={{ marginTop: 0, marginLeft: isMobile ? '16px' : 0 }}>Treasury TUNA Allocation</h3>
       {maxSupply != null && (
-        <p style={{ color: 'var(--ifm-color-emphasis-700)' }}>
+        <p style={{ color: 'var(--ifm-color-emphasis-700)', marginLeft: isMobile ? '16px' : 0 }}>
           Maximum TUNA supply: {maxSupply.toLocaleString()}
           {latest && (
             <>
@@ -88,6 +133,7 @@ export default function StakingBalanceChart({
             gap: '16px',
             marginBottom: '16px',
             flexWrap: 'wrap',
+            marginLeft: isMobile ? '16px' : 0,
           }}
         >
           <div className="badge badge--primary" style={{ padding: '12px 16px', fontSize: '14px' }}>
@@ -147,19 +193,27 @@ export default function StakingBalanceChart({
           layout={{
             ...template.layout,
             autosize: true,
-            height: 420,
-            margin: { l: 70, r: 24, t: 16, b: 32 },
+            height: chartHeight,
             hovermode: 'x unified',
             xaxis: {
               ...template.layout.xaxis,
+              title: isMobile ? '' : {
+                text: 'Date',
+                font: { size: 14 },
+              },
               type: 'date',
+              tickfont: { size: isMobile ? 9 : 12 },
               spikecolor: spikeColor,
               spikedash: 'dot',
               spikethickness: 1,
             },
             yaxis: {
               ...template.layout.yaxis,
-              title: 'TUNA tokens',
+              title: isMobile ? '' : {
+                text: 'TUNA tokens',
+                font: { size: 14 },
+              },
+              tickfont: { size: isMobile ? 8 : 12 },
               ...(yRange ? { range: yRange } : { rangemode: 'tozero' }),
               spikecolor: spikeColor,
               spikedash: 'dot',
@@ -167,14 +221,43 @@ export default function StakingBalanceChart({
             },
             legend: {
               orientation: 'h',
-              y: -0.15,
-              x: 0.5,
+              yanchor: 'top',
+              y: legendY,
               xanchor: 'center',
+              x: 0.5,
+              font: { size: isMobile ? 10 : 12 },
             },
+            ...(isMobile ? {
+              margin: {
+                l: 25,
+                r: 0,
+                t: 16,
+                b: bottomMargin,
+              },
+            } : {
+              margin: {
+                l: 70,
+                r: 24,
+                t: 16,
+                b: 32,
+              },
+            }),
           }}
           config={getResponsivePlotlyConfig()}
-          style={{ width: '100%', height: '100%' }}
+          style={{ width: '100%', height: `${chartHeight}px` }}
         />
+      )}
+      {isMobile && hasData && (
+        <div style={{
+          fontSize: '13px',
+          color: 'var(--ifm-color-secondary)',
+          marginTop: '0px',
+          marginLeft: '25px',
+          lineHeight: '1.6',
+        }}>
+          <div>↑ TUNA tokens</div>
+          <div>→ Date</div>
+        </div>
       )}
     </div>
   );

@@ -15,8 +15,11 @@ export default function InverseWhaleChart({
   const { colorMode } = useColorMode();
   const template = getPlotlyTemplate(colorMode === 'dark');
 
-  // Detect mobile viewport
-  const [isMobile, setIsMobile] = useState(false);
+  // Mobile detection
+  // Initialize with actual window size to prevent hydration mismatch
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 996 : false
+  );
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 996);
@@ -32,6 +35,19 @@ export default function InverseWhaleChart({
     trackClick: true,
     trackZoom: true,
   });
+
+  // Measure container width for dynamic legend sizing
+  const [containerWidth, setContainerWidth] = useState(0);
+  useEffect(() => {
+    if (plotRef.current) {
+      const updateWidth = () => {
+        setContainerWidth(plotRef.current?.offsetWidth || 0);
+      };
+      updateWidth();
+      window.addEventListener('resize', updateWidth);
+      return () => window.removeEventListener('resize', updateWidth);
+    }
+  }, []);
 
   const { by_stake_size } = userSegments;
 
@@ -150,6 +166,26 @@ export default function InverseWhaleChart({
   const mixedColor = '#F59E0B';
   const claimColor = '#EF4444';
 
+  // Dynamic legend sizing calculations
+  const numLegendItems = 3; // Compound-only, Mixed Behavior, Claim-only
+  const effectiveWidth = containerWidth > 0 ? containerWidth : (typeof window !== 'undefined' ? window.innerWidth : 600);
+  const avgItemWidth = isMobile ? 150 : 200;
+  const availableWidth = effectiveWidth - (isMobile ? 50 : 80);
+  const estimatedColumns = Math.max(1, Math.floor(availableWidth / avgItemWidth));
+  const estimatedRows = Math.ceil(numLegendItems / estimatedColumns);
+  const rowHeight = isMobile ? 25 : 22;
+  const legendHeight = estimatedRows * rowHeight;
+
+  // Legend positioning and margins (close to chart - no bottom annotations)
+  const legendY = isMobile ? -0.1 : -0.4;
+  const bottomMargin = isMobile ? legendHeight + 10 : 100;
+
+  // Chart height calculation
+  // Horizontal bar chart needs height based on number of bars
+  const barHeight = labels.length * (isMobile ? 50 : 60);
+  const plotAreaBase = Math.max(350, barHeight);
+  const chartHeight = isMobile ? 30 + plotAreaBase + bottomMargin : Math.max(400, barHeight);
+
   return (
     <div
       ref={plotRef}
@@ -157,14 +193,14 @@ export default function InverseWhaleChart({
         background: 'var(--ifm-background-surface-color)',
         border: '1px solid var(--ifm-toc-border-color)',
         borderRadius: 'var(--ifm-global-radius)',
-        padding: '24px',
+        padding: isMobile ? '16px 0px 16px 0px' : '24px',
         marginBottom: '24px',
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       }}
     >
-      <h3 style={{ marginTop: 0 }}>Compound Rate by Stake Size (TUNA)</h3>
+      <h3 style={{ marginTop: 0, marginLeft: isMobile ? '16px' : 0 }}>Compound Rate by Stake Size (TUNA)</h3>
 
-      <p style={{ color: 'var(--ifm-color-emphasis-700)', marginBottom: '24px' }}>
+      <p style={{ color: 'var(--ifm-color-emphasis-700)', marginBottom: '24px', marginLeft: isMobile ? '16px' : 0 }}>
         Distribution of staker behavior (compound-only, mixed, claim-only) across stake size tiers.
         Each bar shows the percentage breakdown totaling 100%.
       </p>
@@ -264,30 +300,49 @@ export default function InverseWhaleChart({
           barmode: 'stack',
           hovermode: 'closest',
           xaxis: {
-            title: 'Wallet Distribution (%)',
+            ...template.layout.xaxis,
+            title: isMobile ? '' : {
+              text: 'Wallet Distribution (%)',
+              font: { size: 14 },
+            },
             range: [0, 100],
             ticksuffix: '%',
+            tickfont: { size: isMobile ? 9 : 12 },
           },
           yaxis: {
+            ...template.layout.yaxis,
             title: '',
             automargin: true,
             tickfont: {
-              size: isMobile ? 11 : 12,
+              size: isMobile ? 10 : 12,
             },
           },
           showlegend: true,
           legend: {
             orientation: 'h',
-            yanchor: 'bottom',
-            y: isMobile ? -0.6 : -0.4,
+            yanchor: 'top',
+            y: legendY,
             xanchor: 'center',
             x: 0.5,
+            font: { size: isMobile ? 10 : 12 },
             traceorder: 'normal',
           },
-          margin: isMobile
-            ? { l: 80, r: 20, t: 20, b: 140 }
-            : { l: 160, r: 20, t: 20, b: 100 },
-          height: Math.max(400, labels.length * 60),
+          ...(isMobile ? {
+            margin: {
+              l: 80,
+              r: 20,
+              t: 20,
+              b: bottomMargin,
+            },
+          } : {
+            margin: {
+              l: 160,
+              r: 20,
+              t: 20,
+              b: 100,
+            },
+          }),
+          height: chartHeight,
           annotations: totalRewards.map((reward, idx) => ({
             x: 102,
             y: labels[idx],
@@ -303,8 +358,19 @@ export default function InverseWhaleChart({
           })),
         }}
         config={getResponsivePlotlyConfig()}
-        style={{ width: '100%' }}
+        style={{ width: '100%', height: `${chartHeight}px` }}
       />
+      {isMobile && (
+        <div style={{
+          fontSize: '13px',
+          color: 'var(--ifm-color-secondary)',
+          marginTop: '0px',
+          marginLeft: '80px',
+          lineHeight: '1.6',
+        }}>
+          <div>→ Wallet Distribution (%)</div>
+        </div>
+      )}
     </div>
   );
 }

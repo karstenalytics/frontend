@@ -145,8 +145,8 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
   const rowHeight = isMobile ? 25 : 22;
   const legendHeight = estimatedRows * rowHeight;
 
-  // Legend positioning and margins
-  const legendY = isMobile ? -0.15 : -0.2;
+  // Legend positioning and margins (close to chart - no bottom annotations)
+  const legendY = isMobile ? -0.1 : -0.2;
   const bottomMargin = isMobile ? legendHeight + 10 : 100;
 
   // Chart height calculation
@@ -270,6 +270,7 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
       side: 'left',
       rangemode: 'tozero',
       tickfont: { size: isMobile ? 8 : 12 },
+      showgrid: true,  // Show primary grid
     },
     yaxis2: {
       title: isMobile ? '' : {
@@ -279,7 +280,12 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
       side: 'right',
       overlaying: 'y',
       rangemode: 'tozero',
-      showgrid: false,
+      showgrid: true,  // Show yellowish grid
+      gridcolor: 'rgba(245, 158, 11, 0.15)',  // Yellowish, very transparent
+      gridwidth: 1,
+      showline: true,
+      linecolor: 'rgba(245, 158, 11, 0.3)',  // Yellowish axis line
+      linewidth: 1,
       tickfont: { size: isMobile ? 8 : 12, color: '#F59E0B' },
     },
     hovermode: 'closest',
@@ -295,7 +301,7 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
     ...(isMobile ? {
       margin: {
         l: 25,
-        r: 0,
+        r: 25,  // Need space for secondary y-axis ticks
         t: 30,
         b: bottomMargin,
       },

@@ -21,6 +21,20 @@ export default function UnlockTimelineChart({
   const isDark = colorMode === 'dark';
   const manifestPath = useBaseUrl('/data/_manifest.json');
 
+  // Mobile detection
+  // Initialize with actual window size to prevent hydration mismatch
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 996 : false
+  );
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 996);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Fetch the last data update date from manifest
   const [lastDataDate, setLastDataDate] = useState<string | null>(null);
 
@@ -52,6 +66,19 @@ export default function UnlockTimelineChart({
     trackClick: true,
     trackZoom: true,
   });
+
+  // Measure container width for dynamic legend sizing
+  const [containerWidth, setContainerWidth] = useState(0);
+  useEffect(() => {
+    if (plotRef.current) {
+      const updateWidth = () => {
+        setContainerWidth(plotRef.current?.offsetWidth || 0);
+      };
+      updateWidth();
+      window.addEventListener('resize', updateWidth);
+      return () => window.removeEventListener('resize', updateWidth);
+    }
+  }, []);
 
   // Convert timeline to arrays
   const sorted = Object.entries(timeline).sort(([a], [b]) => a.localeCompare(b));
@@ -87,6 +114,24 @@ export default function UnlockTimelineChart({
   const peakLocked = hasData ? Math.max(...locked) : 0;
   const peakStaked = hasStakedData ? Math.max(...staked) : 0;
 
+  // Dynamic legend sizing calculations (only if legend is shown)
+  const numLegendItems = hasStakedData ? 2 : 0; // "Locked TUNA" and "Staked TUNA"
+  const effectiveWidth = containerWidth > 0 ? containerWidth : (typeof window !== 'undefined' ? window.innerWidth : 600);
+  const avgItemWidth = isMobile ? 150 : 200;
+  const availableWidth = effectiveWidth - (isMobile ? 50 : 80);
+  const estimatedColumns = Math.max(1, Math.floor(availableWidth / avgItemWidth));
+  const estimatedRows = Math.ceil(numLegendItems / estimatedColumns);
+  const rowHeight = isMobile ? 25 : 22;
+  const legendHeight = estimatedRows * rowHeight;
+
+  // Legend positioning and margins (close to chart - no bottom annotations)
+  const legendY = isMobile ? -0.1 : -0.2;
+  const bottomMargin = isMobile ? (hasStakedData ? legendHeight + 10 : 60) : 60;
+
+  // Chart height calculation
+  const plotAreaBase = isMobile ? 350 : 400;
+  const chartHeight = isMobile ? 30 + plotAreaBase + bottomMargin : 450;
+
   // Subtle vertical line for "Latest Data" marker
   const latestDataLineColor = isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)';
 
@@ -97,12 +142,12 @@ export default function UnlockTimelineChart({
         background: 'var(--ifm-background-surface-color)',
         border: '1px solid var(--ifm-color-emphasis-200)',
         borderRadius: 'var(--ifm-global-radius)',
-        padding: '24px',
+        padding: isMobile ? '16px 0px 16px 0px' : '24px',
         marginBottom: '32px',
       }}
     >
-      <h3 style={{ marginTop: 0 }}>Vesting Unlock Timeline</h3>
-      <p style={{ color: 'var(--ifm-color-emphasis-700)' }}>
+      <h3 style={{ marginTop: 0, marginLeft: isMobile ? '16px' : 0 }}>Vesting Unlock Timeline</h3>
+      <p style={{ color: 'var(--ifm-color-emphasis-700)', marginLeft: isMobile ? '16px' : 0 }}>
         Total vesting schedules: {totalSchedules}
       </p>
 
@@ -112,6 +157,7 @@ export default function UnlockTimelineChart({
           gap: '16px',
           marginBottom: '16px',
           flexWrap: 'wrap',
+          marginLeft: isMobile ? '16px' : 0,
         }}
       >
         <div className="badge badge--primary" style={{ padding: '12px 16px', fontSize: '14px' }}>
@@ -225,15 +271,23 @@ export default function UnlockTimelineChart({
                 ...template.layout,
                 xaxis: {
                   ...template.layout.xaxis,
-                  title: 'Date',
+                  title: isMobile ? '' : {
+                    text: 'Date',
+                    font: { size: 14 },
+                  },
                   type: 'date',
+                  tickfont: { size: isMobile ? 9 : 12 },
                   spikecolor: spikeColor,
                   spikedash: 'dot',
                   spikethickness: 1,
                 },
                 yaxis: {
                   ...template.layout.yaxis,
-                  title: 'Locked TUNA',
+                  title: isMobile ? '' : {
+                    text: 'Locked TUNA',
+                    font: { size: 14 },
+                  },
+                  tickfont: { size: isMobile ? 8 : 12 },
                   spikecolor: spikeColor,
                   spikedash: 'dot',
                   spikethickness: 1,
@@ -262,9 +316,9 @@ export default function UnlockTimelineChart({
                     showarrow: false,
                     xanchor: 'left',
                     yanchor: 'bottom',
-                    xshift: -16,
+                    xshift: isMobile ? -12 : -16,
                     font: {
-                      size: 12,
+                      size: isMobile ? 10 : 12,
                       color: isDark ? '#e2e8f0' : '#333',
                     },
                     bgcolor: isDark ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.9)',
@@ -272,7 +326,14 @@ export default function UnlockTimelineChart({
                   },
                 ],
                 showlegend: hasStakedData,
-                legend: hasStakedData ? {
+                legend: hasStakedData ? (isMobile ? {
+                  orientation: 'h',
+                  yanchor: 'top',
+                  y: legendY,
+                  xanchor: 'center',
+                  x: 0.5,
+                  font: { size: 10 },
+                } : {
                   x: 1,
                   xanchor: 'right',
                   y: 1,
@@ -280,12 +341,38 @@ export default function UnlockTimelineChart({
                   bgcolor: isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.8)',
                   bordercolor: isDark ? '#444' : '#ddd',
                   borderwidth: 1,
-                } : undefined,
-                margin: { l: 80, r: 40, t: 20, b: 60 },
+                }) : undefined,
+                ...(isMobile ? {
+                  margin: {
+                    l: 25,
+                    r: 0,
+                    t: 20,
+                    b: bottomMargin,
+                  },
+                } : {
+                  margin: {
+                    l: 80,
+                    r: 40,
+                    t: 20,
+                    b: 60,
+                  },
+                }),
               }}
               config={getResponsivePlotlyConfig()}
-              style={{ width: '100%', height: '450px' }}
+              style={{ width: '100%', height: `${chartHeight}px` }}
             />
+            {isMobile && (
+              <div style={{
+                fontSize: '13px',
+                color: 'var(--ifm-color-secondary)',
+                marginTop: '0px',
+                marginLeft: '25px',
+                lineHeight: '1.6',
+              }}>
+                <div>↑ Locked TUNA</div>
+                <div>→ Date</div>
+              </div>
+            )}
           </div>
         </>
       )}
