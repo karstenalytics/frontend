@@ -25,8 +25,11 @@ export default function BreakdownChart({ summary, groupMode, onBarClick }: Break
     trackZoom: true,
   });
 
-  // Detect mobile viewport
-  const [isMobile, setIsMobile] = useState(false);
+  // Mobile detection
+  // Initialize with actual window size to prevent hydration mismatch
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 996 : false
+  );
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 996);
@@ -159,12 +162,15 @@ export default function BreakdownChart({ summary, groupMode, onBarClick }: Break
     width: 0.6,
   };
 
+  // Get x-axis label based on group mode
+  const xAxisLabel = groupMode === 'token' ? 'Tokens' : groupMode === 'type' ? 'Transaction Types' : 'Pools';
+
   return (
     <div ref={plotRef} style={{
       background: 'var(--ifm-background-surface-color)',
       border: '1px solid var(--ifm-toc-border-color)',
       borderRadius: 'var(--ifm-global-radius)',
-      padding: '16px',
+      padding: isMobile ? '16px 0px 16px 0px' : '16px',
       marginBottom: '24px',
     }}>
       <Plot
@@ -173,28 +179,41 @@ export default function BreakdownChart({ summary, groupMode, onBarClick }: Break
           ...template.layout,
           title: {
             text: title,
-            font: { size: 18, weight: 600 },
+            font: { size: isMobile ? 15 : 18, weight: 600 },
           },
           xaxis: {
             ...template.layout.xaxis,
-            title: '',
+            title: isMobile ? '' : {
+              text: xAxisLabel,
+              font: { size: 14 },
+            },
             tickangle: isMobile ? -90 : 0,
+            tickfont: { size: isMobile ? 9 : 12 },
           },
           yaxis: {
             ...template.layout.yaxis,
-            title: {
+            title: isMobile ? '' : {
               text: 'Total SOL',
+              font: { size: 14 },
               standoff: 20
             },
+            tickfont: { size: isMobile ? 8 : 12 },
           },
           showlegend: false,
           hovermode: 'closest',
-          ...(isMobile && {
+          ...(isMobile ? {
             margin: {
-              l: 60,
-              r: 10,
+              l: 25,
+              r: 5,
               t: 30,
               b: 120, // Increased bottom margin for vertical labels on mobile
+            },
+          } : {
+            margin: {
+              l: 70,
+              r: 24,
+              t: 50,
+              b: 48,
             },
           }),
         }}
@@ -210,6 +229,18 @@ export default function BreakdownChart({ summary, groupMode, onBarClick }: Break
           }
         }}
       />
+      {isMobile && (
+        <div style={{
+          fontSize: '13px',
+          color: 'var(--ifm-color-secondary)',
+          marginTop: '-40px',
+          marginLeft: '25px',
+          lineHeight: '1.6',
+        }}>
+          <div>↑ Total SOL</div>
+          <div>→ {xAxisLabel}</div>
+        </div>
+      )}
     </div>
   );
 }

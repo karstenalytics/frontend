@@ -98,8 +98,13 @@ export default function BehaviorPieChart({
             margin: { l: 10, r: 10, t: 20, b: 80 },
             height: 400,
             autosize: true,
+            dragmode: isMobile ? false : 'zoom',
           }}
-          config={getResponsivePlotlyConfig()}
+          config={{
+            ...getResponsivePlotlyConfig(),
+            staticPlot: false,
+            scrollZoom: !isMobile,
+          }}
           style={{ width: '100%', height: '400px' }}
           useResizeHandler={true}
         />

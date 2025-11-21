@@ -95,8 +95,11 @@ export default function AprChart(): React.ReactElement {
   const [entryPriceInput, setEntryPriceInput] = useState<string>('0.05');
   const [showTunaPrice, setShowTunaPrice] = useState(false);
 
-  // Detect mobile viewport
-  const [isMobile, setIsMobile] = useState(false);
+  // Mobile detection
+  // Initialize with actual window size to prevent hydration mismatch
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 996 : false
+  );
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 996);
@@ -113,6 +116,19 @@ export default function AprChart(): React.ReactElement {
     trackClick: true,
     trackZoom: true,
   });
+
+  // Measure container width for dynamic legend sizing
+  const [containerWidth, setContainerWidth] = useState(0);
+  useEffect(() => {
+    if (plotRef.current) {
+      const updateWidth = () => {
+        setContainerWidth(plotRef.current?.offsetWidth || 0);
+      };
+      updateWidth();
+      window.addEventListener('resize', updateWidth);
+      return () => window.removeEventListener('resize', updateWidth);
+    }
+  }, []);
 
   // Load user entry price from localStorage on mount, default to 0.05 (public pre-sale price)
   useEffect(() => {
@@ -350,13 +366,32 @@ export default function AprChart(): React.ReactElement {
     window.dispatchEvent(new Event('tunaEntryPriceChanged'));
   };
 
+  // Dynamic legend sizing calculations
+  // Count legend items: 3 traces (Reference APR, Entry Price APR, TUNA Price)
+  const numLegendItems = 3;
+  const effectiveWidth = containerWidth > 0 ? containerWidth : (typeof window !== 'undefined' ? window.innerWidth : 600);
+  const avgItemWidth = isMobile ? 200 : 250;
+  const availableWidth = effectiveWidth - (isMobile ? 50 : 80);
+  const estimatedColumns = Math.max(1, Math.floor(availableWidth / avgItemWidth));
+  const estimatedRows = Math.ceil(numLegendItems / estimatedColumns);
+  const rowHeight = isMobile ? 25 : 22;
+  const legendHeight = estimatedRows * rowHeight;
+
+  // Legend positioning and margins (close to chart - no bottom annotations)
+  const legendY = isMobile ? -0.1 : -0.15;
+  const bottomMargin = isMobile ? legendHeight + 10 : 80;
+
+  // Chart height calculation
+  const plotAreaBase = isMobile ? 350 : 450;
+  const chartHeight = isMobile ? 30 + plotAreaBase + bottomMargin : 500;
+
   return (
     <>
       <div ref={plotRef} style={{
         background: 'var(--ifm-background-surface-color)',
         border: '1px solid var(--ifm-toc-border-color)',
         borderRadius: 'var(--ifm-global-radius)',
-        padding: '16px',
+        padding: isMobile ? '16px 0px 16px 0px' : '16px',
         marginBottom: '24px',
       }}>
         {/* ShareButton temporarily disabled for rework
@@ -380,57 +415,99 @@ export default function AprChart(): React.ReactElement {
             ...template.layout,
             title: {
               text: 'TUNA Staking APR Over Time',
-              font: { size: 18, weight: 600 },
+              font: { size: isMobile ? 15 : 18, weight: 600 },
             },
             xaxis: {
               ...template.layout.xaxis,
-              title: '',
+              title: isMobile ? '' : {
+                text: 'Date',
+                font: { size: 14 },
+              },
               type: 'date',
+              tickfont: { size: isMobile ? 9 : 12 },
             },
             yaxis: {
               ...template.layout.yaxis,
-              title: 'APR (%)',
+              title: isMobile ? '' : {
+                text: 'APR (%)',
+                font: { size: 14 },
+              },
               rangemode: 'tozero',
+              tickfont: { size: isMobile ? 8 : 12 },
             },
             yaxis2: {
-              title: showTunaPrice ? {
+              title: showTunaPrice && !isMobile ? {
                 text: 'TUNA Reference Price (USD)',
                 font: { size: 12 },
               } : undefined,
               overlaying: 'y',
               side: 'right',
-              showgrid: false,
+              showgrid: true,  // Show red-ish grid
+              gridcolor: 'rgba(239, 68, 68, 0.1)',  // Red-ish, very transparent
+              gridwidth: 1,
               showticklabels: showTunaPrice,
               ticks: '',
-              tickfont: template.layout?.yaxis?.tickfont ?? { size: 12 },
+              tickfont: { size: isMobile ? 8 : 12 },
               rangemode: 'tozero',
               automargin: showTunaPrice,
-              showline: false,
+              showline: true,
+              linecolor: 'rgba(239, 68, 68, 0.3)',  // Red-ish axis line
+              linewidth: 1,
               zeroline: false,
               visible: showTunaPrice,
+              nticks: 10,
             },
             showlegend: true,
             legend: {
               orientation: 'h',
-              y: -0.15,
-              x: 0.5,
+              yanchor: 'top',
+              y: legendY,
               xanchor: 'center',
+              x: 0.5,
+              font: { size: isMobile ? 10 : 12 },
             },
             hovermode: 'closest',
-            ...(isMobile && {
+            // Disable zoom/pan on mobile while keeping legend interactions
+            dragmode: isMobile ? false : 'zoom',
+            ...(isMobile ? {
               margin: {
-                l: 40,
-                r: 10,
-                t: 40,
+                l: 25,
+                r: showTunaPrice ? 25 : 5,  // Need space for secondary y-axis ticks when visible, 5px otherwise
+                t: 30,
+                b: bottomMargin,
+              },
+            } : {
+              margin: {
+                l: 80,
+                r: showTunaPrice ? 80 : 40,
+                t: 60,
                 b: 80,
               },
             }),
           }}
-          config={getResponsivePlotlyConfig()}
-          style={{ width: '100%', height: '500px' }}
+          config={{
+            ...getResponsivePlotlyConfig(),
+            // Override staticPlot to allow legend clicks on mobile
+            staticPlot: false,
+            // Disable scroll zoom on mobile, keep legend clicks
+            scrollZoom: !isMobile,
+          }}
+          style={{ width: '100%', height: `${chartHeight}px` }}
           useResizeHandler={true}
           onLegendClick={handleLegendClick}
         />
+        {isMobile && (
+          <div style={{
+            fontSize: '13px',
+            color: 'var(--ifm-color-secondary)',
+            marginTop: '0px',
+            marginLeft: '25px',
+            lineHeight: '1.6',
+          }}>
+            <div>↑ APR (%) {showTunaPrice && '/ TUNA Price (USD, right)'}</div>
+            <div>→ Date</div>
+          </div>
+        )}
       </div>
 
       {/* Your TUNA Entry Price Input */}

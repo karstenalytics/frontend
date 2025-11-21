@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
@@ -23,6 +23,19 @@ export default function PositionGrowthChart({ data }: PositionGrowthChartProps):
   const accentColor = isDark ? '#4FD1C5' : '#00A3B4';
   const greenColor = isDark ? '#68D391' : '#38A169';
   const redColor = isDark ? '#FC8181' : '#E53E3E';
+
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 996 : false
+  );
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 996);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   if (data.length === 0) {
     return (
@@ -111,9 +124,22 @@ export default function PositionGrowthChart({ data }: PositionGrowthChartProps):
             yanchor: 'top',
             bgcolor: 'rgba(0,0,0,0)',
           },
+          dragmode: isMobile ? false : 'zoom',
+          ...(isMobile ? {
+            margin: {
+              l: 25,
+              r: 5,
+              t: 30,
+              b: 32,
+            },
+          } : {}),
         }}
-        config={getResponsivePlotlyConfig()}
-        style={{ width: '100%', height: '500px' }}
+        config={{
+          ...getResponsivePlotlyConfig(),
+          staticPlot: false,
+          scrollZoom: !isMobile,
+        }}
+        style={{ width: '100%', height: isMobile ? '350px' : '500px' }}
         useResizeHandler={true}
       />
     </div>

@@ -318,10 +318,11 @@ export default function DailyStackedBarChart({
             font: { size: isMobile ? 10 : 12 },
           },
           hovermode: 'closest',
+          dragmode: isMobile ? false : 'zoom',
           ...(isMobile ? {
             margin: {
               l: 25,
-              r: 0,
+              r: 5,
               t: 30,
               b: bottomMargin,
             },
@@ -334,7 +335,11 @@ export default function DailyStackedBarChart({
             },
           }),
         }}
-        config={getResponsivePlotlyConfig()}
+        config={{
+          ...getResponsivePlotlyConfig(),
+          staticPlot: false,
+          scrollZoom: !isMobile,
+        }}
         style={{ width: '100%', height: `${chartHeight}px` }}
         useResizeHandler={true}
       />

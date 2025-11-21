@@ -106,9 +106,17 @@ export default function StakingBalanceChart({
         marginBottom: '24px',
       }}
     >
-      <h3 style={{ marginTop: 0, marginLeft: isMobile ? '16px' : 0 }}>Treasury TUNA Allocation</h3>
+      <h3 style={{
+        marginTop: 0,
+        marginLeft: isMobile ? '16px' : 0,
+        fontSize: isMobile ? '1.1rem' : '1.5rem',
+      }}>Treasury TUNA Allocation</h3>
       {maxSupply != null && (
-        <p style={{ color: 'var(--ifm-color-emphasis-700)', marginLeft: isMobile ? '16px' : 0 }}>
+        <p style={{
+          color: 'var(--ifm-color-emphasis-700)',
+          marginLeft: isMobile ? '16px' : 0,
+          fontSize: isMobile ? '13px' : '16px',
+        }}>
           Maximum TUNA supply: {maxSupply.toLocaleString()}
           {latest && (
             <>
@@ -129,20 +137,36 @@ export default function StakingBalanceChart({
       {latest && (
         <div
           style={{
-            display: 'flex',
-            gap: '16px',
+            display: isMobile ? 'grid' : 'flex',
+            gridTemplateColumns: isMobile ? '1fr 1fr' : undefined,
+            gap: isMobile ? '8px' : '16px',
             marginBottom: '16px',
-            flexWrap: 'wrap',
+            flexWrap: isMobile ? undefined : 'wrap',
             marginLeft: isMobile ? '16px' : 0,
+            marginRight: isMobile ? '16px' : 0,
           }}
         >
-          <div className="badge badge--primary" style={{ padding: '12px 16px', fontSize: '14px' }}>
+          <div className="badge badge--primary" style={{
+            padding: isMobile ? '8px 12px' : '12px 16px',
+            fontSize: isMobile ? '12px' : '14px',
+            textAlign: 'center',
+          }}>
             <strong>{latest.staked.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong> staked TUNA
           </div>
-          <div className="badge badge--info" style={{ padding: '12px 16px', fontSize: '14px' }}>
+          <div className="badge badge--info" style={{
+            padding: isMobile ? '8px 12px' : '12px 16px',
+            fontSize: isMobile ? '12px' : '14px',
+            textAlign: 'center',
+          }}>
             <strong>{latest.unstaked.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong> unstaked TUNA
           </div>
-          <div className="badge badge--secondary" style={{ padding: '12px 16px', fontSize: '14px', color: 'white' }}>
+          <div className="badge badge--secondary" style={{
+            padding: isMobile ? '8px 12px' : '12px 16px',
+            fontSize: isMobile ? '12px' : '14px',
+            color: 'white',
+            textAlign: 'center',
+            gridColumn: isMobile ? '1 / -1' : undefined,
+          }}>
             <strong>{latest.total.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong> total TUNA
           </div>
         </div>
@@ -198,7 +222,7 @@ export default function StakingBalanceChart({
             xaxis: {
               ...template.layout.xaxis,
               title: isMobile ? '' : {
-                text: 'Date',
+                text: 'Date (UTC)',
                 font: { size: 14 },
               },
               type: 'date',
@@ -227,10 +251,11 @@ export default function StakingBalanceChart({
               x: 0.5,
               font: { size: isMobile ? 10 : 12 },
             },
+            dragmode: isMobile ? false : 'zoom',
             ...(isMobile ? {
               margin: {
                 l: 25,
-                r: 0,
+                r: 5,
                 t: 16,
                 b: bottomMargin,
               },
@@ -243,7 +268,11 @@ export default function StakingBalanceChart({
               },
             }),
           }}
-          config={getResponsivePlotlyConfig()}
+          config={{
+            ...getResponsivePlotlyConfig(),
+            staticPlot: false,
+            scrollZoom: !isMobile,
+          }}
           style={{ width: '100%', height: `${chartHeight}px` }}
         />
       )}
@@ -256,7 +285,7 @@ export default function StakingBalanceChart({
           lineHeight: '1.6',
         }}>
           <div>↑ TUNA tokens</div>
-          <div>→ Date</div>
+          <div>→ Date (UTC)</div>
         </div>
       )}
     </div>

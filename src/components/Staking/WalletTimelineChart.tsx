@@ -39,6 +39,9 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Track visibility of Realized Rewards (secondary axis trace)
+  const [showRewards, setShowRewards] = useState(true);
+
    // Helper function to truncate wallet address for display
   function truncateAddress(address: string, startChars: number = 5, endChars: number = 5): string {
     if (!address || address.length <= startChars + endChars) {
@@ -211,6 +214,7 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
       line: { color: '#F59E0B', width: 2, dash: 'dash' },
       yaxis: 'y2',
       hovertemplate: '<b>%{x}</b><br>Realized Rewards: %{y:,.4f} SOL<br><i>(Claimed + Compounded)</i><extra></extra>',
+      visible: showRewards ? true : 'legendonly',
     }
   );
 
@@ -246,6 +250,17 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
     });
   });
 
+  // Handle legend clicks to toggle Realized Rewards visibility
+  // Realized Rewards is at index 2 (no vesting) or 3 (with vesting)
+  const rewardsTraceIndex = hasVesting ? 3 : 2;
+  const handleLegendClick = (event: Readonly<any>) => {
+    if (typeof event?.curveNumber === 'number' && event.curveNumber === rewardsTraceIndex) {
+      setShowRewards(prev => !prev);
+      return false;
+    }
+    return true;
+  };
+
   const layout: any = {
     ...template.layout,
     title: {
@@ -255,7 +270,7 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
     xaxis: {
       ...template.layout.xaxis,
       title: isMobile ? '' : {
-        text: 'Date',
+        text: 'Date (UTC)',
         font: { size: 14 },
       },
       type: 'date',
@@ -273,10 +288,10 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
       showgrid: true,  // Show primary grid
     },
     yaxis2: {
-      title: isMobile ? '' : {
+      title: showRewards && !isMobile ? {
         text: 'Realized Rewards (SOL)',
         font: { size: 14, color: '#F59E0B' },
-      },
+      } : '',
       side: 'right',
       overlaying: 'y',
       rangemode: 'tozero',
@@ -287,6 +302,8 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
       linecolor: 'rgba(245, 158, 11, 0.3)',  // Yellowish axis line
       linewidth: 1,
       tickfont: { size: isMobile ? 8 : 12, color: '#F59E0B' },
+      showticklabels: showRewards,
+      visible: showRewards,
     },
     hovermode: 'closest',
     showlegend: true,
@@ -298,17 +315,18 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
       x: 0.5,
       font: { size: isMobile ? 10 : 12 },
     },
+    dragmode: isMobile ? false : 'zoom',
     ...(isMobile ? {
       margin: {
         l: 25,
-        r: 25,  // Need space for secondary y-axis ticks
+        r: showRewards ? 25 : 5,  // Space for secondary y-axis ticks when visible, 5px otherwise
         t: 30,
         b: bottomMargin,
       },
     } : {
       margin: {
         l: 80,
-        r: 80,
+        r: showRewards ? 80 : 40,
         t: 60,
         b: 100,
       },
@@ -329,9 +347,14 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
       <Plot
         data={traces}
         layout={layout}
-        config={getResponsivePlotlyConfig()}
+        config={{
+          ...getResponsivePlotlyConfig(),
+          staticPlot: false,
+          scrollZoom: !isMobile,
+        }}
         style={{ width: '100%', height: `${chartHeight}px` }}
         useResizeHandler={true}
+        onLegendClick={handleLegendClick}
       />
       {isMobile && (
         <div style={{
@@ -341,8 +364,8 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
           marginLeft: '25px',
           lineHeight: '1.6',
         }}>
-          <div>↑ TUNA Balance (left) / Realized Rewards SOL (right)</div>
-          <div>→ Date</div>
+          <div>↑ TUNA Balance (left){showRewards && ' / Realized Rewards SOL (right)'}</div>
+          <div>→ Date (UTC)</div>
         </div>
       )}
     </div>

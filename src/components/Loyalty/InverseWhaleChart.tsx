@@ -343,6 +343,7 @@ export default function InverseWhaleChart({
             },
           }),
           height: chartHeight,
+          dragmode: isMobile ? false : 'zoom',
           annotations: totalRewards.map((reward, idx) => ({
             x: 102,
             y: labels[idx],
@@ -357,7 +358,11 @@ export default function InverseWhaleChart({
             },
           })),
         }}
-        config={getResponsivePlotlyConfig()}
+        config={{
+          ...getResponsivePlotlyConfig(),
+          staticPlot: false,
+          scrollZoom: !isMobile,
+        }}
         style={{ width: '100%', height: `${chartHeight}px` }}
       />
       {isMobile && (
@@ -368,6 +373,7 @@ export default function InverseWhaleChart({
           marginLeft: '80px',
           lineHeight: '1.6',
         }}>
+          <div>↑ Stake Size Tiers</div>
           <div>→ Wallet Distribution (%)</div>
         </div>
       )}

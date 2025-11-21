@@ -111,9 +111,6 @@ export default function UnlockTimelineChart({
   const currentLocked = timeline[dataDate] ?? 0;
   const currentStaked = stakedTimeline[dataDate] ?? 0;
 
-  const peakLocked = hasData ? Math.max(...locked) : 0;
-  const peakStaked = hasStakedData ? Math.max(...staked) : 0;
-
   // Dynamic legend sizing calculations (only if legend is shown)
   const numLegendItems = hasStakedData ? 2 : 0; // "Locked TUNA" and "Staked TUNA"
   const effectiveWidth = containerWidth > 0 ? containerWidth : (typeof window !== 'undefined' ? window.innerWidth : 600);
@@ -146,31 +143,48 @@ export default function UnlockTimelineChart({
         marginBottom: '32px',
       }}
     >
-      <h3 style={{ marginTop: 0, marginLeft: isMobile ? '16px' : 0 }}>Vesting Unlock Timeline</h3>
-      <p style={{ color: 'var(--ifm-color-emphasis-700)', marginLeft: isMobile ? '16px' : 0 }}>
+      <h3 style={{
+        marginTop: 0,
+        marginLeft: isMobile ? '16px' : 0,
+        fontSize: isMobile ? '1.1rem' : '1.5rem',
+      }}>Vesting Unlock Timeline</h3>
+      <p style={{
+        color: 'var(--ifm-color-emphasis-700)',
+        marginLeft: isMobile ? '16px' : 0,
+        fontSize: isMobile ? '13px' : '16px',
+      }}>
         Total vesting schedules: {totalSchedules}
       </p>
 
       <div
         style={{
-          display: 'flex',
-          gap: '16px',
+          display: isMobile ? 'grid' : 'flex',
+          gridTemplateColumns: isMobile ? '1fr 1fr' : undefined,
+          gap: isMobile ? '8px' : '16px',
           marginBottom: '16px',
-          flexWrap: 'wrap',
+          flexWrap: isMobile ? undefined : 'wrap',
           marginLeft: isMobile ? '16px' : 0,
+          marginRight: isMobile ? '16px' : 0,
         }}
       >
-        <div className="badge badge--primary" style={{ padding: '12px 16px', fontSize: '14px' }}>
+        <div className="badge badge--primary" style={{
+          padding: isMobile ? '8px 12px' : '12px 16px',
+          fontSize: isMobile ? '12px' : '14px',
+          textAlign: 'center',
+        }}>
           <strong>{currentLocked.toLocaleString(undefined, { maximumFractionDigits: 0 })}</strong> TUNA currently locked
         </div>
         {hasStakedData && (
-          <div className="badge badge--warning" style={{ padding: '12px 16px', fontSize: '14px' }}>
+          <div className="badge" style={{
+            padding: isMobile ? '8px 12px' : '12px 16px',
+            fontSize: isMobile ? '12px' : '14px',
+            textAlign: 'center',
+            backgroundColor: stakedColor,
+            color: '#ffffff',
+          }}>
             <strong>{currentStaked.toLocaleString(undefined, { maximumFractionDigits: 0 })}</strong> TUNA staked in wallets with vesting
           </div>
         )}
-        <div className="badge badge--info" style={{ padding: '12px 16px', fontSize: '14px' }}>
-          <strong>{peakLocked.toLocaleString(undefined, { maximumFractionDigits: 0 })}</strong> TUNA peak locked
-        </div>
       </div>
 
       {!hasData ? (
@@ -272,7 +286,7 @@ export default function UnlockTimelineChart({
                 xaxis: {
                   ...template.layout.xaxis,
                   title: isMobile ? '' : {
-                    text: 'Date',
+                    text: 'Date (UTC)',
                     font: { size: 14 },
                   },
                   type: 'date',
@@ -342,10 +356,11 @@ export default function UnlockTimelineChart({
                   bordercolor: isDark ? '#444' : '#ddd',
                   borderwidth: 1,
                 }) : undefined,
+                dragmode: isMobile ? false : 'zoom',
                 ...(isMobile ? {
                   margin: {
                     l: 25,
-                    r: 0,
+                    r: 5,
                     t: 20,
                     b: bottomMargin,
                   },
@@ -358,7 +373,11 @@ export default function UnlockTimelineChart({
                   },
                 }),
               }}
-              config={getResponsivePlotlyConfig()}
+              config={{
+                ...getResponsivePlotlyConfig(),
+                staticPlot: false,
+                scrollZoom: !isMobile,
+              }}
               style={{ width: '100%', height: `${chartHeight}px` }}
             />
             {isMobile && (
@@ -370,7 +389,7 @@ export default function UnlockTimelineChart({
                 lineHeight: '1.6',
               }}>
                 <div>↑ Locked TUNA</div>
-                <div>→ Date</div>
+                <div>→ Date (UTC)</div>
               </div>
             )}
           </div>

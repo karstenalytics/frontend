@@ -75,31 +75,8 @@ Tracks TUNA tokens locked in vesting schedules and their unlock timeline. The ch
 
       const filteredSchedules = getFilteredSchedules();
 
-      // Calculate statistics
-      const totalLocked = schedules.reduce((sum, s) => sum + s.locked_tuna, 0);
-
-      // Get current locked amount for today's date
-      const today = new Date().toISOString().split('T')[0];
-      const currentLocked = daily_timeline[today] ?? 0;
-
-      const peakLocked = Object.values(daily_timeline).length > 0
-        ? Math.max(...Object.values(daily_timeline))
-        : 0;
-
       return (
         <>
-          {/* Summary stats */}
-          <div className="alert alert--info" role="alert" style={{ marginBottom: '24px' }}>
-            <h4 style={{ marginTop: 0 }}>Vesting Overview</h4>
-            <p style={{ marginBottom: 0 }}>
-              <strong>{schedules.length}</strong> vesting schedule(s) with{' '}
-              <strong>{totalLocked.toLocaleString(undefined, { maximumFractionDigits: 0 })}</strong> TUNA total locked.{' '}
-              Currently{' '}
-              <strong>{currentLocked.toLocaleString(undefined, { maximumFractionDigits: 0 })}</strong> TUNA remain locked
-              ({((currentLocked / totalLocked) * 100).toFixed(1)}% of total).
-            </p>
-          </div>
-
           {/* Unlock timeline chart */}
           <UnlockTimelineChart
             timeline={daily_timeline}

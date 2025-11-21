@@ -436,10 +436,11 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
           },
           hovermode: 'closest',
           annotations: annotations,
+          dragmode: isMobile ? false : 'zoom',
           ...(isMobile ? {
             margin: {
               l: 25,
-              r: 0,
+              r: 5,
               t: 30,
               b: bottomMargin,  // Space for rotated pool labels + legend
             },
@@ -452,7 +453,11 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
             },
           }),
         }}
-        config={getResponsivePlotlyConfig()}
+        config={{
+          ...getResponsivePlotlyConfig(),
+          staticPlot: false,
+          scrollZoom: !isMobile,
+        }}
         style={{ width: '100%', height: `${chartHeight}px` }}
         useResizeHandler={true}
         onClick={(event: React.MouseEvent) => {
