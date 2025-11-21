@@ -7,7 +7,135 @@ sidebar_position: 1
 sidebar_custom_props:
   icon: House
 ---
-![Intro Banner](../static/img/banner_start.jpg)
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+
+<BrowserOnly>
+  {() => {
+    const { useEffect, useState } = require('react');
+
+    function RandomChartButton() {
+      const [destination, setDestination] = useState(null);
+      const [buttonText, setButtonText] = useState('');
+      const [topMargin, setTopMargin] = useState('-10rem');
+
+      const chartUrls = [
+        '/analysis/defituna/revenue-breakdown/by-token',
+        '/analysis/defituna/revenue-breakdown/by-type',
+        '/analysis/defituna/revenue-breakdown/by-pool',
+        '/analysis/defituna/revenue-breakdown/pools-vs-types',
+        '/analysis/defituna/revenue-breakdown/tx-type-per-day',
+        '/analysis/defituna/revenue-breakdown/tx-type-development',
+        '/analysis/defituna/revenue-breakdown/orca-vs-fusion',
+        '/analysis/defituna/usage-statistics/wallet-usage',
+        '/analysis/defituna/usage-statistics/active-stakers',
+        '/analysis/defituna/staking/staked-tuna',
+        '/analysis/defituna/staking/staker-conviction',
+        '/analysis/defituna/staking/vesting-timeline',
+        '/analysis/defituna/staking/wallet-timeline',
+        '/analysis/defituna/staking-apr',
+      ];
+
+      const buttonTexts = [
+        "Enough with the intro, bring me to one of your charts already!",
+        "Skip the philosophy, show me the data!",
+        "TL;DR - Just show me a random chart!",
+        "I'm here for the charts, not the story!"
+      ];
+
+      useEffect(() => {
+        const randomChart = chartUrls[Math.floor(Math.random() * chartUrls.length)];
+        const randomText = buttonTexts[Math.floor(Math.random() * buttonTexts.length)];
+        setDestination(randomChart);
+        setButtonText(randomText);
+
+        const updateMargin = () => {
+          const width = window.innerWidth;
+          if (width < 577) {
+            setTopMargin('-9rem');  // Mobile
+          } else if (width < 997) {
+            setTopMargin('-10.3rem');  // Tablet
+          } else {
+            setTopMargin('-10rem'); // Desktop
+          }
+        };
+
+        updateMargin();
+        window.addEventListener('resize', updateMargin);
+        return () => window.removeEventListener('resize', updateMargin);
+      }, []);
+
+      if (!destination) return null;
+
+      return (
+        <a
+          href={destination}
+          style={{
+            display: 'block',
+            textAlign: 'center',
+            padding: '5px 2px 2px 2px',
+            margin: `${topMargin} 0 32px 0`,
+            background: 'var(--ifm-color-primary)',
+            color: 'white',
+            fontSize: '10px',
+            fontWeight: '400',
+            textDecoration: 'none',
+            transition: 'all 0.2s ease',
+            borderRadius: 0
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = '#008C9E';
+            e.target.style.transform = 'translateY(-1px)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'var(--ifm-color-primary)';
+            e.target.style.transform = 'translateY(0)';
+          }}
+        >
+          {buttonText} →
+        </a>
+      );
+    }
+
+    return <RandomChartButton />;
+  }}
+</BrowserOnly>
+
+<BrowserOnly>
+  {() => {
+    const { useEffect, useState } = require('react');
+
+    function ResponsiveImageWrapper() {
+      const [topMargin, setTopMargin] = useState('10rem');
+
+      useEffect(() => {
+        const updateMargin = () => {
+          const width = window.innerWidth;
+          if (width < 577) {
+            setTopMargin('9rem');  // Mobile
+          } else if (width < 997) {
+            setTopMargin('10.3rem');  // Tablet
+          } else {
+            setTopMargin('10rem'); // Desktop
+          }
+        };
+
+        updateMargin();
+        window.addEventListener('resize', updateMargin);
+        return () => window.removeEventListener('resize', updateMargin);
+      }, []);
+
+      return (
+        <div style={{ marginTop: topMargin }}>
+          <img src={require('../static/img/banner_start.jpg').default} alt="Intro Banner" />
+        </div>
+      );
+    }
+
+    return <ResponsiveImageWrapper />;
+  }}
+</BrowserOnly>
+
 <p>
 I've been using the Solana DeFi ecosystem since 2020 and have been a regular user. I followed countless projects, KOLs and "OGs" on X and elsewhere passively for years. And one thing that I always wanted, but never saw, was an independent perspective on the inner workings and detailed data of DeFi projects. I've always felt the big platforms like DeFillama, Blockworks, Tokenterminal etc. do an amazing job with high-level metrics across countless Blockchains and protocols—but there's a gap for those of us craving more.
 
@@ -35,8 +163,6 @@ It's about building a solid foundation for thoughtful discussions on what makes 
 <div className="card-section" data-animate>
   <h2>Scope</h2>
   <div className="section-grid">
-
-import BrowserOnly from '@docusaurus/BrowserOnly';
 
 <BrowserOnly fallback={<div>Loading statistics...</div>}>
   {() => {
