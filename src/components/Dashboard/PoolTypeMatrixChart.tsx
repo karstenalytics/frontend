@@ -267,9 +267,13 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
   const effectiveWidth = containerWidth > 0 ? containerWidth : (typeof window !== 'undefined' ? window.innerWidth : 600);
 
   // Estimate columns based on container width and average legend item width
-  // Mobile: ~150px per item (reduced to fit more columns), Desktop: ~250px per item
-  const avgItemWidth = isMobile ? 150 : 250;
-  const availableWidth = effectiveWidth - (isMobile ? 50 : 80); // Account for margins
+  // Mobile: ~130px per item (with 8px font + tight spacing), Desktop: ~250px per item
+  const avgItemWidth = isMobile ? 130 : 250;
+  // Progressive margin reduction for narrow viewports
+  const marginSubtraction = isMobile
+    ? (effectiveWidth < 420 ? 0 : 50)  // Less margin on very narrow phones
+    : 80;
+  const availableWidth = effectiveWidth - marginSubtraction; // Account for margins
   const estimatedColumns = Math.max(1, Math.floor(availableWidth / avgItemWidth));
   const estimatedRows = Math.ceil(numLegendItems / estimatedColumns);
 
@@ -279,8 +283,9 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
 
   // Position legend below the rotated pool labels (110px space)
   // y is relative to plot area height, so -110px / 350px = -0.314
-  // Use -0.32 to give small buffer below pool labels
-  const legendY = isMobile ? -0.32 : -0.25;
+  // Mobile: -0.32 to give buffer below pool labels
+  // Desktop: -0.35 to push further down below rotated labels and x-axis label
+  const legendY = isMobile ? -0.32 : -0.4;
 
   // Bottom margin needs space for pool labels (110px) + legend + small gap
   const bottomMargin = isMobile ? 110 + legendHeight + 10 : 140;
@@ -300,6 +305,7 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
   console.log(`Viewport: ${typeof window !== 'undefined' ? window.innerWidth : 'N/A'}px`);
   console.log(`Container Width: ${containerWidth}px`);
   console.log(`Effective Width (used): ${effectiveWidth}px`);
+  console.log(`Margin Subtraction: ${marginSubtraction}px`);
   console.log(`Available Width: ${availableWidth}px`);
   console.log(`Avg Item Width: ${avgItemWidth}px`);
   console.log(`Num Legend Items: ${numLegendItems}`);
@@ -406,7 +412,7 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
             ...template.layout.xaxis,
             title: isMobile ? '' : {
               text: 'Liquidity Pools (width = share of revenue)',
-              standoff: 140,
+              standoff: 120,
               font: { size: 14 },
             },
             showticklabels: false,  // Hide tick labels, using annotations instead
@@ -431,8 +437,13 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
             y: legendY,
             xanchor: 'center',
             x: 0.5,
-            font: { size: isMobile ? 10 : 12 },
-            tracegroupgap: 5,
+            font: { size: isMobile ? 8 : 12 },  // Reduced from 10 to 8 on mobile
+            ...(isMobile ? {
+              tracegroupgap: 0,  // No gap between items
+              itemwidth: 20,  // Narrow icons to encourage wrapping
+            } : {
+              tracegroupgap: 5,  // Desktop gap unchanged
+            }),
           },
           hovermode: 'closest',
           annotations: annotations,

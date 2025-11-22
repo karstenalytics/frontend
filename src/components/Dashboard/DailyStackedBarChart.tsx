@@ -187,9 +187,13 @@ export default function DailyStackedBarChart({
   const effectiveWidth = containerWidth > 0 ? containerWidth : (typeof window !== 'undefined' ? window.innerWidth : 600);
 
   // Estimate columns based on container width and average legend item width
-  // Mobile: ~150px per item, Desktop: ~250px per item
-  const avgItemWidth = isMobile ? 150 : 250;
-  const availableWidth = effectiveWidth - (isMobile ? 50 : 80); // Account for margins
+  // Mobile: ~130px per item (with 9px font + tight spacing), Desktop: ~250px per item
+  const avgItemWidth = isMobile ? 130 : 250;
+  // Progressive margin reduction for narrow viewports
+  const marginSubtraction = isMobile
+    ? (effectiveWidth < 420 ? 0 : 50)  // Less margin on very narrow phones
+    : 80;
+  const availableWidth = effectiveWidth - marginSubtraction; // Account for margins
   const estimatedColumns = Math.max(1, Math.floor(availableWidth / avgItemWidth));
   const estimatedRows = Math.ceil(numLegendItems / estimatedColumns);
 
@@ -214,6 +218,7 @@ export default function DailyStackedBarChart({
   console.log(`Viewport: ${typeof window !== 'undefined' ? window.innerWidth : 'N/A'}px`);
   console.log(`Container Width: ${containerWidth}px`);
   console.log(`Effective Width (used): ${effectiveWidth}px`);
+  console.log(`Margin Subtraction: ${marginSubtraction}px`);
   console.log(`Available Width: ${availableWidth}px`);
   console.log(`Avg Item Width: ${avgItemWidth}px`);
   console.log(`Num Legend Items: ${numLegendItems}`);
@@ -315,7 +320,11 @@ export default function DailyStackedBarChart({
             y: legendY,
             xanchor: 'center',
             x: 0.5,
-            font: { size: isMobile ? 10 : 12 },
+            font: { size: isMobile ? 8 : 12 },  // Even smaller: 9 → 8
+            ...(isMobile ? {
+              tracegroupgap: 0,  // No gap
+              itemwidth: 20,  // Even narrower icons: 25 → 20
+            } : {}),
           },
           hovermode: 'closest',
           dragmode: isMobile ? false : 'zoom',

@@ -141,8 +141,12 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
   const numLegendItems = 3 + 1 + Object.keys(opsByType).length;
 
   const effectiveWidth = containerWidth > 0 ? containerWidth : (typeof window !== 'undefined' ? window.innerWidth : 600);
-  const avgItemWidth = isMobile ? 150 : 200;
-  const availableWidth = effectiveWidth - (isMobile ? 50 : 80);
+  const avgItemWidth = isMobile ? 130 : 200;  // Reduced from 150 to 130 for tighter wrapping
+  // Progressive margin reduction for narrow viewports
+  const marginSubtraction = isMobile
+    ? (effectiveWidth < 420 ? 0 : 50)  // Less margin on very narrow phones
+    : 80;
+  const availableWidth = effectiveWidth - marginSubtraction;
   const estimatedColumns = Math.max(1, Math.floor(availableWidth / avgItemWidth));
   const estimatedRows = Math.ceil(numLegendItems / estimatedColumns);
   const rowHeight = isMobile ? 25 : 22;
@@ -313,7 +317,11 @@ export default function WalletTimelineChart({ data }: WalletTimelineChartProps):
       y: legendY,
       xanchor: 'center',
       x: 0.5,
-      font: { size: isMobile ? 10 : 12 },
+      font: { size: isMobile ? 8 : 12 },  // Reduced from 10 to 8 on mobile
+      ...(isMobile ? {
+        tracegroupgap: 0,  // No gap between items
+        itemwidth: 20,  // Narrow icons to encourage wrapping
+      } : {}),
     },
     dragmode: isMobile ? false : 'zoom',
     ...(isMobile ? {
