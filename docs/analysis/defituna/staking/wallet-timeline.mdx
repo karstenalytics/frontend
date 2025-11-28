@@ -175,7 +175,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
             }}>
               Wallet Address
             </label>
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <input
                 type="text"
                 value={inputAddress}
@@ -183,7 +183,8 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                 onKeyPress={handleKeyPress}
                 placeholder="Enter Solana wallet address (e.g., 5MJ6Jx2SJKyTce...)"
                 style={{
-                  flex: 1,
+                  flex: '1 1 200px',
+                  minWidth: 0,
                   padding: '12px 16px',
                   fontSize: '14px',
                   fontFamily: 'var(--ifm-font-family-monospace)',
@@ -197,7 +198,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                 onClick={handleSearch}
                 disabled={loading}
                 style={{
-                  padding: '12px 32px',
+                  padding: '12px 24px',
                   fontSize: '14px',
                   fontWeight: 600,
                   color: 'white',
@@ -206,6 +207,8 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                   borderRadius: 'var(--ifm-global-radius)',
                   cursor: loading ? 'not-allowed' : 'pointer',
                   transition: 'background 120ms ease',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
                 }}
                 onMouseEnter={(e) => {
                   if (!loading) e.currentTarget.style.background = 'var(--accent-hover)';

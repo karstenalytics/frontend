@@ -47,7 +47,11 @@ Displays protocol revenue categorized by liquidity pool, showing which LP positi
       }, [data.loading]);
 
       if (data.loading) {
-        return <LoadingSpinner />;
+        return (
+          <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
       }
 
       if (data.error) {

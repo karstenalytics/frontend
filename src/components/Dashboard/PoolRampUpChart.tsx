@@ -121,7 +121,11 @@ export default function PoolRampUpChart(): React.ReactElement {
   }, [poolDataPath]);
 
   if (loading) {
-    return <LoadingSpinner />;
+    return (
+      <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   if (error) {

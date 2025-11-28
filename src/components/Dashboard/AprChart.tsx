@@ -172,7 +172,11 @@ export default function AprChart(): React.ReactElement {
   }, [aprDataPath]);
 
   if (loading) {
-    return <LoadingSpinner />;
+    return (
+      <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   if (error) {

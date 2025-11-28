@@ -186,6 +186,7 @@ export default function BreakdownChart({ summary, groupMode, onBarClick }: Break
             title: isMobile ? '' : {
               text: xAxisLabel,
               font: { size: 14 },
+              standoff: 30
             },
             tickangle: isMobile ? -90 : 0,
             tickfont: { size: isMobile ? 9 : 12 },
@@ -213,7 +214,7 @@ export default function BreakdownChart({ summary, groupMode, onBarClick }: Break
               l: 70,
               r: 24,
               t: 50,
-              b: 48,
+              b: 70,
             },
           }),
         }}

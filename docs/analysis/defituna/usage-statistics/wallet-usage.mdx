@@ -22,7 +22,11 @@ Tracks unique wallets interacting with the DefiTuna protocol through revenue-gen
       const { data, loading, error } = useUsageMetrics();
 
       if (loading) {
-        return <LoadingSpinner />;
+        return (
+          <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
       }
 
       if (error || !data) {

@@ -24,7 +24,11 @@ export default function Dashboard(): React.ReactElement {
 
   // Show loading state
   if (data.loading) {
-    return <LoadingSpinner />;
+    return (
+      <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   // Show error state

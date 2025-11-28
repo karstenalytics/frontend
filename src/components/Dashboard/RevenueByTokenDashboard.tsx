@@ -20,7 +20,11 @@ export default function RevenueByTokenDashboard(): React.ReactElement {
   };
 
   if (data.loading) {
-    return <LoadingSpinner />;
+    return (
+      <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   if (data.error) {
