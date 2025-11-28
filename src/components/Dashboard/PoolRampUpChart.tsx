@@ -43,7 +43,7 @@ export default function PoolRampUpChart(): React.ReactElement {
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
   const template = getPlotlyTemplate(isDark);
-  const poolDataPath = useBaseUrl('/data/pool_ramp_up.json');
+  const poolDataPath = useBaseUrl('/data/defituna/pool_ramp_up.json');
 
   const [data, setData] = useState<PoolRampUpData | null>(null);
   const [loading, setLoading] = useState(true);

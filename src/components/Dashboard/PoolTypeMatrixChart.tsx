@@ -62,7 +62,7 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
   const template = getPlotlyTemplate(isDark);
-  const poolTypePath = useBaseUrl('/data/pool_type_summary.json');
+  const poolTypePath = useBaseUrl('/data/defituna/pool_type_summary.json');
 
   const [data, setData] = useState<PoolTypeData[]>([]);
   const [loading, setLoading] = useState(true);

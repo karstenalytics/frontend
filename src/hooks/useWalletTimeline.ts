@@ -458,7 +458,7 @@ function parseWalletTimeline(walletAddress: string, cache: StakerCache): WalletT
  * Includes debouncing to prevent excessive requests during rapid input changes
  */
 export function useWalletTimeline(walletAddress: string | null) {
-  const dataPath = useBaseUrl('/data/staker_cache.json.gz');
+  const dataPath = useBaseUrl('/data/defituna/staker_cache.json.gz');
 
   const [data, setData] = useState<WalletTimelineData | null>(null);
   const [loading, setLoading] = useState(false);

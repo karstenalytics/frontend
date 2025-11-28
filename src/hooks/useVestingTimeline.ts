@@ -38,7 +38,7 @@ let isLoading = false;
 let loadPromise: Promise<void> | null = null;
 
 export function useVestingTimeline() {
-  const dataPath = useBaseUrl('/data/vesting_timeline.json');
+  const dataPath = useBaseUrl('/data/defituna/vesting_timeline.json');
 
   const [data, setData] = useState<VestingTimeline | null>(cachedData);
   const [loading, setLoading] = useState(!cachedData && !cachedError);

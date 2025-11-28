@@ -48,7 +48,7 @@ let isLoading = false;
 let loadPromise: Promise<void> | null = null;
 
 export function useUsageMetrics() {
-  const dataPath = useBaseUrl('/data/usage_metrics.json');
+  const dataPath = useBaseUrl('/data/defituna/usage_metrics.json');
 
   const [data, setData] = useState<UsageMetrics | null>(cachedData);
   const [loading, setLoading] = useState(!cachedData && !cachedError);

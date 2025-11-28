@@ -24,7 +24,7 @@ Before I talk about DefiTuna let's start with a summary of the key metrics that 
       const [error, setError] = useState(null);
 
       useEffect(() => {
-        fetch('/data/key_metrics.json')
+        fetch('/data/defituna/key_metrics.json')
           .then(res => res.json())
           .then(data => {
             setData(data);

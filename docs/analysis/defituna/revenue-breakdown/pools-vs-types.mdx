@@ -25,9 +25,9 @@ Two-dimensional revenue distribution showing how transaction types and liquidity
       const [summary, setSummary] = useState(null);
       const [loading, setLoading] = useState(true);
 
-      const topTransactionsPoolPath = useBaseUrl('/data/top_transactions_pool.json');
-      const topTransactionsPoolTypePath = useBaseUrl('/data/top_transactions_pool_type.json');
-      const summaryPath = useBaseUrl('/data/summary.json');
+      const topTransactionsPoolPath = useBaseUrl('/data/defituna/top_transactions_pool.json');
+      const topTransactionsPoolTypePath = useBaseUrl('/data/defituna/top_transactions_pool_type.json');
+      const summaryPath = useBaseUrl('/data/defituna/summary.json');
 
       useEffect(() => {
         Promise.all([

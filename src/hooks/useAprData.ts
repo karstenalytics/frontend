@@ -33,7 +33,7 @@ let isLoading = false;
 let loadPromise: Promise<void> | null = null;
 
 export function useAprData() {
-  const dataPath = useBaseUrl('/data/apr_data.json');
+  const dataPath = useBaseUrl('/data/defituna/apr_data.json');
 
   const [data, setData] = useState<AprData | null>(cachedData);
   const [loading, setLoading] = useState(!cachedData && !cachedError);

@@ -131,7 +131,7 @@ let isLoading = false;
 let loadPromise: Promise<void> | null = null;
 
 export function useStakerLoyalty(): UseStakerLoyaltyResult {
-  const dataPath = useBaseUrl('/data/staker_loyalty.json');
+  const dataPath = useBaseUrl('/data/defituna/staker_loyalty.json');
 
   const [data, setData] = useState<StakerLoyaltyData | null>(cachedData);
   const [loading, setLoading] = useState(!cachedData && !cachedError);

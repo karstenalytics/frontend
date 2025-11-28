@@ -87,7 +87,7 @@ export default function AprChart(): React.ReactElement {
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
   const template = getPlotlyTemplate(isDark);
-  const aprDataPath = useBaseUrl('/data/apr_data.json');
+  const aprDataPath = useBaseUrl('/data/defituna/apr_data.json');
 
   const [data, setData] = useState<AprData | null>(null);
   const [loading, setLoading] = useState(true);

@@ -44,7 +44,7 @@ let isLoading = false;
 let loadPromise: Promise<void> | null = null;
 
 export function useStakingMetrics() {
-  const dataPath = useBaseUrl('/data/staking_tuna.json');
+  const dataPath = useBaseUrl('/data/defituna/staking_tuna.json');
 
   const [data, setData] = useState<StakingMetrics | null>(cachedData);
   const [loading, setLoading] = useState(!cachedData && !cachedError);
