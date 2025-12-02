@@ -1380,7 +1380,7 @@
   },
   "date_range": {
     "start": "2025-07-24",
-    "end": "2025-11-30"
+    "end": "2025-12-01"
   },
   "staked_by_vesting_wallets_timeline": {
     "2025-07-25": 750843648.7620871,
@@ -1511,9 +1511,50 @@
     "2025-11-27": 754567635.8187912,
     "2025-11-28": 754567635.8187912,
     "2025-11-29": 754555634.6560222,
-    "2025-11-30": 754555634.6560222
+    "2025-11-30": 754555634.6560222,
+    "2025-12-01": 754694837.0501232
   },
   "vesting_wallet_staking_operations": [
+    {
+      "signature": "45PCnENFLa91krwXUTDtfuNLxfA5STCC3LWdbmMf1CNZwbjsLorY7wTi5uAacYWfyKp23SHL3tyAPQUwcMX8uf4m",
+      "timestamp": "2025-12-01T15:07:19Z",
+      "date": "2025-12-01",
+      "wallet": "31bz9pFqHC6a5DFRk2DrXhzWghNSh6Ybb6D7dcPzvWw7",
+      "type": "unstake",
+      "amount": 59375.0,
+      "pool": 383779477,
+      "mint": null
+    },
+    {
+      "signature": "3CnW5KGaTDMgAoqYbvcvH3Yq9nPXvNkkj6wCnizvEJNQ53SzSynfXFC7gtjt587Vrz2fZhxctu9CKgQytwDSaahP",
+      "timestamp": "2025-12-01T14:35:35Z",
+      "date": "2025-12-01",
+      "wallet": "3rJe7FAeMDxUYkLMYVcBj1ZPX4o8Ukt4h3mWgyS9a6Jy",
+      "type": "stake",
+      "amount": 3585.724975,
+      "pool": 383774589,
+      "mint": null
+    },
+    {
+      "signature": "4ZmecU3LY8xALDkJNBp9dT9aByESKJYqC6yz2t8LpxZY6dpQKggyiF83fXJRkqHN1Q81X8BAaT8sfnguFsU6Gp76",
+      "timestamp": "2025-12-01T11:09:46Z",
+      "date": "2025-12-01",
+      "wallet": "5eXV2EHffops3QbxqsFCsARb9Lq6MtUnWL7bfw6cVnrw",
+      "type": "stake",
+      "amount": 2770.171812,
+      "pool": 383742807,
+      "mint": null
+    },
+    {
+      "signature": "4ojL2EHiGQc2nM96LGepEXChFUmaw9HVd9kjhyvRQjL3m8KNz4yu2TZY2MRLA2b5DBqffaDy2tDNGCNFzx1igcn4",
+      "timestamp": "2025-12-01T09:41:12Z",
+      "date": "2025-12-01",
+      "wallet": "5eXV2EHffops3QbxqsFCsARb9Lq6MtUnWL7bfw6cVnrw",
+      "type": "stake",
+      "amount": 192221.497314,
+      "pool": 383729078,
+      "mint": null
+    },
     {
       "signature": "4JeyLcJpa28u4LVEoAoA3nKDERq4NVUrkm5wqaatSKUfZC4y3xTdAHSaYnr8Mor6BbH8yL63HQVhYYed1jcWwUH1",
       "timestamp": "2025-11-29T14:23:07Z",
