@@ -1380,7 +1380,7 @@
   },
   "date_range": {
     "start": "2025-07-24",
-    "end": "2025-12-05"
+    "end": "2025-12-06"
   },
   "staked_by_vesting_wallets_timeline": {
     "2025-07-25": 750843648.7620871,
@@ -1516,9 +1516,60 @@
     "2025-12-02": 754665149.5501232,
     "2025-12-03": 754647848.6089042,
     "2025-12-04": 754647848.6089042,
-    "2025-12-05": 754631790.7832803
+    "2025-12-05": 754631790.7832803,
+    "2025-12-06": 752254603.2832803
   },
   "vesting_wallet_staking_operations": [
+    {
+      "signature": "6u2KXhjZQMdDfMoJPbZwmeXhaZwr98JyeAbeamRhYEigdrW1i3Zf2Xzk1WWChfHoLegrDniXeZRdwSm8kRahgEG",
+      "timestamp": "2025-12-06T20:53:44Z",
+      "date": "2025-12-06",
+      "wallet": "2vAg5qYrpa4GV6Xio75TEzFocHV7MWLfitxipjY6H2EJ",
+      "type": "unstake",
+      "amount": 62500.0,
+      "pool": 384943633,
+      "mint": null
+    },
+    {
+      "signature": "5zP3ag8i6V85Q3nf9PNW3kptq63i3NDpQt87BGENkr7Gvt1zFoUX6J7fnUVd73uU8TvY28c2hDQx39ngiHqNTNUU",
+      "timestamp": "2025-12-06T11:30:32Z",
+      "date": "2025-12-06",
+      "wallet": "6CEJhr1Z5GWxLsk5GermUfPc1511EH1S4WJAaazN2xWm",
+      "type": "unstake",
+      "amount": 237500.0,
+      "pool": 384856972,
+      "mint": null
+    },
+    {
+      "signature": "5Lo4QdEpUavLVdT1YSkSHWR6vhnHi8R7nztWgv8eqG2t4DYEhe3FZv3TyBvKp3xMDGb8FL3cqs1aErVxmiujioDK",
+      "timestamp": "2025-12-06T09:13:15Z",
+      "date": "2025-12-06",
+      "wallet": "BbJP5VT3nprTeMC2cZgHQiWiw2j9KQCTso3idWUXXp7z",
+      "type": "unstake",
+      "amount": 2000000.0,
+      "pool": 384835844,
+      "mint": null
+    },
+    {
+      "signature": "3E4bP3N9TXt4MnJFhp7EAkqnSSyWfC58ZJCF2Ku6ZRccXhuMYejGCQXg6fotrppzJZ5hxDEY7FAUrLqK2Uf9NVKu",
+      "timestamp": "2025-12-06T08:56:59Z",
+      "date": "2025-12-06",
+      "wallet": "4aUhpwZCrd3paaUEj4FEeEbpAq76kG4PmuDJp59fksrM",
+      "type": "unstake",
+      "amount": 59375.0,
+      "pool": 384833335,
+      "mint": null
+    },
+    {
+      "signature": "szvFy2EoruVuo9rAkHqJQbrKTpDjQWJvUtPEAmvrXVtyhVDL6oxStJGMjyKqQHuQqHu9B99KftxuiXGXqFQhNMU",
+      "timestamp": "2025-12-06T08:12:19Z",
+      "date": "2025-12-06",
+      "wallet": "BenGcYAaMnVReHwqRmqHtC2dX7nd88e3UtGHz3i6EN1U",
+      "type": "unstake",
+      "amount": 17812.5,
+      "pool": 384826449,
+      "mint": null
+    },
     {
       "signature": "CVEyjAEeAH78TS4pJq8k8Yz52LwtkCJr8u6pVBasfGP9j1fvxNkYCnbomzGs2FJDxGYe8sbMukPx3hhXrfCArcT",
       "timestamp": "2025-12-05T20:41:06Z",
