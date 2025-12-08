@@ -1380,7 +1380,7 @@
   },
   "date_range": {
     "start": "2025-07-24",
-    "end": "2025-12-06"
+    "end": "2025-12-07"
   },
   "staked_by_vesting_wallets_timeline": {
     "2025-07-25": 750843648.7620871,
@@ -1517,9 +1517,40 @@
     "2025-12-03": 754647848.6089042,
     "2025-12-04": 754647848.6089042,
     "2025-12-05": 754631790.7832803,
-    "2025-12-06": 752254603.2832803
+    "2025-12-06": 752254603.2832803,
+    "2025-12-07": 751795738.5064893
   },
   "vesting_wallet_staking_operations": [
+    {
+      "signature": "3beX5xxYutDn9qpnhuiaqsQySizYtDgXNa9pUXd1gZwVgieje5JeUT3r6jC8iSkBkNqz9Rc94h2TpEvZpzhd9oFd",
+      "timestamp": "2025-12-07T16:22:21Z",
+      "date": "2025-12-07",
+      "wallet": "3rJe7FAeMDxUYkLMYVcBj1ZPX4o8Ukt4h3mWgyS9a6Jy",
+      "type": "stake",
+      "amount": 510.223209,
+      "pool": 385123308,
+      "mint": null
+    },
+    {
+      "signature": "62yFJV6qiz4r6KBUAVG3xJ7B5A12w9uZ6uLz77JU8NGC5jKeDiWjA6To1WuBLPydJLKuSszGe9VCmd8ZRx1QTwmx",
+      "timestamp": "2025-12-07T03:21:29Z",
+      "date": "2025-12-07",
+      "wallet": "HUST7np5e5dAvfXgrhVxCGXMGym9KuC7MLJAraj9795f",
+      "type": "unstake",
+      "amount": 400000.0,
+      "pool": 385003223,
+      "mint": null
+    },
+    {
+      "signature": "5Tub5rQiRzLtdbKWx8awnxnHtJ9boZLTGXx91mDQE3V9KuMHziKtSvirQNSsCMUVQwNPzPZP2wSmJdkfArf416jX",
+      "timestamp": "2025-12-07T01:44:01Z",
+      "date": "2025-12-07",
+      "wallet": "JBDKyJUDEkJauC56DryT11qsiTJKncWq1NeigLEbPDp3",
+      "type": "unstake",
+      "amount": 59375.0,
+      "pool": 384988256,
+      "mint": null
+    },
     {
       "signature": "6u2KXhjZQMdDfMoJPbZwmeXhaZwr98JyeAbeamRhYEigdrW1i3Zf2Xzk1WWChfHoLegrDniXeZRdwSm8kRahgEG",
       "timestamp": "2025-12-06T20:53:44Z",
