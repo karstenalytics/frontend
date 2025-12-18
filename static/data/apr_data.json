@@ -1,7 +1,7 @@
 {
   "date_range": {
     "start": "2025-07-24",
-    "end": "2025-12-16"
+    "end": "2025-12-17"
   },
   "daily_apr": [
     {
@@ -2179,14 +2179,30 @@
       "daily_revenue_sol": 14.6,
       "daily_revenue_usdc": 1860.03,
       "usd_sol_rate": 127.44
+    },
+    {
+      "date": "2025-12-17",
+      "reference_apr_percent": 2.37,
+      "your_apr_percent": 2.02,
+      "rolling_days": 30,
+      "rolling_revenue_sol": 665.26,
+      "rolling_revenue_usdc": 83041.77,
+      "annualized_revenue_sol": 8094.05,
+      "annualized_revenue_usdc": 1010341.49,
+      "tuna_price_usd": 0.04257701566341358,
+      "tuna_price_source": "assets",
+      "revenue_per_tuna_usdc": 0.0010103414899954924,
+      "daily_revenue_sol": 22.81,
+      "daily_revenue_usdc": 2847.74,
+      "usd_sol_rate": 124.83
     }
   ],
   "summary": {
-    "thirty_day_average_reference_apr": 3.41,
-    "thirty_day_average_your_apr": 3.18,
-    "historical_average_reference_apr": 4.02,
-    "historical_average_your_apr": 5.99,
-    "current_reference_apr": 2.69,
-    "current_your_apr": 2.26
+    "thirty_day_average_reference_apr": 3.4,
+    "thirty_day_average_your_apr": 3.15,
+    "historical_average_reference_apr": 4.01,
+    "historical_average_your_apr": 5.96,
+    "current_reference_apr": 2.37,
+    "current_your_apr": 2.02
   }
 }
