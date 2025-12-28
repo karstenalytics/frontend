@@ -1,8 +1,8 @@
 {
-  "generated_at": "2025-12-26T00:00:00+00:00",
+  "generated_at": "2025-12-27T00:00:00+00:00",
   "date_range": {
     "start": "2025-07-24",
-    "end": "2025-12-26"
+    "end": "2025-12-27"
   },
   "supply": {
     "max": 1000000000.0
@@ -1247,6 +1247,14 @@
       "total": 859965701.291863,
       "staked_delta": -1954928.687768,
       "total_delta": -181628.571153
+    },
+    {
+      "date": "2025-12-27",
+      "staked": 856673439.789048,
+      "unstaked": 1611124.907157,
+      "total": 858284564.696205,
+      "staked_delta": 149898.100406,
+      "total_delta": -1681136.595658
     }
   ],
   "active_stakers": {
@@ -1870,6 +1878,10 @@
       {
         "date": "2025-12-26",
         "count": 3797
+      },
+      {
+        "date": "2025-12-27",
+        "count": 3793
       }
     ],
     "description": "Wallets with staked balance > 0 (actively earning rewards)"
@@ -2495,6 +2507,10 @@
       {
         "date": "2025-12-26",
         "count": 3804
+      },
+      {
+        "date": "2025-12-27",
+        "count": 3799
       }
     ],
     "description": "Wallets with staked > 0 OR pending >= 21,000 TUNA (matches API definition)"
@@ -2502,31 +2518,23 @@
   "top_stakers_7d": [
     {
       "address": "5m4ZwvrDJvCgRcQXHfUBukNoh54HCmFAq7cQX6JEG5K6",
-      "amount": 258210.718436
+      "amount": 376476.193305
     },
     {
       "address": "9B9LDgCz9k8T3zu8EroNRw6XgN2YYxGNGhArY5t3gTC9",
       "amount": 169907.141506
     },
     {
+      "address": "DHGaqE14JmUtGG7hgbupFeC5cVPTkjzztXH3GicNZcyB",
+      "amount": 78047.739813
+    },
+    {
       "address": "2QPLmtdq8eH9PjgkCeRNmoFjKauqkY3pkmv8ejF3S1Ev",
       "amount": 52534.542768
     },
     {
-      "address": "DHGaqE14JmUtGG7hgbupFeC5cVPTkjzztXH3GicNZcyB",
-      "amount": 46674.067276
-    },
-    {
-      "address": "WYAPgz5ynWxL2zPhxVFcXQRBBo8zjZjfoHyNyPdfpRn",
-      "amount": 33851.645776
-    },
-    {
       "address": "DBSpt1UHipFmTSsCwTT2zvHXxGEWU1seMejPHFa5qtt8",
       "amount": 21761.244949
-    },
-    {
-      "address": "AeHJyaCFiabwH2RGxKoKFfBbZQEa53o7KvRe6eU8gEi3",
-      "amount": 15915.0
     },
     {
       "address": "2sAmWtV6U3SaGAjsQzQz2NCRpoNbQQFDY6xrK2Za8uZh",
@@ -2539,6 +2547,14 @@
     {
       "address": "2KhW3EY94w3uYByk26gadZJSUEWnLgz9PG6k1ECwmNWf",
       "amount": 5847.474111
+    },
+    {
+      "address": "EpN7QQt2hDLYv8aS7yBF43H7reHh4cRSJGarxhwiTEVc",
+      "amount": 5563.650113
+    },
+    {
+      "address": "EcASxyyzPqui8PrHKNgzvNcCGPBfC33UY1BeNzfeanSm",
+      "amount": 5101.068868
     }
   ],
   "top_withdrawers_7d": [
@@ -2552,7 +2568,7 @@
     },
     {
       "address": "5m4ZwvrDJvCgRcQXHfUBukNoh54HCmFAq7cQX6JEG5K6",
-      "amount": 258211.0
+      "amount": 398159.0
     },
     {
       "address": "xSe5G3a6wS2pnV9k4LYMymbxEHxvUEaNhuomtaonhQC",
@@ -2563,10 +2579,6 @@
       "amount": 200000.0
     },
     {
-      "address": "9L9GBaQLaPqFxdSQsT4MWuZpCQdxuUCsV1eD8Z7wUP1i",
-      "amount": 120669.974344
-    },
-    {
       "address": "2TY7YXcSSPbovEk4oJtngUBSavS3CSZdpX87j4Nx5h7J",
       "amount": 11531.493408
     },
@@ -2575,12 +2587,16 @@
       "amount": 5101.068868
     },
     {
-      "address": "E59rZqnjHgxQr7nhEtn5NCi7EjAGdLsQK79znQfoyyNa",
-      "amount": 4576.237225
-    },
-    {
       "address": "P33bVrBRLoKido2QQnYp1iPD3nYwH4FT13CpjtJnJjj",
       "amount": 2919.754433
+    },
+    {
+      "address": "Gysms4ULGhai8M7YbBUNfC31sma7kPrr7cy72pKgyw87",
+      "amount": 2482.30728
+    },
+    {
+      "address": "APTfK6S8gzoBiuwXFT63Sit7tXzZn9oxL5zbBYv4nLr",
+      "amount": 2138.219071
     }
   ],
   "user_positions_latest": {
@@ -2603,7 +2619,7 @@
     "9BysaStg7jQcUiRaAs3eyEoN3tPd3F78ioYx5mzxSxEg": 10276970.192784,
     "5vkszx8JdzVzrAybisCpZbVjPQDB6bfAeKTNxDS3FAfQ": 124101.5883,
     "7M8XUMom2W8252JifGYtaGdyzrF1Zx4riuyawushxKcE": 104717.5554,
-    "5m4ZwvrDJvCgRcQXHfUBukNoh54HCmFAq7cQX6JEG5K6": 119984.868841,
+    "5m4ZwvrDJvCgRcQXHfUBukNoh54HCmFAq7cQX6JEG5K6": 238250.34371,
     "G8NjpkSKLWPHYwmADYuuD9BJbYabxXmqDTXKbTsw4R1x": 53335.151712,
     "HGDG5v4wYQxVk72YZRM6hRQfE2EnR4Lu3k9MRGwHa8jj": 250242.681655,
     "BJgQXoeYrJfSzhmrArTbxww6KiFsb5rrvsJ2UTDCTPtF": 53999.517415,
@@ -2824,7 +2840,7 @@
     "8jJMxb94DuLMvWwTdHutgTKo268q3tVhTeKLFRCSPzEX": 1500.0,
     "GMkm65aWNjsqv38Fa2TpRzCvCdvb6GscUJkvex3vVAL6": 135788.189829,
     "EBxCZcHiTTuVDHnY1rGDZb38dAJCZdro3jTpuKMmSE5A": 3438.189882,
-    "4t6cFgFThjH2HrgAxnVtvTVkDmDoPAHGy9RfSoprsJRa": 314895.703475,
+    "4t6cFgFThjH2HrgAxnVtvTVkDmDoPAHGy9RfSoprsJRa": 314908.044783,
     "21wKH7NX9jawUofSSch8QhoAgiW1pci4mEYEkrHomi52": 4236.818242,
     "EdGb4SbueA7mykDKU71yuVwKHpck2az3bDomeosNXnkB": 174572.975886,
     "4q1w2fqnAFkPP6BG4WW2rVBDabbCshZe2XBu5h2w68jR": 3402.488515,
@@ -2886,7 +2902,7 @@
     "12hMr89nadte1fR3o9w1z3omyV5P2aNRkrFYbHhqLwcs": 2338.616614,
     "8V5SwPGPQFVA73TCMVnXvDD7r2fDvdP6AF3y4njrxPzh": 17922.920562,
     "9jhW2JS6Mtj8KBtJveKrTcnwhDo4qjkxGUAK2rvXx279": 2328.824906,
-    "GAQSbiojikrkSi82Np2pQn95H16arAdcBR7EK68iroQB": 23859.228706,
+    "GAQSbiojikrkSi82Np2pQn95H16arAdcBR7EK68iroQB": 23901.569902,
     "39V48JfGPUFMkW2Pu5SQrBFmhgR7piB34iai5f3znnPf": 2313.441753,
     "FnJuLzfmWbPHhTWWsZiTvCt19p6bC8KWnUW9ttcF7FP9": 2254.558859,
     "DnFUumxmBFN9BJnHmXNJu6itDk9NJgBFc7FmgHMbRAbe": 3231.663966,
@@ -2927,7 +2943,7 @@
     "3adVNc8x9aejVQCFQoTiMLt9U7Ay21XGbhc1sR4Zc6hy": 1867.937381,
     "12eLaF28cTFbSnsZ4LeEQBq6x94YBu9mN9QDMWWXG2Ww": 4255.170895,
     "B9MXuRC2tMWrqmFcaFodFLRk4pm6dt8B1b8qtqpngkAb": 1852.758392,
-    "9WzhD62y39sKCL4wPXdaWtfUFNsr39fmXhbkFu42vToa": 40224.270372,
+    "9WzhD62y39sKCL4wPXdaWtfUFNsr39fmXhbkFu42vToa": 40230.776922,
     "ARe4RzAfDGMVTk5qh2rLDrG223a79Bw9xQdDPVPU2VuR": 5262.875709,
     "DZ8zVCWgBhdJfM8u84xz858uWBcA6PJqgcCD822uimgU": 1825.975163,
     "8dvagQjCMNG4VDydt6y4g4aVKtb3zhmqevhSpH2MNue7": 31442.970315,
@@ -2997,7 +3013,7 @@
     "6puN6shRGUxGChbFqzRH94Z68RZgmijKhE783dgyV5xe": 1421.481782,
     "HSWdDQZwqMywRMnyG31TWmbtW1vtoAz6sDFUyfeFMHcn": 18630.874205,
     "H62LPw5STHzEgpXTmDWghSaCtMVsUp1oEjdenQL26peG": 6914.945527,
-    "EM55cNYNfzarY6gZmWLmFZ9axYyLLZHjrGRVGwE5sVSY": 35748.564711,
+    "EM55cNYNfzarY6gZmWLmFZ9axYyLLZHjrGRVGwE5sVSY": 35758.85715,
     "S1wCjGmYxZVx4Gfm2qkq14QNr9Qg7HiS5rKQFBnD11Y": 1221.385416,
     "C5XQoTukgNVJ1i1UaDeHtKqN5AFrRmnMocuPMMVPGnP3": 1211.630772,
     "6o2ASdEoRGDZaaHRupBmocL7wKWNpyMXkFKePGsSs79p": 16523.048233,
@@ -3141,7 +3157,7 @@
     "FgiFaUombQXhCr6qVS7oHQ83J2JBDix3U3TL8kpNWFZu": 676.935419,
     "DMqAvi5D6nnHeGjeVmmuj95RfLvCTLbGw9g96576Ab4p": 654.887524,
     "GuZyAcwncg29hE72WodQWTeBN4qUhVw8WTW7oxZqNicw": 659.063898,
-    "CryUnHj2cLkpBLQcSHBqEsDA4KEyhcem8cQddvGr77ju": 85261.590561,
+    "CryUnHj2cLkpBLQcSHBqEsDA4KEyhcem8cQddvGr77ju": 85273.573974,
     "5RkUTqdnq3to7X2ruX4pzQ5CyMPhhzm6F2kFh3ynhHDP": 1094.351824,
     "83JThUwTRSa8DJfzkACFRXkKypVfTdR85hvWp5SmJNMY": 668.485945,
     "7Zzd1mqEgsCxmNBbVVjaBUMpfTpcGj5vBs5xDB5Dh2rD": 2198.34418,
@@ -3255,8 +3271,8 @@
     "5k4ks7rN6baXVhwwdr1K3dfNs5DtTmCGTmFFY8djg2F1": 3082.324722,
     "9Gxh5X3gUDtB76zM7HfNrTdHJwDWh3PAQ6UvgFqs4hVc": 936.911448,
     "dmjKeznLMCc8oN72gNJVghtvCDD9H7Mxe6WY1xhrCam": 422.140417,
-    "8TUdrASySxmFsuPFrTUq6yuuXo8gqZwkSff6mKf4bK3D": 24043.052578,
-    "BfTissTzxhXXWtAAxkS5KLJ3sJPnXzgdpKdDNigV8CvB": 320853.34793,
+    "8TUdrASySxmFsuPFrTUq6yuuXo8gqZwkSff6mKf4bK3D": 24045.270831,
+    "BfTissTzxhXXWtAAxkS5KLJ3sJPnXzgdpKdDNigV8CvB": 320917.660746,
     "3g31G8V7Wccjc9xhtjCX1Xar9HZEWwaa9hT7q9BcLna6": 3208.532006,
     "Bu7nc3dfogFuvhHBimfnThSndgDPp3S8fzCKiUe7S1RA": 115.690054,
     "9wt8hk6ZNwL8bLgij8QAkg7qG2rUD56pk1LjUCM3ZYMh": 422.745318,
@@ -3274,7 +3290,7 @@
     "Bm2iukWMEo9FvzZMBXJRW65kMmspYMcNKGCF1s9jJvoF": 397.694029,
     "CKpNMrMmbDgiqN9rvE4ZqBSKmDbCHAcBvUvNvx3uUwjj": 380.004235,
     "2CW9wh9X3HvXVQTqyCmcPGUWVtgqqP3W6cPpWNfSvpap": 378.459368,
-    "38fSXxmZFBWHEQog5GD1YuSGqX5xqFW9JE152bXTnqzJ": 305.732534,
+    "38fSXxmZFBWHEQog5GD1YuSGqX5xqFW9JE152bXTnqzJ": 305.963844,
     "XGm3pWSG9jDgitTwxkb4EczRiBQSwmigjJR7t9ux8hs": 379.629624,
     "28Y5Hci3CT8y8aTj4EJB9ubdezaHCEUPpruVBFQsPcYY": 371.324878,
     "7ZpnTWCN97qbw8WS9yiAcpfprJ8dequy5yAbNbyEbdSH": 982.114606,
@@ -3490,7 +3506,6 @@
     "2kdRnjKNFS18iET335vnu19UpZC4s7c2ddvCiHJPsGeD": 185.934272,
     "AHhpYPBqweEAP2FVkrU3aHYqNAWxHhRReu35PZ6CdHU": 183.069713,
     "Ace7spCftt1UNvqhbKNqdReGH4SW5uy58wNV9L5UP5j4": 2207.268029,
-    "8VNZQsNtAZPxPfSBQEr34MnVVYMtzo55Wwi2g4Qja49v": 185.346323,
     "BbGq4Je1pj492gdLLsL8QzrEwTPRnQDMcDUmEJXE7Am2": 512.725746,
     "6jmy2BGBxBfNfCYd9EWLche3kc9gYsnaKqCH7LApDQHt": 1300.476227,
     "AVSb3XidboiAs3pqwDjbvzQyyKzwqy5FhviPVUuB9koT": 440.326925,
@@ -4035,7 +4050,7 @@
     "4EPW8Do8v4ACugHN7GjkCxF5Jv5zqXQxHmtHf15ZbKxS": 36.122845,
     "2Mvdc7xcpkPK1fKUWf3RLXbPB4EiNCp7fBuzzAcCQnuK": 36.233674,
     "4LNr5AtjSeQQSmtJuoaFuuYuKwYf6gWHCzNDf6LcZoiw": 32554.543795,
-    "BNe5eYtG6Y4RnE677eJ6EPVT39HJZqbuKgSQEGPMR5md": 2646.821551,
+    "BNe5eYtG6Y4RnE677eJ6EPVT39HJZqbuKgSQEGPMR5md": 2648.608033,
     "2UsimLmAxDkkcNKSqP6oYdJqfJmUvdQy2kkvKNE8xAp4": 36.283383,
     "FCuteqSTcadpHF1s32sfvquE5Ct7KTqvAna3USaBWigG": 36.33673,
     "DNmNbhjfox7F9ztv2ksRbaUo4XUxatTcWceVrx95ViuS": 36.581615,
@@ -5879,7 +5894,7 @@
     "kMJnKn23UrcJUMd4qt1ubhuUGkiziAQWsMDf7K2E1wC": 373048.611052,
     "HFxqv5qsYBucZmn7RcbxY2MFJXDdaBG2sLpvCPpfXwaL": 1131.199782,
     "3HxqsUguP6E7CNqjvpEAnJ8v86qbyJgWvN2idAKygLdD": 403.999922,
-    "BvUa89m5zkqmH7fbNqydSvAHCgSFTEjUjrBo1eD62tTH": 2877.855497,
+    "BvUa89m5zkqmH7fbNqydSvAHCgSFTEjUjrBo1eD62tTH": 2880.519257,
     "1vbFrg5vGyZHyw56J95KVuNJnL2ayeQeyziJt1gzAan": 1817.99965,
     "4cQaySyCg8PAbVcYxv2iwh3668E4isYemcBd8nFDobCW": 9e-06,
     "DinRG9HNwgwVwtpaa2Ep3yGr69qqQHZGxkqB4hut7Kgg": 656.0,
@@ -5892,7 +5907,7 @@
     "vYm2NAwQFVrwSF63Xcy3QNViZg3t7pWH953BvfQ3bkK": 72.0,
     "An5V452fF1K6LmFSi7K6qEfviffLd8M8huW2EpZXoVcC": 5000.0,
     "AniCBfQ8XLCBPNAKQSnSvSgPUoWDQFkPbH4zrqY3gnS": 14705.733192,
-    "72FvLXiHyo7QKLJVEzkMphbaAEg78RBJAYJiZ9YBi4M3": 11619.788293,
+    "72FvLXiHyo7QKLJVEzkMphbaAEg78RBJAYJiZ9YBi4M3": 12245.223772,
     "5qNqzf1JyJqytNQAmYzRQj1CHHpD22xCdvtCWFkaJTVy": 23.483742,
     "B4xoQSbDurQCxQE9acMMhdzsypGPhTQb5JT62sXKBi3w": 100.0,
     "5SVzVDuQKFWVrrfNK7HMgkNEhbBFiffpeurwasg6eLd8": 1722.713679,
@@ -5993,7 +6008,7 @@
     "BsD1Akh9shCudp2TCYRnrmK2bwdAGbpHDeNGZoqTFko2": 500.558841,
     "HBiEeDwW2ejy5HcXiLVAw1zfVNzK3KdtBKHkdTW7sumR": 7758.731048,
     "6YurbRgkHJ9PzsfoTuqphvWcLMLEG5LA65Mh28G3k8Kh": 10000.0,
-    "H8o8qAcieqJZ4iyCBNNi2LvVzD3aLWW64tg6ohUopADh": 22075.415257,
+    "H8o8qAcieqJZ4iyCBNNi2LvVzD3aLWW64tg6ohUopADh": 22607.885464,
     "AUcoZdUBoj3RqkDssQMtQTTccvUd2aTSF3MyGcrSvtV6": 3300.796119,
     "2FzWkrnMVPEtbpmdqP8qVfnCfDSajS38kc129fMWERf2": 0.351687,
     "4iYURg33zkmrSKpmmH8ciWcBdA3EyFv4DT5RkhK7n16x": 1548.689027,
@@ -6184,7 +6199,7 @@
     "5jHcwjL6mmvgWEvTkPk3Ps6Fu7M6moiocASQuBLmbX4f": 72.786342,
     "Gb4D3Vong7iUH9HR7hyYRfTf7rFeVu9TW8J94RyAQ2pe": 10748.168914,
     "DZSmgX9gBVxqtE1ZFU1PA8oJa4HwrPdfLqdLQRnz75FP": 36321.310849,
-    "HhiX3SfvxwqoaoWA3LRq9MjowuSHtXYS1t1WyJ1SkKE3": 3375.145525,
+    "HhiX3SfvxwqoaoWA3LRq9MjowuSHtXYS1t1WyJ1SkKE3": 3375.551947,
     "DiUmXbsWhiARzyHxh8jntH2TttZuE9jNuVSgCCopAcjD": 3691.455209,
     "8yBqqbm7nuaFo9cHwWjKYhjjSDC5JSmgGWRL2hJWeEMu": 0.127126,
     "7CHthdgATBBHmeyeAPKaxFVvmZgx71XieVMSAeQEH3Gd": 710610.335692,
@@ -6285,7 +6300,7 @@
     "7dnNZvuLctgaCCfRjvk4wYs5wsXjxcuPTSywHAEd59wF": 37.71347,
     "ECb2yCVLWjo7y9RcJJmorY8A5NesdD2fAeeYdDTWp91r": 3676.471178,
     "Fj1674tEozsM7vueAfaGyrW7D1d9WTCg36P4KcWR8J7i": 855.0,
-    "DHGaqE14JmUtGG7hgbupFeC5cVPTkjzztXH3GicNZcyB": 374180.648613,
+    "DHGaqE14JmUtGG7hgbupFeC5cVPTkjzztXH3GicNZcyB": 405676.093176,
     "JDdHX7JCsnnGdQ3X2u7QbedkcYXdDgi3zP9KKc8ehnAW": 409865.17,
     "8sB4Q1YCHZGXZLjnboG6jTDgrVMKtWEL34D6NSDJYg8C": 1000.0,
     "6UXmNnuPZSnVvS19EruVvX2c5GT4FvK3sPohExmMfJzJ": 200000.0,
@@ -6293,7 +6308,7 @@
     "HpQxhFsxqCy41bUoPTW8cBE4SxkxnJfuWqVob41Xjxct": 141466.378041,
     "HNi41cLUiWW18tzjsehq6NtuDkzXFz9bMu5NkJye3y8b": 154.192599,
     "FN1MFG1UVY6XvZqYvPhANfoKyWSfk3w9QE1HGvjQQZnp": 3893.125644,
-    "GDLidautFVaL8HedTsQacMfPLfWxLCJCyTcfPZ8xtGa5": 2020.204323,
+    "GDLidautFVaL8HedTsQacMfPLfWxLCJCyTcfPZ8xtGa5": 2031.10511,
     "9Z8EZnVHJLxj8EqpsrSQcWuZd35pyrsuUWKcfHdkm3bv": 84124.960232,
     "CdM6QjRQnmH1fKS6AZirqGTBSKkJQD5SRuPF9pjS4YFh": 1142.587676,
     "4e5s3Mu7zs9KS8gLusnkEUN61oJJThxb2Ma9qdWDtNUA": 953031.903012,
@@ -6307,7 +6322,6 @@
     "CKkVdpaLVkhJNR2DtPW2iCWDRdgpY1G19Wnrg1k9cAAA": 26026.421254,
     "91JjpSxqYa1pf5w2qxF3qvT1323VmeHS8jHBdXVZY77u": 41278.91334,
     "JAY5n8HauxnmSgoEnqjsBPyM1RULmaBYzVBWDMyDqQaX": 21156.384048,
-    "5evPDdeStGRrExj4g3FQRSCyKNj9UAq7bY9PQt8PxuMm": 341.255103,
     "GWD47LRDmsDw5oC1QnGLLDDC7Yuk4EuBU2tdZjaEfUJK": 4672.919068,
     "6EjHZAt1P6jo2Xp9oJ3aMm8CUxW3m1RrewqxBDeS9Mnd": 12576.504318,
     "FEubUsvM51cpdxkGL9tsSFL66L5JeX3UN7sNdv1tfCRo": 12399.166531,
@@ -6321,12 +6335,10 @@
     "4N8xR11crs2JN2zAVUdGh995h1xqQJyJudHTZe9oPMBY": 2166.87456,
     "GeASmqhUygFXRnSZNyfu7wkBe49f9JHCWGkuAbsBDxyb": 47019.87509,
     "DeMGCPTdE2f6L1ssqk8azUcwdi9qj9ergFN8iRpZ1B2B": 4758.894675,
-    "D77JdnFDt1HsFQ9wro1VUwFsfkvGnQYEBc6yGWg8GjrJ": 642.652769,
     "9TYow4Eqo9UQejEu9Bktz32tA2so1JAMcKKVYusxKVk5": 3624.449177,
     "A5ksKwYkQFdQQbkgx3LTNpDKDVsbj9K4gtTJHD3PsSda": 1240.592804,
     "HUfAvL2i3JxNZsVZMCDLT2gp6gPJdT1fjxMGymUAFvvz": 11346.86988,
     "47ofG3gMc5Wx27eZRvSwLTNcH2j6E2idZwU5RUbEd5Kz": 222.491893,
-    "6qd4Sk9V22HwjexvG3vVi5rUh6qyNyQ2QpvRhB4KzAKf": 17.455253,
     "6AhemeaQZkbYxLTkJxWd65Bo32uot1aQD1z6c2WL9GMc": 15170.666187,
     "AUgAF37aXjLbAA1RVkQt18TBPv7vfmyBRDhi2JE2gJv": 525.997053,
     "BMseEsAqBVjfzgNUHpzkNQmPiruFzMd5C57DZAoqmeLT": 3000.01974,
