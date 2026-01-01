@@ -1380,7 +1380,7 @@
   },
   "date_range": {
     "start": "2025-07-24",
-    "end": "2025-12-30"
+    "end": "2025-12-31"
   },
   "staked_by_vesting_wallets_timeline": {
     "2025-07-25": 750843648.7620871,
@@ -1541,9 +1541,20 @@
     "2025-12-27": 750924439.4790713,
     "2025-12-28": 750924439.4790713,
     "2025-12-29": 750924439.4790713,
-    "2025-12-30": 750853189.4790713
+    "2025-12-30": 750853189.4790713,
+    "2025-12-31": 750793814.4790713
   },
   "vesting_wallet_staking_operations": [
+    {
+      "signature": "4jBeyWbxtzBVMcnFnMmhRkES4wPnz6tJYhHrej71VHJqUKJohmgBurRAeCjtaBWndbkRETz2Mv891RyMhJ5ZfXYW",
+      "timestamp": "2025-12-31T19:10:35Z",
+      "date": "2025-12-31",
+      "wallet": "CpbBBcUv9ic5RbADfGLvGTqCnMCY7wmw2WijJcky6Qxf",
+      "type": "unstake",
+      "amount": 59375.0,
+      "pool": 390446309,
+      "mint": null
+    },
     {
       "signature": "3gxGNFQmrzn949uiUnfctHbLrCbbqsFogrbBTsJvPgLF1NxGDcq19Nq68ExesM8UhsMZctZw4XetY2MiaNG2kqwY",
       "timestamp": "2025-12-30T22:33:49Z",
