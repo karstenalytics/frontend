@@ -1380,7 +1380,7 @@
   },
   "date_range": {
     "start": "2025-07-24",
-    "end": "2026-01-04"
+    "end": "2026-01-05"
   },
   "staked_by_vesting_wallets_timeline": {
     "2025-07-25": 750843648.7620871,
@@ -1546,9 +1546,20 @@
     "2026-01-01": 750798437.2239423,
     "2026-01-02": 750781798.5496793,
     "2026-01-03": 750758048.5496793,
-    "2026-01-04": 750758048.5496793
+    "2026-01-04": 750758048.5496793,
+    "2026-01-05": 750698673.5496793
   },
   "vesting_wallet_staking_operations": [
+    {
+      "signature": "4atVhHYJXkeW8P65cMGjNABf8P6SmV627LLP6Ls95G4wtbX1YcvuzqqWJ94L4XxUbg1hZyd3FtkFbVynYAugDAvm",
+      "timestamp": "2026-01-05T15:19:19Z",
+      "date": "2026-01-05",
+      "wallet": "JBDKyJUDEkJauC56DryT11qsiTJKncWq1NeigLEbPDp3",
+      "type": "unstake",
+      "amount": 59375.0,
+      "pool": 391504944,
+      "mint": null
+    },
     {
       "signature": "5UELVMxfYJWfwRpgFqJUjPEyj5kLMF8DNgxfyHMJaABFcTrn59ZS4ypsusLtXdL35siHAu9dB82ZTWGipfRCXUpp",
       "timestamp": "2026-01-03T12:12:24Z",
