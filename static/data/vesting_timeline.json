@@ -1380,7 +1380,7 @@
   },
   "date_range": {
     "start": "2025-07-24",
-    "end": "2026-01-07"
+    "end": "2026-01-08"
   },
   "staked_by_vesting_wallets_timeline": {
     "2025-07-25": 750843648.7620871,
@@ -1549,9 +1549,40 @@
     "2026-01-04": 750758048.5496793,
     "2026-01-05": 750698673.5496793,
     "2026-01-06": 750698673.5496793,
-    "2026-01-07": 750649704.7470483
+    "2026-01-07": 750649704.7470483,
+    "2026-01-08": 750573789.2980093
   },
   "vesting_wallet_staking_operations": [
+    {
+      "signature": "wyXqAXHTJrmiZGmAp9XqjsFquFxGh1wQRWUJXLjTp139uWKvWCkiUGPzfJWpCXR1uM6S6RNadqpiEADN8dapi1S",
+      "timestamp": "2026-01-08T18:27:41Z",
+      "date": "2026-01-08",
+      "wallet": "3rJe7FAeMDxUYkLMYVcBj1ZPX4o8Ukt4h3mWgyS9a6Jy",
+      "type": "stake",
+      "amount": 16272.050961,
+      "pool": 392184912,
+      "mint": null
+    },
+    {
+      "signature": "2ED4g28f1qdZ39QoFx8eQTBxhrGFEQydVaruzv6TGZf7GqPp8EmpzxqLwaiCDoK8pCwE8GJQtge7DbYP2ZpDtvJV",
+      "timestamp": "2026-01-08T18:16:12Z",
+      "date": "2026-01-08",
+      "wallet": "5A2gBoqU5GkBfFN7qQvp1RR2TTKXnFT2wt9w8e9RnXx5",
+      "type": "unstake",
+      "amount": 29687.5,
+      "pool": 392183188,
+      "mint": null
+    },
+    {
+      "signature": "sZFVAfj6CPLVUVZHyggqxE352sE843MwPoZGpbXzgxnRVyMtt9Q1MWVdGoQfwFn3x6EbctN87p24aeTjDmQJ9wH",
+      "timestamp": "2026-01-08T02:24:57Z",
+      "date": "2026-01-08",
+      "wallet": "FA8Kft2G8xGY8AhQEdPSSxpRnEoPpg4tm17nmS1hYJQf",
+      "type": "unstake",
+      "amount": 62500.0,
+      "pool": 392039730,
+      "mint": null
+    },
     {
       "signature": "2DTN1DcahTNsYDExYVXrUjhPc4dG6BNjj3cPnRrwfLcnp8yPxiA1W4VChh7L5GtrryNZftSnF3uJAMTUFCSNET8S",
       "timestamp": "2026-01-07T00:42:28Z",
