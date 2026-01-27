@@ -1,15 +1,15 @@
 {
   "date_range": {
     "start": "2025-07-24",
-    "end": "2026-01-25",
-    "days": 186
+    "end": "2026-01-26",
+    "days": 187
   },
   "totals": {
-    "wsol_direct": 3927.765906781001,
-    "total_token_records": 2390,
-    "total_pool_records": 4215,
-    "total_pool_type_records": 10892,
-    "total_type_records": 1942,
+    "wsol_direct": 3930.881203962001,
+    "total_token_records": 2401,
+    "total_pool_records": 4234,
+    "total_pool_type_records": 10952,
+    "total_type_records": 1956,
     "unique_mints": 36,
     "unique_pools": 47,
     "unique_types": 23,
@@ -19,32 +19,32 @@
     {
       "name": "SOL (direct)",
       "mint": "WSOL_DIRECT",
-      "total_sol": 3927.765906781001
+      "total_sol": 3930.881203962001
     },
     {
       "name": "USDC",
       "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-      "total_sol": 1889.5224188900008
+      "total_sol": 1895.7050587220008
     },
     {
       "name": "Fartcoin ",
       "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
-      "total_sol": 275.56418509700006
+      "total_sol": 275.57687158600004
     },
     {
       "name": "WhiteWhale",
       "mint": "a3W4qutoEJA4232T2gwZUfgYJTetr96pU4SJMwppump",
-      "total_sol": 206.417445961
+      "total_sol": 209.627775155
     },
     {
       "name": "ORE",
       "mint": "oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp",
-      "total_sol": 139.24413851299997
+      "total_sol": 139.24441471199998
     },
     {
       "name": "TUNA",
       "mint": "TUNAfXDZEdQizTMTh3uEvNvYqJmqFHZbEJt8joP4cyx",
-      "total_sol": 136.34058678800008
+      "total_sol": 136.3693852520001
     },
     {
       "name": "USELESS",
@@ -59,39 +59,39 @@
     {
       "name": "JLP",
       "mint": "27G8MtK7VtTcCHkpASjSDdkWWYfoqT6ggEuKidVJidD4",
-      "total_sol": 77.25280745599997
+      "total_sol": 77.26175950399997
     },
     {
       "name": "Others",
       "mint": "OTHERS",
-      "total_sol": 260.790454978
+      "total_sol": 261.23161725
     }
   ],
   "top_pools_by_value": [
     {
       "pool_id": "7VuKeevbvbQQcxz6N4SNLmuq6PYy4AcGQRDssoqo4t65",
       "pool_label": "Fusion SOL-USDC",
-      "total_sol": 2760.224543415854
+      "total_sol": 2765.970380514233
     },
     {
       "pool_id": "Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE",
       "pool_label": "Orca (SOL\u2013USDC)",
-      "total_sol": 1759.9276162114902
+      "total_sol": 1760.699183770083
     },
     {
       "pool_id": "unknown_pool",
       "pool_label": "Other / Not Applicable",
-      "total_sol": 525.3700460325031
+      "total_sol": 530.1461228707876
     },
     {
       "pool_id": "CeaZcxBNLpJWtxzt58qQmfMBtJY8pQLvursXTJYGQpbN",
       "pool_label": "Orca (SOL\u2013CBBTC)",
-      "total_sol": 303.7034927951369
+      "total_sol": 303.7105173981369
     },
     {
       "pool_id": "C9U2Ksk6KKWvLEeo5yUQ7Xu46X7NzeBJtd9PBfuXaUSM",
       "pool_label": "Orca (SOL\u2013FARTCOIN )",
-      "total_sol": 299.324054291
+      "total_sol": 299.341989484
     },
     {
       "pool_id": "FwewVm8u6tFPGewAyHmWAqad9hmF7mvqxK4mJ7iNqqGC",
@@ -101,22 +101,22 @@
     {
       "pool_id": "HsQGWEh3ib6w59rBh5n1jXmi8VXFBqKEjxozL6PGfcgb",
       "pool_label": "Orca (SOL\u2013USELESS)",
-      "total_sol": 209.07796244200003
+      "total_sol": 209.07799310000001
     },
     {
       "pool_id": "27ExzqiGapKFd6NhffapRfdSkuykTVUqY5qeuNnrzBNm",
       "pool_label": "Orca SOL-ORE",
-      "total_sol": 200.80058151687984
+      "total_sol": 200.80152732587985
     },
     {
       "pool_id": "AXB9KoFBT4ZxJgc4bHMYDgSkxjox6JuL3bbLBeL8LdSJ",
       "pool_label": "Fusion USDC-TUNA",
-      "total_sol": 147.18011673464528
+      "total_sol": 147.19206337390213
     },
     {
       "pool_id": "OTHERS",
       "pool_label": "Others",
-      "total_sol": 679.5695249273404
+      "total_sol": 681.2383022088272
     }
   ],
   "top_types_by_value": [
@@ -127,7 +127,7 @@
         "tuna_liquidatetunalppositionorca"
       ],
       "label": "Liquidate LP Position (Orca)",
-      "total_sol": 2550.3611521426474
+      "total_sol": 2550.478799904178
     },
     {
       "type": "Collect Protocol Fees (Fusion)",
@@ -135,7 +135,7 @@
         "fusion_collectprotocolfees"
       ],
       "label": "Collect Protocol Fees (Fusion)",
-      "total_sol": 2331.785914683129
+      "total_sol": 2342.511854247693
     },
     {
       "type": "Liquidate LP Position (Fusion)",
@@ -144,7 +144,7 @@
         "tuna_liquidatetunalppositionfusion"
       ],
       "label": "Liquidate LP Position (Fusion)",
-      "total_sol": 968.8247684411917
+      "total_sol": 968.9153898925673
     },
     {
       "type": "Open Position w. Liq. (Orca)",
@@ -152,7 +152,7 @@
         "openpositionwithliquidity"
       ],
       "label": "Open Position w. Liq. (Orca)",
-      "total_sol": 781.9076443634234
+      "total_sol": 782.6339172098262
     },
     {
       "type": "Token Transfer",
@@ -169,7 +169,7 @@
         "tuna_openandincreasetunalppositionfusion"
       ],
       "label": "Open/ Incr. LP Position (Fusion)",
-      "total_sol": 93.36332194579262
+      "total_sol": 94.51572542434627
     },
     {
       "type": "Liquidate Spot Position (Fusion)",
@@ -177,7 +177,7 @@
         "TunaLiquidatetunaspotpositionfusion"
       ],
       "label": "Liquidate Spot Position (Fusion)",
-      "total_sol": 68.6799688114018
+      "total_sol": 68.68701480272541
     },
     {
       "type": "Position SL/TP (Orca)",
@@ -193,13 +193,13 @@
         "liquidity_add_tuna"
       ],
       "label": "Add Liquidity (Tuna)",
-      "total_sol": 60.754280066026155
+      "total_sol": 60.77779112893593
     },
     {
       "type": "Others",
       "types": [],
       "label": "Others",
-      "total_sol": 65.07780780595341
+      "total_sol": 65.2345073312934
     }
   ]
 }
