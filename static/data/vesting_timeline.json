@@ -1380,7 +1380,7 @@
   },
   "date_range": {
     "start": "2025-07-24",
-    "end": "2026-01-28"
+    "end": "2026-01-29"
   },
   "staked_by_vesting_wallets_timeline": {
     "2025-07-25": 750843648.7620871,
@@ -1570,9 +1570,50 @@
     "2026-01-25": 749565885.0214792,
     "2026-01-26": 749570007.3489512,
     "2026-01-27": 749570418.0061282,
-    "2026-01-28": 749570418.0061282
+    "2026-01-28": 749570418.0061282,
+    "2026-01-29": 749512069.9928682
   },
   "vesting_wallet_staking_operations": [
+    {
+      "signature": "313g7XTUBTQ2JDxDRnPemgfZKywvo3Ww4NipHc8c5RyGGjHWwB6mu69156L3PE1m6F4p5qvUi4MDbb39j9L9HRu8",
+      "timestamp": "2026-01-29T13:50:08Z",
+      "date": "2026-01-29",
+      "wallet": "5A2gBoqU5GkBfFN7qQvp1RR2TTKXnFT2wt9w8e9RnXx5",
+      "type": "unstake",
+      "amount": 29687.5,
+      "pool": 396709098,
+      "mint": null
+    },
+    {
+      "signature": "3aHg7izTDqPGMxUC7qA33peKx6L4XUSo3zephKH3KCh5cmFSVEhM3vesZ7M5FbcAo5Xo1m3xNNc1Hq9akZqJmsaG",
+      "timestamp": "2026-01-29T13:20:51Z",
+      "date": "2026-01-29",
+      "wallet": "C4BWvTPm2nCbqhLSuyc7PPWUoVVe1pjrYhdco3MbZLaL",
+      "type": "unstake",
+      "amount": 11875.0,
+      "pool": 396704704,
+      "mint": null
+    },
+    {
+      "signature": "3QJF6y9YP977FzZB7BLrWP7VZCjjXfAKnYyYfBizTSPZdT6nN3eS4W1gC3J85S65wcLGj8LPYgEJimRs4vRVE2BQ",
+      "timestamp": "2026-01-29T10:46:51Z",
+      "date": "2026-01-29",
+      "wallet": "BenGcYAaMnVReHwqRmqHtC2dX7nd88e3UtGHz3i6EN1U",
+      "type": "unstake",
+      "amount": 17812.5,
+      "pool": 396681599,
+      "mint": null
+    },
+    {
+      "signature": "2EJu6EihvHC6cr7coG35MpBtzFz1CpL4eoqSygiANAyT65wqY5NFh2xt8argi4ybfDbWgcUwMzx2XhVrbxyrsyVh",
+      "timestamp": "2026-01-29T09:42:14Z",
+      "date": "2026-01-29",
+      "wallet": "3rJe7FAeMDxUYkLMYVcBj1ZPX4o8Ukt4h3mWgyS9a6Jy",
+      "type": "stake",
+      "amount": 1026.98674,
+      "pool": 396671898,
+      "mint": null
+    },
     {
       "signature": "21wL9WG8fUhqvw3ie9QcHDNRcdHXjTw13g4ysXfVnt9A3QAt6C31hj5Att9xd9ZhD4cfdvfbV9e2Uz22iHHWNXUW",
       "timestamp": "2026-01-27T08:20:07Z",
