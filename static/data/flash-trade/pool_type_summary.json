@@ -1,0 +1,662 @@
+[
+  {
+    "pool_id": "Crypto.1",
+    "pool_label": "Crypto.1",
+    "total_usdc": 2053034.7947190003,
+    "share_of_total": 0.7346228108703945,
+    "types": [
+      {
+        "type": "SwapAndOpen",
+        "usdc_amount": 519342.923317,
+        "share_of_pool": 0.2529635272879448,
+        "share_of_total": 0.18583277746395976
+      },
+      {
+        "type": "CloseAndSwap",
+        "usdc_amount": 376149.5430960002,
+        "share_of_pool": 0.18321635077182602,
+        "share_of_total": 0.134594910601415
+      },
+      {
+        "type": "ExecuteTriggerWithSwap",
+        "usdc_amount": 263766.51340499986,
+        "share_of_pool": 0.1284763970311091,
+        "share_of_total": 0.09438169191749418
+      },
+      {
+        "type": "OpenPosition",
+        "usdc_amount": 223767.645031,
+        "share_of_pool": 0.10899359602019174,
+        "share_of_total": 0.08006918187522549
+      },
+      {
+        "type": "Liquidate",
+        "usdc_amount": 214726.74713400006,
+        "share_of_pool": 0.10458992107018322,
+        "share_of_total": 0.0768341418052907
+      },
+      {
+        "type": "ClosePosition",
+        "usdc_amount": 205395.57685399993,
+        "share_of_pool": 0.10004485914332129,
+        "share_of_total": 0.07349523563699938
+      },
+      {
+        "type": "IncreaseSize",
+        "usdc_amount": 134475.42677799996,
+        "share_of_pool": 0.06550080257962977,
+        "share_of_total": 0.048118383705314405
+      },
+      {
+        "type": "ExecuteTriggerOrder",
+        "usdc_amount": 54247.609770999996,
+        "share_of_pool": 0.02642313218974201,
+        "share_of_total": 0.01941103564122828
+      },
+      {
+        "type": "DecreaseSize",
+        "usdc_amount": 52012.152042999915,
+        "share_of_pool": 0.025334276933245466,
+        "share_of_total": 0.018611137732069783
+      },
+      {
+        "type": "ExecuteLimitWithSwap",
+        "usdc_amount": 8076.766493000002,
+        "share_of_pool": 0.003934062157044675,
+        "share_of_total": 0.0028900517999470065
+      },
+      {
+        "type": "ExecuteLimitOrder",
+        "usdc_amount": 1073.8907969999998,
+        "share_of_pool": 0.0005230748157616996,
+        "share_of_total": 0.0003842626914503735
+      }
+    ]
+  },
+  {
+    "pool_id": "Community.1",
+    "pool_label": "Community.1",
+    "total_usdc": 183638.0563399999,
+    "share_of_total": 0.06570989711342475,
+    "types": [
+      {
+        "type": "CloseAndSwap",
+        "usdc_amount": 60252.95023499996,
+        "share_of_pool": 0.32810710065153154,
+        "share_of_total": 0.02155988382599623
+      },
+      {
+        "type": "Liquidate",
+        "usdc_amount": 48407.81436599997,
+        "share_of_pool": 0.2636044800886722,
+        "share_of_total": 0.017321423265264473
+      },
+      {
+        "type": "SwapAndOpen",
+        "usdc_amount": 47623.00139400003,
+        "share_of_pool": 0.25933078547633714,
+        "share_of_total": 0.017040599231993737
+      },
+      {
+        "type": "ExecuteTriggerWithSwap",
+        "usdc_amount": 9053.897715999998,
+        "share_of_pool": 0.04930294894450963,
+        "share_of_total": 0.0032396917025321608
+      },
+      {
+        "type": "IncreaseSize",
+        "usdc_amount": 5611.4529330000005,
+        "share_of_pool": 0.030557135295586978,
+        "share_of_total": 0.00200790621635402
+      },
+      {
+        "type": "ClosePosition",
+        "usdc_amount": 4237.511799999998,
+        "share_of_pool": 0.02307534660546822,
+        "share_of_total": 0.0015162786513019317
+      },
+      {
+        "type": "DecreaseSize",
+        "usdc_amount": 3709.1766320000006,
+        "share_of_pool": 0.020198300428167136,
+        "share_of_total": 0.0013272282430009054
+      },
+      {
+        "type": "OpenPosition",
+        "usdc_amount": 3295.847703000001,
+        "share_of_pool": 0.017947520076654733,
+        "share_of_total": 0.0011793296976781074
+      },
+      {
+        "type": "ExecuteTriggerOrder",
+        "usdc_amount": 1017.7716759999994,
+        "share_of_pool": 0.005542269920977753,
+        "share_of_total": 0.0003641819862822768
+      },
+      {
+        "type": "ExecuteLimitWithSwap",
+        "usdc_amount": 387.89651499999997,
+        "share_of_pool": 0.0021122882845254153,
+        "share_of_total": 0.0001387982458500575
+      },
+      {
+        "type": "ExecuteLimitOrder",
+        "usdc_amount": 40.73537,
+        "share_of_pool": 0.0002218242275695828,
+        "share_of_total": 1.4576047170862201e-05
+      }
+    ]
+  },
+  {
+    "pool_id": "Governance.1",
+    "pool_label": "Governance.1",
+    "total_usdc": 181420.25495000015,
+    "share_of_total": 0.06491631704587558,
+    "types": [
+      {
+        "type": "CloseAndSwap",
+        "usdc_amount": 54480.415143000006,
+        "share_of_pool": 0.3002995181437427,
+        "share_of_total": 0.019494338728542872
+      },
+      {
+        "type": "SwapAndOpen",
+        "usdc_amount": 41938.443494999956,
+        "share_of_pool": 0.23116737161767462,
+        "share_of_total": 0.015006534386594704
+      },
+      {
+        "type": "Liquidate",
+        "usdc_amount": 35048.208614999974,
+        "share_of_pool": 0.1931879581177931,
+        "share_of_total": 0.01254105073861999
+      },
+      {
+        "type": "ExecuteTriggerWithSwap",
+        "usdc_amount": 13136.78372699999,
+        "share_of_pool": 0.07241078858929241,
+        "share_of_total": 0.004700641709604376
+      },
+      {
+        "type": "DecreaseSize",
+        "usdc_amount": 8880.562802000002,
+        "share_of_pool": 0.048950227770584415,
+        "share_of_total": 0.0031776685054230812
+      },
+      {
+        "type": "IncreaseSize",
+        "usdc_amount": 7584.403908999998,
+        "share_of_pool": 0.04180571739958296,
+        "share_of_total": 0.0027138732050416047
+      },
+      {
+        "type": "ClosePosition",
+        "usdc_amount": 7336.889451000002,
+        "share_of_pool": 0.040441401942809894,
+        "share_of_total": 0.0026253068702991357
+      },
+      {
+        "type": "OpenPosition",
+        "usdc_amount": 7094.465157999998,
+        "share_of_pool": 0.03910514379971106,
+        "share_of_total": 0.0025385619130265987
+      },
+      {
+        "type": "ExecuteTriggerOrder",
+        "usdc_amount": 4633.205047999999,
+        "share_of_pool": 0.02553852131492661,
+        "share_of_total": 0.0016578667465626273
+      },
+      {
+        "type": "ExecuteLimitOrder",
+        "usdc_amount": 662.3448530000003,
+        "share_of_pool": 0.0036508870146971413,
+        "share_of_total": 0.00023700213894474982
+      },
+      {
+        "type": "ExecuteLimitWithSwap",
+        "usdc_amount": 624.5327490000001,
+        "share_of_pool": 0.0034424642891838224,
+        "share_of_total": 0.00022347210321576173
+      }
+    ]
+  },
+  {
+    "pool_id": "Community.2",
+    "pool_label": "Community.2",
+    "total_usdc": 117851.01569200002,
+    "share_of_total": 0.042169789150328416,
+    "types": [
+      {
+        "type": "ClosePosition",
+        "usdc_amount": 24648.457087999996,
+        "share_of_pool": 0.2091492970448212,
+        "share_of_total": 0.008819781757319515
+      },
+      {
+        "type": "Liquidate",
+        "usdc_amount": 16035.448539000006,
+        "share_of_pool": 0.13606542501855184,
+        "share_of_total": 0.0057378502836821525
+      },
+      {
+        "type": "IncreaseSize",
+        "usdc_amount": 15956.196354000007,
+        "share_of_pool": 0.13539294727591514,
+        "share_of_total": 0.005709492039066874
+      },
+      {
+        "type": "ExecuteTriggerOrder",
+        "usdc_amount": 14391.302296999995,
+        "share_of_pool": 0.12211436797974841,
+        "share_of_total": 0.005149537149931606
+      },
+      {
+        "type": "CloseAndSwap",
+        "usdc_amount": 13339.206095000005,
+        "share_of_pool": 0.11318702699908507,
+        "share_of_total": 0.0047730730631039475
+      },
+      {
+        "type": "DecreaseSize",
+        "usdc_amount": 10046.437091999993,
+        "share_of_pool": 0.08524692836127985,
+        "share_of_total": 0.0035948449947083225
+      },
+      {
+        "type": "OpenPosition",
+        "usdc_amount": 9273.461536999997,
+        "share_of_pool": 0.07868800690895955,
+        "share_of_total": 0.0033182566600104095
+      },
+      {
+        "type": "SwapAndOpen",
+        "usdc_amount": 7377.582277000001,
+        "share_of_pool": 0.0626009223058466,
+        "share_of_total": 0.0026398676942536417
+      },
+      {
+        "type": "ExecuteTriggerWithSwap",
+        "usdc_amount": 6248.517808,
+        "share_of_pool": 0.05302048328824172,
+        "share_of_total": 0.0022358626009136647
+      },
+      {
+        "type": "ExecuteLimitWithSwap",
+        "usdc_amount": 322.11705500000005,
+        "share_of_pool": 0.002733256502785203,
+        "share_of_total": 0.00011526085041621604
+      },
+      {
+        "type": "ExecuteLimitOrder",
+        "usdc_amount": 212.28955,
+        "share_of_pool": 0.001801338314765247,
+        "share_of_total": 7.596205692205839e-05
+      }
+    ]
+  },
+  {
+    "pool_id": "Remora.1",
+    "pool_label": "Remora.1",
+    "total_usdc": 80452.99103900002,
+    "share_of_total": 0.028787920483388713,
+    "types": [
+      {
+        "type": "CloseAndSwap",
+        "usdc_amount": 37382.27827299998,
+        "share_of_pool": 0.46464746419283187,
+        "share_of_total": 0.013376234251991448
+      },
+      {
+        "type": "OpenPosition",
+        "usdc_amount": 14592.061414,
+        "share_of_pool": 0.18137375908033576,
+        "share_of_total": 0.005221373354178007
+      },
+      {
+        "type": "ClosePosition",
+        "usdc_amount": 12385.491163999995,
+        "share_of_pool": 0.15394693228988918,
+        "share_of_total": 0.004431812045422956
+      },
+      {
+        "type": "SwapAndOpen",
+        "usdc_amount": 12059.676804000002,
+        "share_of_pool": 0.14989718403575586,
+        "share_of_total": 0.004315228214705224
+      },
+      {
+        "type": "Liquidate",
+        "usdc_amount": 2951.7453389999996,
+        "share_of_pool": 0.036689068993956055,
+        "share_of_total": 0.0010562020008075693
+      },
+      {
+        "type": "IncreaseSize",
+        "usdc_amount": 396.23139,
+        "share_of_pool": 0.004925005085366244,
+        "share_of_total": 0.00014178065477780849
+      },
+      {
+        "type": "DecreaseSize",
+        "usdc_amount": 207.79945900000004,
+        "share_of_pool": 0.0025828680365565047,
+        "share_of_total": 7.435539965547499e-05
+      },
+      {
+        "type": "ExecuteTriggerWithSwap",
+        "usdc_amount": 178.793809,
+        "share_of_pool": 0.0022223388675919925,
+        "share_of_total": 6.39765146073824e-05
+      },
+      {
+        "type": "ExecuteLimitWithSwap",
+        "usdc_amount": 164.75809700000002,
+        "share_of_pool": 0.0020478803195785804,
+        "share_of_total": 5.895421579952484e-05
+      },
+      {
+        "type": "ExecuteTriggerOrder",
+        "usdc_amount": 133.461635,
+        "share_of_pool": 0.0016588772309944792,
+        "share_of_total": 4.7755625817573123e-05
+      },
+      {
+        "type": "ExecuteLimitOrder",
+        "usdc_amount": 0.693655,
+        "share_of_pool": 8.621867143059319e-06,
+        "share_of_total": 2.482056257327335e-07
+      }
+    ]
+  },
+  {
+    "pool_id": "Ore.1",
+    "pool_label": "Ore.1",
+    "total_usdc": 64420.50030400001,
+    "share_of_total": 0.02305112856963486,
+    "types": [
+      {
+        "type": "CloseAndSwap",
+        "usdc_amount": 15383.718786,
+        "share_of_pool": 0.23880160373490286,
+        "share_of_total": 0.005504646470328243
+      },
+      {
+        "type": "SwapAndOpen",
+        "usdc_amount": 13662.536306000004,
+        "share_of_pool": 0.21208367276762158,
+        "share_of_total": 0.004888768008486813
+      },
+      {
+        "type": "ClosePosition",
+        "usdc_amount": 10466.747078,
+        "share_of_pool": 0.16247540811709743,
+        "share_of_total": 0.0037452415219111084
+      },
+      {
+        "type": "Liquidate",
+        "usdc_amount": 7235.699572,
+        "share_of_pool": 0.11231982890314064,
+        "share_of_total": 0.0025890988169656845
+      },
+      {
+        "type": "OpenPosition",
+        "usdc_amount": 5779.743429000001,
+        "share_of_pool": 0.08971900872743027,
+        "share_of_total": 0.0020681244053161875
+      },
+      {
+        "type": "IncreaseSize",
+        "usdc_amount": 5616.684850000001,
+        "share_of_pool": 0.08718784895328185,
+        "share_of_total": 0.0020097783159320043
+      },
+      {
+        "type": "ExecuteTriggerWithSwap",
+        "usdc_amount": 3802.886623,
+        "share_of_pool": 0.05903224292040884,
+        "share_of_total": 0.0013607598213122615
+      },
+      {
+        "type": "DecreaseSize",
+        "usdc_amount": 1403.088907,
+        "share_of_pool": 0.021780161600404076,
+        "share_of_total": 0.0005020573053183385
+      },
+      {
+        "type": "ExecuteTriggerOrder",
+        "usdc_amount": 961.8196550000002,
+        "share_of_pool": 0.01493033507130771,
+        "share_of_total": 0.0003441610733164425
+      },
+      {
+        "type": "ExecuteLimitOrder",
+        "usdc_amount": 90.109343,
+        "share_of_pool": 0.0013987681339755896,
+        "share_of_total": 3.2243184095379555e-05
+      },
+      {
+        "type": "ExecuteLimitWithSwap",
+        "usdc_amount": 17.465754999999998,
+        "share_of_pool": 0.000271121070429121,
+        "share_of_total": 6.249646652398696e-06
+      }
+    ]
+  },
+  {
+    "pool_id": "Virtual.1",
+    "pool_label": "Virtual.1",
+    "total_usdc": 55540.693595000004,
+    "share_of_total": 0.019873730611582124,
+    "types": [
+      {
+        "type": "SwapAndOpen",
+        "usdc_amount": 12271.072697,
+        "share_of_pool": 0.22093841294961233,
+        "share_of_total": 0.004390870500711083
+      },
+      {
+        "type": "CloseAndSwap",
+        "usdc_amount": 8300.771772999999,
+        "share_of_pool": 0.14945387311020666,
+        "share_of_total": 0.0029702060130498247
+      },
+      {
+        "type": "OpenPosition",
+        "usdc_amount": 8277.343721000001,
+        "share_of_pool": 0.14903205533150132,
+        "share_of_total": 0.0029618229201486585
+      },
+      {
+        "type": "Liquidate",
+        "usdc_amount": 7233.387444000001,
+        "share_of_pool": 0.1302358140635676,
+        "share_of_total": 0.002588271484679441
+      },
+      {
+        "type": "ExecuteTriggerWithSwap",
+        "usdc_amount": 5435.698138,
+        "share_of_pool": 0.0978687478704685,
+        "share_of_total": 0.0019450171304705426
+      },
+      {
+        "type": "ClosePosition",
+        "usdc_amount": 4822.694126999999,
+        "share_of_pool": 0.08683172309958616,
+        "share_of_total": 0.0017256702734206682
+      },
+      {
+        "type": "IncreaseSize",
+        "usdc_amount": 3642.315207,
+        "share_of_pool": 0.06557921716929901,
+        "share_of_total": 0.00130330369574109
+      },
+      {
+        "type": "ExecuteTriggerOrder",
+        "usdc_amount": 3286.3961360000008,
+        "share_of_pool": 0.05917095958441281,
+        "share_of_total": 0.0011759477108094336
+      },
+      {
+        "type": "DecreaseSize",
+        "usdc_amount": 1995.259393,
+        "share_of_pool": 0.03592427936801317,
+        "share_of_total": 0.0007139494505751116
+      },
+      {
+        "type": "ExecuteLimitOrder",
+        "usdc_amount": 225.03171700000001,
+        "share_of_pool": 0.004051654785604951,
+        "share_of_total": 8.052149574024032e-05
+      },
+      {
+        "type": "ExecuteLimitWithSwap",
+        "usdc_amount": 50.723242,
+        "share_of_pool": 0.0009132626677274032,
+        "share_of_total": 1.8149936236029247e-05
+      }
+    ]
+  },
+  {
+    "pool_id": "Trump.1",
+    "pool_label": "Trump.1",
+    "total_usdc": 46693.061609000004,
+    "share_of_total": 0.01670784550538657,
+    "types": [
+      {
+        "type": "Liquidate",
+        "usdc_amount": 21761.34491799999,
+        "share_of_pool": 0.4660509327965235,
+        "share_of_total": 0.007786706982805613
+      },
+      {
+        "type": "CloseAndSwap",
+        "usdc_amount": 9945.267659999994,
+        "share_of_pool": 0.2129924086640543,
+        "share_of_total": 0.003558644257779179
+      },
+      {
+        "type": "SwapAndOpen",
+        "usdc_amount": 4995.288575,
+        "share_of_pool": 0.10698138873029407,
+        "share_of_total": 0.0017874285148574572
+      },
+      {
+        "type": "OpenPosition",
+        "usdc_amount": 2478.0102179999994,
+        "share_of_pool": 0.05307020213732071,
+        "share_of_total": 0.0008866887382499905
+      },
+      {
+        "type": "ExecuteTriggerWithSwap",
+        "usdc_amount": 2077.7035219999993,
+        "share_of_pool": 0.04449705053393898,
+        "share_of_total": 0.0007434498457664315
+      },
+      {
+        "type": "ClosePosition",
+        "usdc_amount": 1879.6886239999997,
+        "share_of_pool": 0.040256272757186115,
+        "share_of_total": 0.0006725955858497678
+      },
+      {
+        "type": "IncreaseSize",
+        "usdc_amount": 1467.5579719999994,
+        "share_of_pool": 0.03142989389492357,
+        "share_of_total": 0.0005251258114470755
+      },
+      {
+        "type": "DecreaseSize",
+        "usdc_amount": 1112.0956090000004,
+        "share_of_pool": 0.023817149072650357,
+        "share_of_total": 0.00039793324708460316
+      },
+      {
+        "type": "ExecuteTriggerOrder",
+        "usdc_amount": 871.5727039999998,
+        "share_of_pool": 0.01866600034280052,
+        "share_of_total": 0.0003118686499310038
+      },
+      {
+        "type": "ExecuteLimitOrder",
+        "usdc_amount": 53.665803000000004,
+        "share_of_pool": 0.0011493314242143422,
+        "share_of_total": 1.9202851870259144e-05
+      },
+      {
+        "type": "ExecuteLimitWithSwap",
+        "usdc_amount": 50.86600399999998,
+        "share_of_pool": 0.0010893696460931072,
+        "share_of_total": 1.820101974518128e-05
+      }
+    ]
+  },
+  {
+    "pool_id": "Community.3",
+    "pool_label": "Community.3",
+    "total_usdc": 11627.430639999997,
+    "share_of_total": 0.004160560649984729,
+    "types": [
+      {
+        "type": "ExecuteTriggerOrder",
+        "usdc_amount": 3501.14898,
+        "share_of_pool": 0.3011111472861042,
+        "share_of_total": 0.0012527911906703212
+      },
+      {
+        "type": "ClosePosition",
+        "usdc_amount": 2976.7656909999996,
+        "share_of_pool": 0.25601233696114317,
+        "share_of_total": 0.0010651548550711632
+      },
+      {
+        "type": "CloseAndSwap",
+        "usdc_amount": 2489.236319,
+        "share_of_pool": 0.21408309333935538,
+        "share_of_total": 0.0008907056939747298
+      },
+      {
+        "type": "Liquidate",
+        "usdc_amount": 1464.4646400000001,
+        "share_of_pool": 0.1259491185406031,
+        "share_of_total": 0.0005240189465002953
+      },
+      {
+        "type": "OpenPosition",
+        "usdc_amount": 836.9623919999999,
+        "share_of_pool": 0.07198171444005277,
+        "share_of_total": 0.0002994842886177211
+      },
+      {
+        "type": "SwapAndOpen",
+        "usdc_amount": 217.11251299999992,
+        "share_of_pool": 0.01867244103380005,
+        "share_of_total": 7.768782340438866e-05
+      },
+      {
+        "type": "IncreaseSize",
+        "usdc_amount": 109.126888,
+        "share_of_pool": 0.00938529683630949,
+        "share_of_total": 3.904809670557543e-05
+      },
+      {
+        "type": "ExecuteLimitWithSwap",
+        "usdc_amount": 16.552278,
+        "share_of_pool": 0.001423554223841838,
+        "share_of_total": 5.9227836868359035e-06
+      },
+      {
+        "type": "ExecuteTriggerWithSwap",
+        "usdc_amount": 8.404704,
+        "share_of_pool": 0.0007228341548722412,
+        "share_of_total": 3.0073953412264137e-06
+      },
+      {
+        "type": "DecreaseSize",
+        "usdc_amount": 7.656235000000001,
+        "share_of_pool": 0.0006584631839179909,
+        "share_of_total": 2.73957601247285e-06
+      }
+    ]
+  }
+]
