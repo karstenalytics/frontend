@@ -21149,6 +21149,78 @@
         "Ore.1": 4.335733,
         "Trump.1": 2.122708
       }
+    },
+    {
+      "date": "2026-02-23",
+      "pools": {
+        "Community.1": {
+          "trading_fees_usdc": 103.009671,
+          "non_trading_fees_usdc": 0.0,
+          "lp_fees_usdc": 0.0,
+          "gross_fees_usdc": 103.009671,
+          "total_fees_usdc": 103.009671
+        },
+        "Crypto.1": {
+          "trading_fees_usdc": 8587.224548,
+          "non_trading_fees_usdc": 0.0,
+          "lp_fees_usdc": 0.60441,
+          "gross_fees_usdc": 8587.224548,
+          "total_fees_usdc": 8587.828958
+        },
+        "Governance.1": {
+          "trading_fees_usdc": 256.07713,
+          "non_trading_fees_usdc": 0.0,
+          "lp_fees_usdc": 0.007735,
+          "gross_fees_usdc": 256.07713,
+          "total_fees_usdc": 256.084865
+        },
+        "Ore.1": {
+          "trading_fees_usdc": 454.383417,
+          "non_trading_fees_usdc": 1.161289,
+          "lp_fees_usdc": 0.0,
+          "gross_fees_usdc": 455.544706,
+          "total_fees_usdc": 455.544706
+        },
+        "Remora.1": {
+          "trading_fees_usdc": 875.597616,
+          "non_trading_fees_usdc": 0.0,
+          "lp_fees_usdc": 0.147502,
+          "gross_fees_usdc": 875.597616,
+          "total_fees_usdc": 875.745118
+        },
+        "Virtual.1": {
+          "trading_fees_usdc": 131.194747,
+          "non_trading_fees_usdc": 0.0,
+          "lp_fees_usdc": 6.862009,
+          "gross_fees_usdc": 131.194747,
+          "total_fees_usdc": 138.056756
+        }
+      },
+      "totals": {
+        "trading_fees_usdc": 10407.487129,
+        "non_trading_fees_usdc": 1.161289,
+        "lp_fees_usdc": 7.621655,
+        "gross_fees_usdc": 10408.648418,
+        "total_fees_usdc": 10416.270073
+      },
+      "pools_simple": {
+        "Community.1": 103.009671,
+        "Crypto.1": 8587.224548,
+        "Governance.1": 256.07713,
+        "Ore.1": 455.544706,
+        "Remora.1": 875.597616,
+        "Virtual.1": 131.194747
+      },
+      "revenue": {
+        "Governance.1": 106.084949,
+        "Community.1": 9.987793,
+        "Community.2": 13.992449,
+        "Trump.1": 2.972395,
+        "Ore.1": 43.89248,
+        "Crypto.1": 1795.678661,
+        "Virtual.1": 155.408303,
+        "Remora.1": 86.992692
+      }
     }
   ]
 }
