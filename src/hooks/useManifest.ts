@@ -7,7 +7,7 @@ let isLoading = false;
 let loadPromise: Promise<void> | null = null;
 
 export function useManifest(): string {
-  const manifestPath = useBaseUrl('/data/_manifest.json');
+  const manifestPath = useBaseUrl('/data/defituna/_manifest.json');
 
   const [timestamp, setTimestamp] = useState<string>(cachedTimestamp || '');
 
