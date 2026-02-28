@@ -266,39 +266,32 @@ export interface StakerLoyaltyData {
 }
 
 // ============================================================================
-// APR Data (apr_data.json)
+// APR Data (apr_data.json - summary, apr_timeline.json - timeline)
 // ============================================================================
 
-export interface AprDataPoint {
+export interface AprTimelineEntry {
   date: string;
-  reference_apr_percent: number;
-  your_apr_percent: number;
-  rolling_days: number;
-  rolling_revenue_sol: number;
-  rolling_revenue_usdc: number;
-  annualized_revenue_sol: number;
-  annualized_revenue_usdc: number;
-  tuna_price_usd: number;
-  tuna_price_source: string;
-  revenue_per_tuna_usdc: number;
-  daily_revenue_sol: number;
-  daily_revenue_usdc: number;
-  usd_sol_rate: number;
+  apr_7d: number | null;
+  apr_30d: number | null;
+  apr_all_time: number | null;
+  tuna_price_usd: number | null;
+  daily_revenue_usdc: number | null;
+  daily_revenue_sol: number | null;
+  usd_sol_rate: number | null;
 }
 
-export interface AprSummary {
-  thirty_day_average_reference_apr: number;
-  thirty_day_average_your_apr: number;
-  historical_average_reference_apr: number;
-  historical_average_your_apr: number;
-  current_reference_apr: number;
-  current_your_apr: number;
+export interface AprTimelineData {
+  timeline: AprTimelineEntry[];
 }
 
-export interface AprData {
-  date_range: DateRange;
-  daily_apr: AprDataPoint[];
-  summary: AprSummary;
+export interface AprSummaryData {
+  apr_7d: number | null;
+  apr_30d: number | null;
+  apr_all_time: number | null;
+  tuna_price_usd: number | null;
+  change_7d: number | null;
+  change_30d: number | null;
+  change_all_time: number | null;
 }
 
 // ============================================================================
@@ -344,25 +337,6 @@ export interface StakingData {
   top_stakers_7d: TopStaker[];
   top_withdrawers_7d: TopStaker[];
   active_stakers?: ActiveStakersData;
-}
-
-// ============================================================================
-// Wallet Timeline Data (from compressed staker_cache.json.gz)
-// ============================================================================
-
-export interface WalletActivity {
-  date: string;
-  balance: number;
-  action?: string;
-  amount?: number;
-}
-
-export interface WalletTimelineData {
-  wallet_address: string;
-  first_seen: string;
-  last_seen: string;
-  current_balance: number;
-  activity: WalletActivity[];
 }
 
 // ============================================================================

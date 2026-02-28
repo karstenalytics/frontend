@@ -156,6 +156,7 @@ html {
   scroll-behavior: smooth;
   overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -844,6 +845,7 @@ textarea:focus {
   /* Remove max-width constraints to allow content to move left */
   .navbar__inner,
   .main-wrapper [class*="docRoot"],
+  .blog-layout .container,
   .social-footer__content {
     max-width: none !important;
   }
@@ -874,6 +876,7 @@ textarea:focus {
 @media (min-width: 1300px) {
   .navbar__inner,
   .main-wrapper [class*="docRoot"],
+  .blog-layout .container,
   .social-footer__content {
     max-width: var(--max-content-width) !important;
   }
@@ -1196,21 +1199,34 @@ textarea:focus {
 .usage-summary-card {
   padding: 24px;
   border-radius: var(--ifm-global-radius);
-  border: 1px solid var(--ifm-color-emphasis-200);
+  border: 1px solid var(--ifm-toc-border-color);
   background: var(--ifm-background-surface-color);
   box-shadow: 0 4px 16px rgba(15, 20, 27, 0.05);
 }
 .usage-summary-card h3 {
   margin: 0 0 8px;
   font-size: 1rem;
+  font-weight: 600;
   color: var(--ifm-color-emphasis-700);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 .usage-summary-card p {
   margin: 0;
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 600;
-  color: var(--ifm-color-primary);
+  color: var(--accent);
 }
+.metric-change {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 4px;
+}
+.metric-change--up { color: #16a34a; }
+.metric-change--down { color: #dc2626; }
+.metric-change--flat { color: var(--ifm-color-emphasis-500); }
 .usage-top-table {
   width: 100%;
   border-collapse: collapse;
@@ -1241,8 +1257,9 @@ textarea:focus {
 .staking-top-table {
   background: var(--ifm-background-surface-color);
   border-radius: var(--ifm-global-radius);
-  border: 1px solid var(--ifm-color-emphasis-200);
+  border: 1px solid var(--ifm-toc-border-color);
   padding: 24px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 .staking-top-table h4 {
   margin-top: 0;
@@ -1278,6 +1295,61 @@ textarea:focus {
 }
 
 /* ========================
+   Info Tooltip
+   ======================== */
+.info-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: var(--ifm-color-emphasis-500);
+  cursor: help;
+  flex-shrink: 0;
+}
+.info-tooltip:hover {
+  color: var(--ifm-color-emphasis-700);
+}
+.info-tooltip-bubble {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a2e;
+  color: #e2e8f0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  padding: 8px 12px;
+  border-radius: 6px;
+  max-width: 250px;
+  width: max-content;
+  white-space: normal;
+  pointer-events: none;
+  transition: opacity 150ms ease, visibility 150ms ease;
+  z-index: 100;
+}
+.info-tooltip-bubble::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1a1a2e;
+}
+.info-tooltip:hover .info-tooltip-bubble {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+.info-tooltip-link {
+  color: var(--accent-hover);
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+/* ========================
    Blog Visual Consistency
    ========================
 
@@ -1310,17 +1382,17 @@ textarea:focus {
   .blog-wrapper .theme-doc-sidebar-container {
     /* Match the negative margin that pulls sidebar beneath navbar */
     margin-top: calc(-1 * var(--ifm-navbar-height)) !important;
-    /* Force width to match Analysis sidebar */
-    width: 330px !important;
-    flex: 0 0 330px !important;
+    /* Match docs sidebar width */
+    width: var(--doc-sidebar-width) !important;
+    flex: 0 0 var(--doc-sidebar-width) !important;
   }
 }
 
 .blog-layout .theme-doc-sidebar-container {
-  /* Explicitly inherit all doc sidebar styling */
+  /* Match docs sidebar styling exactly */
   background: var(--ifm-background-surface-color);
   width: var(--doc-sidebar-width) !important;
-  padding: 36px var(--ifm-spacing-horizontal) 32px calc(var(--sidebar-rail-offset) + 32px);
+  padding: 28px 0px 32px calc(var(--sidebar-rail-offset) + 16px);
   box-sizing: border-box;
   position: relative;
   border-right: none !important;
@@ -1402,6 +1474,7 @@ textarea:focus {
   display: block;
   font-size: 11px;
   letter-spacing: 0.18em;
+  text-transform: uppercase;
   font-weight: 600;
   color: var(--ifm-font-color-base);
   margin: 20px 0 12px;
@@ -1459,13 +1532,24 @@ textarea:focus {
    Blog Container Layout
    ======================== */
 
-/* Shift blog main content to the right to make room for sidebar */
+/* Match blog container to docs docRoot layout */
+.blog-layout .container {
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+  padding: 0 var(--page-gutter);
+}
+
+/* Zero out row negative margins to match docs */
+.blog-layout .container > .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Match sidebar-content gap to docs (60px) */
 @media (min-width: 997px) {
-  /* Target the blog content column (col--7) */
-  /* Small gap between sidebar (320px) and content */
   [class*="blogPages"] .col--7,
   .blog-wrapper .col--7 {
-    margin-left: 22px !important;
+    margin-left: var(--sidebar-content-gap) !important;
   }
 }
 
@@ -1476,19 +1560,17 @@ textarea:focus {
   }
 }
 
-.blog-layout .container {
-  /* Ensure blog container spacing matches docs */
-  max-width: var(--ifm-container-width);
-  margin-left: auto;
-  margin-right: auto;
+.blog-layout .container > .row > .col {
   padding-left: var(--ifm-spacing-horizontal);
   padding-right: var(--ifm-spacing-horizontal);
 }
 
-.blog-layout .col {
-  /* Match column padding to docs */
-  padding-left: var(--ifm-spacing-horizontal);
-  padding-right: var(--ifm-spacing-horizontal);
+.blog-layout .container > .row > .col:first-child {
+  padding-left: 0;
+}
+
+.blog-layout .container > .row > .col:last-child {
+  padding-right: 0;
 }
 
 /* ========================

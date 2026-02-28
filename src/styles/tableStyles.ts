@@ -77,6 +77,19 @@ export const tableStyles = {
     fontWeight: 600,
     color: 'var(--accent)',
   },
+
+  // Action button (See details, View, etc.)
+  actionButton: {
+    color: 'var(--accent)',
+    textDecoration: 'none' as const,
+    fontSize: '13px',
+    fontWeight: 600,
+    padding: '6px 12px',
+    border: '1px solid var(--accent)',
+    borderRadius: '4px',
+    display: 'inline-block' as const,
+    transition: 'all 120ms ease',
+  },
 } as const;
 
 /**
@@ -100,5 +113,19 @@ export const linkHoverHandlers = {
   },
   onMouseLeave: (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.currentTarget.style.textDecoration = 'none';
+  },
+};
+
+/**
+ * Hover effect handlers for action buttons (fill with accent color)
+ */
+export const actionButtonHoverHandlers = {
+  onMouseEnter: (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.currentTarget.style.background = 'var(--accent)';
+    e.currentTarget.style.color = 'white';
+  },
+  onMouseLeave: (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.currentTarget.style.background = 'transparent';
+    e.currentTarget.style.color = 'var(--accent)';
   },
 };
