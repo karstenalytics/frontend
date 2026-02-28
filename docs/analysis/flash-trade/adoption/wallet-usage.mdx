@@ -1,0 +1,587 @@
+---
+id: wallet-usage
+title: Wallet Usage
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Wallet Usage
+
+Tracks unique trader wallets on Flash.Trade (positions, swaps, orders). FAF staking and LP operations are tracked separately and not included here. Daily metrics capture single-day activity, while weekly metrics show rolling 7-day participation to identify sustained engagement patterns.
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '800px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useState, useEffect } = require('react');
+    const Plot = require('react-plotly.js').default;
+    const { useColorMode } = require('@docusaurus/theme-common');
+    const { getPlotlyTemplate, getResponsivePlotlyConfig } = require('@site/src/utils/plotlyTheme');
+    const UsageTopAddresses = require('@site/src/components/Usage/UsageTopAddresses').default;
+    const { useUsageMetrics } = require('@site/src/hooks/useUsageMetrics');
+    const ChartToggle = require('@site/src/components/common/ChartToggle').default;
+
+    // Pool colors for stacked chart
+    const POOL_COLORS = {
+      'Crypto.1': '#00A3B4',
+      'Ore.1': '#FF6B6B',
+      'Governance.1': '#4ECDC4',
+      'Community.1': '#45B7D1',
+      'Virtual.1': '#96CEB4',
+      'Trump.1': '#FFEAA7',
+      'Community.2': '#DDA0DD',
+      'Community.3': '#98D8C8',
+    };
+
+    // Calculate 30-day moving average. `key` selects the numeric field to average.
+    function calc30DayMA(data, windowSize = 30, key = 'count') {
+      if (!data || data.length < windowSize) return [];
+      const result = [];
+      for (let i = windowSize - 1; i < data.length; i++) {
+        let sum = 0;
+        for (let j = 0; j < windowSize; j++) {
+          sum += data[i - j][key];
+        }
+        result.push({
+          date: data[i].date,
+          value: sum / windowSize
+        });
+      }
+      return result;
+    }
+
+    // Toggle options
+    const TIME_OPTIONS = [
+      { value: 'daily', label: 'Daily' },
+      { value: 'weekly', label: 'Weekly' }
+    ];
+    const POOL_OPTIONS = [
+      { value: 'unique', label: 'Unique' },
+      { value: 'byPool', label: 'By Pool' }
+    ];
+    const WALLET_RANGE_OPTIONS = [
+      { value: 'all', label: 'All Time' },
+      { value: '30d', label: '30 Days' },
+      { value: '7d', label: '7 Days' },
+    ];
+
+    // Combined chart with Daily/Weekly toggle and optional By Pool view
+    function WalletChart({ dailyData, dailyNewWallets, weeklyData, weeklyNewWallets, byPool }) {
+      const { colorMode } = useColorMode();
+      const template = getPlotlyTemplate(colorMode === 'dark');
+      const isDark = colorMode === 'dark';
+      const accentColor = isDark ? '#14BCCD' : '#00A3B4';
+      const secondaryColor = isDark ? '#FF9F43' : '#E67E22';
+      const trendColor = isDark ? '#888888' : '#666666';
+      const spikeColor = isDark ? '#1a2832' : '#cbd5e0';
+
+      const [timeView, setTimeView] = useState('daily');
+      const [poolView, setPoolView] = useState('unique');
+      const [isMobile, setIsMobile] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth <= 996 : false
+      );
+
+      useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth <= 996);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+      }, []);
+
+      const hasPoolData = byPool && Object.keys(byPool).length > 0;
+
+      // Select data based on time view
+      const primaryData = timeView === 'daily' ? dailyData : weeklyData;
+      const newWalletsData = timeView === 'daily' ? dailyNewWallets : weeklyNewWallets;
+      const dataKey = timeView === 'daily' ? 'daily_counts' : 'weekly_counts';
+      const yAxisLabel = timeView === 'daily' ? 'Wallets' : 'Wallets (7-day)';
+
+      // Build traces based on pool view
+      let traces = [];
+      let showLegend = false;
+      let hasSecondaryAxis = false;
+
+      if (poolView === 'unique') {
+        const sorted = [...(primaryData || [])].sort((a, b) => a.date.localeCompare(b.date));
+        const hasNewWallets = newWalletsData && newWalletsData.length > 0;
+        const sortedNew = hasNewWallets ? [...newWalletsData].sort((a, b) => a.date.localeCompare(b.date)) : [];
+
+        // Build lookup for active counts by date
+        const activeByDate = {};
+        sorted.forEach(d => { activeByDate[d.date] = d.count; });
+
+        // Calculate new wallet %
+        const newPctData = sortedNew.map(d => {
+          const active = activeByDate[d.date] || 0;
+          const newCount = d.count;
+          const newPct = active > 0 ? (newCount / active) * 100 : 0;
+          return { date: d.date, pct: Math.round(newPct * 10) / 10 };
+        });
+
+        traces = [{
+          x: sorted.map(d => d.date),
+          y: sorted.map(d => d.count),
+          type: 'scatter',
+          mode: 'lines+markers',
+          name: 'Active Wallets',
+          legendgroup: 'active',
+          marker: { color: accentColor, size: isMobile ? 3 : 4 },
+          line: { color: accentColor },
+          hovertemplate: '<b>%{y}</b> wallets<extra></extra>',
+          yaxis: 'y',
+        }];
+
+        // Add 30-day MA trend line (only for daily view)
+        if (timeView === 'daily') {
+          const ma30 = calc30DayMA(sorted);
+          if (ma30.length > 0) {
+            traces.push({
+              x: ma30.map(d => d.date),
+              y: ma30.map(d => d.value),
+              type: 'scatter',
+              mode: 'lines',
+              name: '30-day MA',
+              legendgroup: 'ma',
+              line: { color: trendColor, width: 2 },
+              hovertemplate: '<b>%{y:.0f}</b> (30d avg)<extra></extra>',
+              yaxis: 'y',
+            });
+          }
+        }
+
+        // Skip first 7 daily data points (seen-wallet pool too small for meaningful %).
+        // Weekly data is already trimmed by the backend (_compute_rolling_counts skips
+        // entries before the first full 7-day window), so no frontend trim needed.
+        const trimmedPctData = timeView === 'daily' ? newPctData.slice(7) : newPctData;
+        if (hasNewWallets && trimmedPctData.length > 0) {
+          traces.push({
+            x: trimmedPctData.map(d => d.date),
+            y: trimmedPctData.map(d => d.pct),
+            type: 'scatter',
+            mode: 'lines',
+            name: 'New %',
+            legendgroup: 'new-pct',
+            line: { color: secondaryColor, width: 2 },
+            hovertemplate: '<b>%{y:.1f}%</b> new<extra></extra>',
+            yaxis: 'y2',
+          });
+          hasSecondaryAxis = true;
+
+          // 30-day MA for New % -- grouped with New % so legend click toggles both
+          const newPctMA = calc30DayMA(trimmedPctData, 30, 'pct');
+          if (newPctMA.length > 0) {
+            traces.push({
+              x: newPctMA.map(d => d.date),
+              y: newPctMA.map(d => d.value),
+              type: 'scatter',
+              mode: 'lines',
+              name: '30-day MA',
+              legendgroup: 'ma',
+              showlegend: false,
+              line: { color: trendColor, width: 2 },
+              hovertemplate: '<b>%{y:.1f}%</b> new (30d avg)<extra></extra>',
+              yaxis: 'y2',
+            });
+          }
+        }
+
+        showLegend = traces.length > 1;
+
+        // Compute aligned primary axis range when secondary axis is present
+        // Pick interval count (4 or 5) that gives least headroom; both divide 100% cleanly
+        if (hasSecondaryAxis) {
+          const allYValues = sorted.map(d => d.count);
+          if (timeView === 'daily') {
+            const ma30 = calc30DayMA(sorted);
+            ma30.forEach(d => allYValues.push(d.value));
+          }
+          const maxCount = Math.max(...allYValues, 0);
+          const niceFor = (n) => {
+            const raw = maxCount / n;
+            const mag = Math.pow(10, Math.floor(Math.log10(raw || 1)));
+            return [1, 2, 2.5, 5, 10].find(v => v * mag >= raw) * mag;
+          };
+          const opt4 = { n: 4, dtick: niceFor(4) };
+          const opt5 = { n: 5, dtick: niceFor(5) };
+          opt4.range = opt4.dtick * 4;
+          opt5.range = opt5.dtick * 5;
+          const best = opt4.range <= opt5.range ? opt4 : opt5;
+          traces._primaryDtick = best.dtick;
+          traces._primaryRange = [0, best.range];
+          traces._secondaryDtick = 100 / best.n;
+        }
+      } else if (poolView === 'byPool') {
+        // Stacked area chart by pool
+        if (byPool && typeof byPool === 'object') {
+          const poolNames = Object.keys(byPool);
+          poolNames.forEach(poolName => {
+            const poolData = byPool[poolName];
+            const counts = poolData?.[dataKey];
+            if (counts && Array.isArray(counts) && counts.length > 0) {
+              const sortedCounts = [...counts].sort((a, b) => a.date.localeCompare(b.date));
+              traces.push({
+                x: sortedCounts.map(d => d.date),
+                y: sortedCounts.map(d => d.count),
+                name: poolName,
+                type: 'scatter',
+                mode: 'none',
+                stackgroup: 'one',
+                fillcolor: POOL_COLORS[poolName] || '#888888',
+                line: { width: 0, color: POOL_COLORS[poolName] || '#888888' },
+                hovertemplate: `${poolName}: %{y}<extra></extra>`,
+              });
+            }
+          });
+        }
+        showLegend = traces.length > 0;
+      }
+
+      const title = timeView === 'daily'
+        ? (poolView === 'byPool' ? 'Daily Active Wallets by Pool' : 'Daily Active Wallets')
+        : (poolView === 'byPool' ? 'Weekly Active Wallets by Pool' : 'Weekly Active Wallets');
+
+      return (
+        <div style={{
+          background: 'var(--ifm-background-surface-color)',
+          border: '1px solid var(--ifm-toc-border-color)',
+          borderRadius: 'var(--ifm-global-radius)',
+          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+          padding: isMobile ? '16px 0px 16px 0px' : '24px',
+          marginBottom: '24px',
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '8px',
+            marginBottom: '16px',
+            paddingLeft: isMobile ? '16px' : 0,
+            paddingRight: isMobile ? '16px' : 0,
+          }}>
+            <h3 style={{
+              margin: 0,
+              fontSize: isMobile ? '1.1rem' : '1.25rem',
+              fontWeight: 600,
+            }}>
+              {title}
+            </h3>
+            <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+              <ChartToggle
+                value={timeView}
+                onChange={setTimeView}
+                options={TIME_OPTIONS}
+                variant="primary"
+              />
+              {hasPoolData && (
+                <ChartToggle
+                  value={poolView}
+                  onChange={setPoolView}
+                  options={POOL_OPTIONS}
+                  variant="secondary"
+                />
+              )}
+            </div>
+          </div>
+          {traces.length === 0 ? (
+            <div style={{ padding: '48px', textAlign: 'center', color: 'var(--ifm-color-secondary)' }}>
+              No data available for this view.
+            </div>
+          ) : (
+          <Plot
+            key={`${timeView}-${poolView}`}
+            data={poolView === 'byPool' ? traces : traces}
+            layout={poolView === 'byPool' ? {
+              // Simplified layout for byPool (avoids template conflicts)
+              autosize: true,
+              height: isMobile ? 350 : 420,
+              showlegend: true,
+              legend: {
+                orientation: 'h',
+                y: isMobile ? -0.35 : -0.25,
+                x: 0.5,
+                xanchor: 'center',
+                font: { size: isMobile ? 9 : 11 },
+              },
+              xaxis: {
+                type: 'date',
+                title: isMobile ? '' : { text: 'Date (UTC)', font: { size: 14 } },
+                tickfont: { size: isMobile ? 9 : 12 },
+                gridcolor: isDark ? '#333' : '#eee',
+              },
+              yaxis: {
+                rangemode: 'tozero',
+                title: isMobile ? '' : { text: yAxisLabel, font: { size: 14 } },
+                tickfont: { size: isMobile ? 8 : 12 },
+                gridcolor: isDark ? '#333' : '#eee',
+              },
+              margin: isMobile
+                ? { l: 40, r: 10, t: 20, b: 80 }
+                : { l: 70, r: 20, t: 20, b: 80 },
+              paper_bgcolor: 'rgba(0,0,0,0)',
+              plot_bgcolor: 'rgba(0,0,0,0)',
+              font: { color: isDark ? '#e0e0e0' : '#333' },
+              hovermode: 'x unified',
+            } : {
+              ...template.layout,
+              autosize: true,
+              height: isMobile ? 350 : 420,
+              showlegend: showLegend,
+              legend: showLegend ? {
+                orientation: 'h',
+                yanchor: 'bottom',
+                y: isMobile ? -0.35 : -0.25,
+                xanchor: 'center',
+                x: 0.5,
+                font: { size: isMobile ? 9 : 11 },
+              } : undefined,
+              xaxis: {
+                ...template.layout.xaxis,
+                title: isMobile ? '' : { text: 'Date (UTC)', font: { size: 14 } },
+                type: 'date',
+                tickfont: { size: isMobile ? 9 : 12 },
+                spikecolor: spikeColor,
+                spikedash: 'dot',
+                spikethickness: 1,
+              },
+              yaxis: {
+                ...template.layout.yaxis,
+                title: isMobile ? '' : { text: yAxisLabel, font: { size: 14 }, standoff: 20 },
+                ...(traces._primaryRange ? { range: traces._primaryRange } : { rangemode: 'tozero' }),
+                ...(traces._primaryDtick ? { dtick: traces._primaryDtick, tick0: 0 } : {}),
+                tickfont: { size: isMobile ? 8 : 12 },
+                spikecolor: spikeColor,
+                spikedash: 'dot',
+                spikethickness: 1,
+              },
+              yaxis2: hasSecondaryAxis ? {
+                title: isMobile ? '' : { text: 'New %', font: { size: 14, color: secondaryColor }, standoff: 10 },
+                overlaying: 'y',
+                side: 'right',
+                range: [0, 100],
+                dtick: traces._secondaryDtick || 20,
+                tick0: 0,
+                tickfont: { size: isMobile ? 8 : 12, color: secondaryColor },
+                ticksuffix: '%',
+                showgrid: false,
+              } : undefined,
+              hovermode: 'x unified',
+              margin: isMobile
+                ? { l: 25, r: hasSecondaryAxis ? 35 : 5, t: 16, b: showLegend ? 80 : 32 }
+                : { l: 70, r: hasSecondaryAxis ? 70 : 24, t: 16, b: showLegend ? 80 : 48 },
+            }}
+            config={{ ...getResponsivePlotlyConfig(), staticPlot: false }}
+            style={{ width: '100%', height: isMobile ? '350px' : '420px' }}
+            useResizeHandler={true}
+          />
+          )}
+        </div>
+      );
+    }
+
+    function UsageStatisticsPage() {
+      const { data, loading, error } = useUsageMetrics('flash-trade');
+      const [walletRange, setWalletRange] = useState('30d');
+
+      if (loading) {
+        return (
+          <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      if (error || !data) {
+        return (
+          <div style={{
+            padding: '32px',
+            background: 'var(--ifm-background-surface-color)',
+            border: '1px solid var(--ifm-color-danger)',
+            borderRadius: 'var(--ifm-global-radius)',
+            color: 'var(--ifm-color-danger)',
+          }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '8px' }}>Error Loading Usage Metrics</div>
+            <p>{error || 'Unknown error'}</p>
+          </div>
+        );
+      }
+
+      const { daily_users, weekly_users, by_pool } = data;
+
+      const topWalletRows = walletRange === '7d'
+        ? (daily_users.top_wallets_7d || [])
+        : walletRange === '30d'
+          ? (daily_users.top_wallets_30d || [])
+          : daily_users.top_wallets;
+
+      return (
+        <>
+          <WalletChart
+            dailyData={daily_users.daily_counts}
+            dailyNewWallets={daily_users.new_wallets}
+            weeklyData={weekly_users.rolling_counts}
+            weeklyNewWallets={weekly_users.new_wallets}
+            byPool={by_pool}
+          />
+
+          <div style={{ marginTop: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+              <h2 id="top-wallets-by-days-active" style={{ margin: 0 }}>Top Wallets by Days Active</h2>
+              <ChartToggle value={walletRange} onChange={setWalletRange}
+                           options={WALLET_RANGE_OPTIONS} variant="primary" />
+            </div>
+            <p style={{ marginBottom: '16px' }}>
+              Wallets ranked by the number of distinct days they executed fee-generating transactions
+              {walletRange === 'all'
+                ? ' across the entire measurement period (since April 12, 2025).'
+                : walletRange === '30d'
+                  ? ' in the last 30 days.'
+                  : ' in the last 7 days.'}
+            </p>
+            <UsageTopAddresses
+              title=""
+              rows={topWalletRows}
+              description=""
+              protocol="flash-trade"
+              detailsLabel="Wallet Details"
+            />
+          </div>
+        </>
+      );
+    }
+
+    return <UsageStatisticsPage />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Track protocol adoption**: Monitor growth in unique wallets trading on Flash.Trade daily
+- **Identify engagement patterns**: Compare daily spikes with sustained weekly activity to distinguish one-time wallets from regular participants
+- **Assess user retention**: Weekly active wallet trends reveal whether traders return after their first interaction
+- **Evaluate protocol changes**: Identify the impact of new markets, fee changes, or integrations on usage numbers by comparing activity before and after changes
+- **Benchmark growth**: Use daily and weekly metrics to measure protocol health over time
+- **Identify power traders**: Use the Top Wallets by Days Active table to find the most consistently engaged traders
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+**Chart (Daily / Weekly toggle):**
+- **Daily view**: Each point is the number of unique trader wallets active on that UTC day. The grey line is a 30-day moving average that smooths daily noise. Spikes may indicate marketing campaigns, token launches, or protocol events.
+- **Weekly view**: Each point is the rolling 7-day union of active wallets (counted once even if active on multiple days). Smooths daily volatility to highlight sustained engagement. Changes appear gradually due to the rolling window.
+- **New %** (orange, right axis): Shown in both views. Percentage of active wallets whose first-ever platform trade falls within the period. The first 7 days are trimmed because the seen-wallet pool is too small for meaningful percentages.
+
+**Chart (Unique / By Pool toggle):**
+- **Unique view**: Aggregate trader wallets across all pools (default)
+- **By Pool view**: Stacked areas showing per-pool trader counts. Wallets trading multiple pools are counted in each.
+
+**Top Wallets by Days Active Table:**
+- **Wallet Address**: Solana address (links to Solscan)
+- **Days Active**: Total distinct days the wallet executed trading transactions
+- **Tx Count**: Total number of trading transactions across all days
+- **First/Last Seen**: Date range of wallet activity
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Data Sources**
+
+- **Transaction logs**: On-chain trading transactions from Flash.Trade protocol
+- **Wallet identification**: Unique Solana addresses executing protocol instructions
+- **Activity tracking**: Daily records of which wallets executed fee-generating actions
+
+**Wallet Categories**
+
+Wallets are classified into three categories based on their transaction types:
+
+- **Traders**: wallets executing fee-generating trading operations (position management, swaps, trigger orders, liquidations)
+- **LPs**: wallets providing or removing liquidity
+- **Stakers**: wallets staking FAF tokens or managing existing stakes
+
+A fourth **Platform** category is the union of all three, counting each wallet once per day regardless of how many categories it appears in.
+
+**This page shows only the Trader category.** FAF staking operations (DepositTokenStake, CollectTokenReward, RefreshStake, etc.) and LP operations (AddLiquidityAndStake, RemoveLiquidity, etc.) are not included in the charts or table on this page.
+
+**Fee-Generating Trading Operations**
+
+A wallet is counted as an active *trader* when it executes transactions that generate protocol trading fees. This includes:
+
+- **Position management**: OpenPosition, ClosePosition, IncreaseSize, DecreaseSize
+- **Combined operations**: SwapAndOpen, CloseAndSwap
+- **Collateral operations**: AddCollateral, RemoveCollateral, SwapAndAddCollateral, RemoveCollateralAndSwap
+- **Order management**: PlaceTriggerOrder, PlaceLimitOrder, EditTriggerOrder, CancelTriggerOrder, CancelAllTriggerOrders, EditLimitOrder
+- **Order execution**: ExecuteTriggerOrder, ExecuteTriggerWithSwap, ExecuteLimitOrder, ExecuteLimitWithSwap
+- **Liquidations**: Liquidating underwater positions
+
+Failed transactions and system transactions (price updates, oracle refreshes) are excluded from all categories.
+
+**New vs Returning Wallet Classification**
+
+Not every wallet whose first observed transaction falls within our data window is genuinely new to the protocol. Some transaction types *require* prior on-chain state -- for example, you cannot `ClosePosition` without first having opened one, and `RefreshStake` requires an existing stake.
+
+When a wallet's first observed transaction is one of these requires-prior-state types, it is classified as a **returning wallet** rather than a new one. This means the wallet must have interacted with Flash.Trade before our data start date (April 12, 2025) and is re-appearing in our window for the first time.
+
+Entry-point transaction types (can genuinely be a first interaction):
+- **Trading**: OpenPosition, SwapAndOpen, PlaceLimitOrder
+- **LP**: AddLiquidityAndStake, AddCompoundingLiquidity
+- **Staking**: DepositTokenStake, BurnAndStake
+
+Requires-prior-state types (wallet classified as returning if seen first):
+- **Trading**: ClosePosition, CloseAndSwap, IncreaseSize, DecreaseSize, AddCollateral, RemoveCollateral, PlaceTriggerOrder, all trigger/limit order execution
+- **LP**: RemoveLiquidity, RemoveCompoundingLiquidity, MigrateFlp
+- **Staking**: WithdrawStake, RefreshStake, CollectStakeFees, CollectTokenReward, MigrateStake, etc.
+
+Note: this classification applies across all wallet categories. Only the trading category is shown on this page; LP and staking entry-point rules affect their respective category counts.
+
+**Daily Active Wallets Calculation**
+
+For each UTC day:
+- Collect all successful trading transactions
+- Extract unique wallet addresses from transaction signers
+- Count distinct addresses per day
+
+This provides a **snapshot count** of unique participants each day, with wallets counted once per day regardless of transaction frequency.
+
+**Weekly Active Wallets Calculation**
+
+For each UTC day:
+- Collect all unique daily active wallets from the past 7 days (including current day)
+- Count distinct addresses across the 7-day window
+- Each wallet counted once even if active on multiple days within the window
+
+This **rolling 7-day union** smooths daily volatility and highlights sustained participation patterns.
+
+**Top Wallets by Days Active Ranking**
+
+The Top Wallets by Days Active table ranks by:
+- **Activity frequency**: Number of distinct calendar days (UTC) the wallet executed trading transactions
+- **Not by transaction volume**: A wallet with 100 transactions on 1 day ranks below a wallet with 10 transactions on 10 different days
+- **Purpose**: Identifies consistently engaged traders rather than high-volume traders
+
+**Update Frequency**
+
+Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Scope**
+
+Data is scoped to transactions touching the Flash.Trade treasury, not all program interactions. This captures the vast majority of user activity since fee-generating operations route through the treasury. Known system wallets (liquidation bots, keeper bots, admin signers) are actively excluded from all counts.
+
+**Known Limitations**
+
+- **Data start date**: Our transaction history begins April 12, 2025. Wallets active before this date will appear as "returning" on their first observed transaction, not "new". True lifetime metrics require a complete history from protocol launch.
+- Multi-wallet addresses (same person controlling multiple wallets) are counted separately
+- Does not measure transaction size or volume, only participation
+- Single-day spike can inflate weekly metric for up to 7 days due to rolling window
+- Cross-protocol wallets (same address on multiple protocols) appear separately per protocol
+
+</details>

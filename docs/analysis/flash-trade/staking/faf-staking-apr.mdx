@@ -1,0 +1,230 @@
+---
+title: FAF Staking APR
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# FAF Staking APR
+
+Tracks rolling 7-day and 30-day staking APR for FAF holders, derived from on-chain USDC reward distributions. Enter your purchase price to see a personal Entry Price APR alongside the reference rate.
+
+<BrowserOnly fallback={<div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useEffect, useState } = require('react');
+    const { safeGetItem } = require('@site/src/utils/localStorage');
+    const MetricCard = require('@site/src/components/common/MetricCard').default;
+    const ChartToggle = require('@site/src/components/common/ChartToggle').default;
+
+    function personalApr(refApr, fafPrice, entryPrice) {
+      if (!refApr || !fafPrice || !entryPrice || entryPrice <= 0) return null;
+      return refApr * (fafPrice / entryPrice);
+    }
+
+    function CurrentApr() {
+      const [data, setData] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+      const [entryPrice, setEntryPrice] = useState(null);
+      const [aprMode, setAprMode] = useState('reference');
+
+      useEffect(() => {
+        fetch('/data/flash-trade/apr_data.json')
+          .then(res => res.json())
+          .then(data => {
+            setData(data);
+            setLoading(false);
+          })
+          .catch(err => {
+            setError(err.message);
+            setLoading(false);
+          });
+      }, []);
+
+      useEffect(() => {
+        const saved = safeGetItem('fafEntryPrice');
+        if (saved) {
+          const parsed = parseFloat(saved.replace(',', '.'));
+          if (Number.isFinite(parsed) && parsed > 0 && parsed < 1000) {
+            setEntryPrice(parsed);
+          }
+        }
+        const onStorage = () => {
+          const val = safeGetItem('fafEntryPrice');
+          if (val) {
+            const p = parseFloat(val.replace(',', '.'));
+            if (Number.isFinite(p) && p > 0 && p < 1000) { setEntryPrice(p); return; }
+          }
+          setEntryPrice(null);
+        };
+        window.addEventListener('storage', onStorage);
+        return () => window.removeEventListener('storage', onStorage);
+      }, []);
+
+      if (loading) {
+        return (
+          <div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      if (error || !data) {
+        return (
+          <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ifm-color-emphasis-600)' }}>
+            Data not yet available. Check back after cache reload.
+          </div>
+        );
+      }
+
+      const fafPrice = data.faf_price_usd;
+      const pa7d = personalApr(data.apr_7d, fafPrice, entryPrice);
+      const pa30d = personalApr(data.apr_30d, fafPrice, entryPrice);
+      const paAll = personalApr(data.apr_all_time, fafPrice, entryPrice);
+      const showPersonal = aprMode === 'personal' && pa7d !== null;
+
+      return (
+        <>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '8px',
+            marginBottom: '16px',
+          }}>
+            <h2 id="current-metrics" style={{ margin: 0 }}>Current Metrics</h2>
+            {entryPrice && (
+              <ChartToggle
+                value={aprMode}
+                onChange={setAprMode}
+                options={[
+                  { value: 'reference', label: 'Reference APR' },
+                  { value: 'personal', label: 'Entry Price APR' },
+                ]}
+                variant="secondary"
+              />
+            )}
+          </div>
+          <div className="usage-summary-grid">
+            <MetricCard
+              title="7-Day APR"
+              value={showPersonal ? pa7d : data.apr_7d}
+              format="percent"
+              decimals={2}
+              change={data.change_7d}
+              tooltip={"Annualized yield for FAF stakers based on the last 7 days of USDC reward distributions. Most volatile window, reacts quickly to trading volume changes.\nChange compares to the 7-day APR one week ago."}
+            />
+            <MetricCard
+              title="30-Day APR"
+              value={showPersonal ? pa30d : data.apr_30d}
+              format="percent"
+              decimals={2}
+              change={data.change_30d}
+              tooltip={"Annualized yield for FAF stakers smoothed over the last 30 days of reward distributions. Provides a more stable estimate than the 7-day window.\nChange compares to the 30-day APR one month ago."}
+            />
+            <MetricCard
+              title="All-Time APR"
+              value={showPersonal ? paAll : data.apr_all_time}
+              format="percent"
+              decimals={2}
+              change={data.change_all_time}
+              tooltip={"Annualized yield for FAF stakers since distributions began. Uses the current staked-FAF snapshot as the denominator.\nChange compares to the all-time APR one month ago."}
+            />
+          </div>
+        </>
+      );
+    }
+
+    return <CurrentApr />;
+  }}
+</BrowserOnly>
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const FlashAprChart = require('@site/src/components/FlashTrade/FlashAprChart').default;
+    return <FlashAprChart />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Evaluate staking returns**: See current and historical APR to assess whether FAF staking meets yield expectations
+- **Compare time windows**: Use 7-day, 30-day, and all-time APR to distinguish short-term spikes from sustained trends
+- **Calculate personal yield**: If you set an entry price, the "Entry Price APR" toggle adjusts the reference APR to reflect your actual cost basis
+- **Track yield trends**: The rolling APR chart reveals whether staking returns are stable, improving, or declining
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+**Current Metrics Cards:**
+- **7-Day APR**: Annualized yield based on the last 7 days of reward distributions (most volatile)
+- **30-Day APR**: Smoothed over 30 days for a more stable estimate
+- **All-Time APR**: Lifetime average since staking began (summary card only; the chart shows 7-day and 30-day rolling windows)
+- **Reference APR / Entry Price APR toggle**: Appears when an entry price is set. Switches all three cards between the reference APR (based on current FAF market price) and the entry price APR (adjusted for your purchase price).
+- **Change badge**: Shows the change in percentage points (pp). The 7-Day card compares to one week ago, the 30-Day card to one month ago, and the All-Time card compares to 30 days ago.
+
+**FAF Staking APR Chart:**
+- **X-axis**: Date
+- **Y-axis**: APR as a percentage
+- **Teal line**: Reference APR (each point uses that day's historical FAF price; summary cards use the current price)
+- **Green dashed line**: Personal APR (only shown if entry price is set)
+- **FAF Reference Price** (hidden by default): Click "FAF Reference Price" in the legend to overlay a secondary y-axis showing the FAF token price history. Helps contextualize APR spikes caused by price drops.
+- **Toggle**: Switch between 7-day and 30-day rolling windows (chart only; the summary cards always display all three windows)
+- **Hover**: See exact APR values for any date
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Formula**
+
+The staking APR is calculated as:
+
+```
+APR = (Rewards Distributed / Total Staked Value) * (365 / Period Days) * 100
+```
+
+Where:
+- **Rewards Distributed**: Total USDC distributed to FAF stakers in the period
+- **Total Staked Value**: Total FAF staked as of the most recent cache update (a single snapshot applied to all dates) multiplied by FAF price
+- **Period Days**: Length of the rolling window (7 or 30 days)
+
+**Data Sources**
+
+- **Rewards**: The staker pool's USDC share of each MoveProtocolFees transaction (not total protocol revenue) as recorded on-chain
+- **Staked Amount**: Calculated from token deposit and withdrawal events
+- **FAF Price**: Sourced from on-chain DEX data or API
+
+**Calculation Process**
+
+- Track all reward distribution events
+- Calculate total staked FAF at each point in time
+- Convert rewards and stake to USD values
+- Apply annualization formula based on rolling windows
+
+All data is derived from treasury and staking program transactions.
+
+**Known Limitations**
+
+- No reward distributions occurred from April to late June 2025 (protocol ramp-up), so the chart starts near zero for that period
+- APR is **realized yield** based on actual distributions, not projected returns
+- Short-term APR (7d) can be volatile due to trading volume fluctuations
+- The 30-day window provides a more stable estimate than the 7-day window
+- Both summary cards and the historical chart use the same staked-FAF snapshot as the denominator, so the entire chart line shifts whenever the total staked amount changes
+- APR does not account for FAF token price changes (impermanent gain/loss)
+
+**Update Frequency**
+
+Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+
+</details>

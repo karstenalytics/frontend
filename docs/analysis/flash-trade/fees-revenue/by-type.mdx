@@ -1,0 +1,327 @@
+---
+title: By Type
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Fees by Type
+
+Daily trading fees broken down by instruction type, with a stacked chart showing each operation's contribution and a table of the largest individual transactions.
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '800px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useState, useEffect } = require('react');
+    const TypeModule = require('@site/src/components/FlashTrade/TypeStackedAreaChart');
+    const TypeStackedAreaChart = TypeModule.default;
+
+    function ChartSection() {
+      const [visibleTypes, setVisibleTypes] = useState(null);
+
+      return (
+        <TypeStackedAreaChart
+          visibleTypes={visibleTypes}
+          onVisibilityChange={setVisibleTypes}
+        />
+      );
+    }
+
+    return <ChartSection />;
+  }}
+</BrowserOnly>
+
+## Top Transactions
+
+<BrowserOnly fallback={<div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useState, useEffect } = require('react');
+    const TypeModule = require('@site/src/components/FlashTrade/TypeStackedAreaChart');
+    const TYPE_COLORS = TypeModule.TYPE_COLORS;
+    const { tableStyles, tableRowHoverHandlers, linkHoverHandlers } = require('@site/src/styles/tableStyles');
+
+    function TopTransactionsTable() {
+      const [visibleTypes, setVisibleTypes] = useState(null);
+      const [topTxData, setTopTxData] = useState(null);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        fetch('/data/flash-trade/top_transactions_type.json')
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null)
+          .then(typeData => {
+            if (typeData) {
+              setTopTxData(typeData);
+            } else {
+              return fetch('/data/flash-trade/top_transactions_pool.json')
+                .then(r => r.ok ? r.json() : null)
+                .catch(() => null)
+                .then(poolData => {
+                  setTopTxData(poolData);
+                });
+            }
+          })
+          .finally(() => setLoading(false));
+      }, []);
+
+      const clearFilter = () => {
+        setVisibleTypes(null);
+      };
+
+      if (loading) {
+        return (
+          <div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      const allTransactions = topTxData?.transactions || [];
+      const filteredTransactions = visibleTypes
+        ? allTransactions.filter(tx => visibleTypes.includes(tx.type))
+        : allTransactions;
+      const displayTransactions = filteredTransactions.slice(0, 10);
+
+      // Build type filter chips from available data
+      const availableTypes = [...new Set(allTransactions.map(tx => tx.type))].sort();
+
+      return (
+        <div>
+          <p style={{ marginBottom: '16px' }}>
+            The table displays the largest individual transactions contributing to trading fees.
+            {!topTxData && ' Transaction data will be available after the next data pipeline run.'}
+          </p>
+
+          {availableTypes.length > 1 && (
+            <div style={{
+              marginBottom: '16px',
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <span style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)', marginRight: '4px' }}>Filter:</span>
+              {visibleTypes && (
+                <button
+                  onClick={clearFilter}
+                  style={{
+                    padding: '4px 10px',
+                    fontSize: '12px',
+                    background: 'var(--ifm-color-emphasis-200)',
+                    border: '1px solid var(--ifm-toc-border-color)',
+                    borderRadius: 'var(--ifm-global-radius)',
+                    cursor: 'pointer',
+                    color: 'var(--ifm-font-color-base)',
+                  }}
+                >
+                  Clear
+                </button>
+              )}
+              {availableTypes.map(type => {
+                const isActive = !visibleTypes || visibleTypes.includes(type);
+                const color = TYPE_COLORS[type] || '#888888';
+                return (
+                  <button
+                    key={type}
+                    onClick={() => {
+                      if (visibleTypes && visibleTypes.length === 1 && visibleTypes[0] === type) {
+                        setVisibleTypes(null);
+                      } else {
+                        setVisibleTypes([type]);
+                      }
+                    }}
+                    style={{
+                      padding: '4px 10px',
+                      fontSize: '12px',
+                      background: isActive ? color + '22' : 'transparent',
+                      border: `1px solid ${isActive ? color : 'var(--ifm-toc-border-color)'}`,
+                      borderRadius: 'var(--ifm-global-radius)',
+                      cursor: 'pointer',
+                      color: isActive ? color : 'var(--ifm-color-secondary)',
+                      opacity: isActive ? 1 : 0.6,
+                    }}
+                  >
+                    {type}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {topTxData ? (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={tableStyles.table}>
+                <thead>
+                  <tr style={tableStyles.headerRow}>
+                    <th style={tableStyles.headerCell}>#</th>
+                    <th style={tableStyles.headerCell}>Date</th>
+                    <th style={tableStyles.headerCell}>Type</th>
+                    <th style={tableStyles.headerCell}>Pool</th>
+                    <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>Fee (USDC)</th>
+                    <th style={tableStyles.headerCell}>Transaction</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayTransactions.length > 0 ? displayTransactions.map((tx, idx) => {
+                    const color = TYPE_COLORS[tx.type] || '#888888';
+                    return (
+                      <tr key={tx.signature} style={tableStyles.bodyRow} {...tableRowHoverHandlers}>
+                        <td style={{ ...tableStyles.cell, fontWeight: 600 }}>{idx + 1}</td>
+                        <td style={tableStyles.dateCell}>{tx.date}</td>
+                        <td style={tableStyles.cell}>
+                          <span style={{
+                            display: 'inline-block',
+                            width: '10px',
+                            height: '10px',
+                            borderRadius: '2px',
+                            backgroundColor: color,
+                            marginRight: '6px',
+                          }} />
+                          {tx.type}
+                        </td>
+                        <td style={tableStyles.cell}>{tx.pool || '-'}</td>
+                        <td style={{ ...tableStyles.cell, textAlign: 'right', fontWeight: 600 }}>
+                          ${tx.fee_usdc.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                        <td style={tableStyles.addressCell}>
+                          <a
+                            href={`https://solscan.io/tx/${tx.signature}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={tableStyles.link}
+                            {...linkHoverHandlers}
+                          >
+                            {tx.signature.slice(0, 8)}...{tx.signature.slice(-8)}
+                          </a>
+                        </td>
+                      </tr>
+                    );
+                  }) : (
+                    <tr>
+                      <td colSpan={6} style={{ ...tableStyles.cell, textAlign: 'center', padding: '24px' }}>
+                        {visibleTypes ? 'No transactions found for selected type' : 'No transactions available'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={{
+              padding: '32px',
+              textAlign: 'center',
+              background: 'var(--ifm-background-surface-color)',
+              border: '1px solid var(--ifm-toc-border-color)',
+              borderRadius: 'var(--ifm-global-radius)',
+              color: 'var(--ifm-color-secondary)',
+            }}>
+              Transaction data not yet available. The data pipeline will generate this file on the next run.
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return <TopTransactionsTable />;
+  }}
+</BrowserOnly>
+
+## Transaction Type Descriptions
+
+| Type | Category | Fee-generating | Description |
+|------|----------|:--------------:|-------------|
+| SwapAndOpen | Opening | Yes | Open position with input token swap |
+| OpenPosition | Opening | Yes | Open position directly |
+| IncreaseSize | Opening | Yes | Increase existing position size |
+| AddCollateral | Collateral | No | Add margin to position |
+| SwapAndAddCollateral | Collateral | No | Add collateral with swap |
+| CloseAndSwap | Closing | Yes | Close position with output swap |
+| ClosePosition | Closing | Yes | Close position directly |
+| DecreaseSize | Closing | Yes | Partial position close |
+| RemoveCollateral | Collateral | No | Remove excess margin |
+| RemoveCollateralAndSwap | Collateral | No | Remove collateral with swap |
+| ExecuteTriggerWithSwap | Trigger | Yes | Execute stop-loss/take-profit with swap |
+| ExecuteTriggerOrder | Trigger | Yes | Execute trigger order |
+| ExecuteLimitWithSwap | Trigger | Yes | Execute limit order with swap |
+| ExecuteLimitOrder | Trigger | Yes | Execute limit order |
+| Liquidate | System | Yes | Liquidate underwater positions |
+
+Collateral management operations (AddCollateral, RemoveCollateral, SwapAndAddCollateral, RemoveCollateralAndSwap) adjust a trader's margin without changing position size and do not generate protocol fees. They do not appear in the fee charts above.
+
+## Use Cases
+
+This chart helps you:
+
+- **Track fee trends**: Monitor how each operation type's fee contribution changes over time
+- **Identify top operations**: See which trading operations generate the most fees
+- **Assess operation mix**: Determine if fees are concentrated in specific operations or distributed
+- **Investigate specific types**: Click on a type in the chart legend to isolate it, or use the table filters to examine individual trades
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+**Chart:**
+- **X-axis**: Date (UTC days) from April 12, 2025 onwards
+- **Y-axis**: Fees in USDC (stacked)
+- **Daily mode**: Stacked bar chart showing each day's fees broken down by type. Bar height is the sum of all types for that day.
+- **Cumulative mode**: Stacked area chart showing running totals. Each band's top edge represents the cumulative total up to and including that type. Hover values show stacked heights, not isolated per-type totals.
+- **Interactions**:
+  - Use the Daily/Cumulative toggle at the top right to switch views
+  - Click a legend item to show or hide that type in the chart
+  - Double-click a legend item to isolate a single type
+  - Hover to see values per type
+
+**Top Transactions Table:**
+- **Date**: When the transaction occurred (UTC)
+- **Type**: Trading operation type (OpenPosition, ClosePosition, etc.)
+- **Pool**: Which market the trade occurred in
+- **Fee (USDC)**: Fee amount in USDC
+- **Transaction**: Signature (links to Solscan for detailed exploration)
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Data Sources**
+
+- **Treasury transactions**: On-chain data from the Flash.Trade stake pool authority
+- **Fee extraction**: Fee amounts extracted from transaction log entries
+- **Type identification**: Transaction types extracted from program instruction logs
+
+**Operation Categories**
+
+Flash.Trade operations can be grouped into categories:
+
+| Category | Operations | Description |
+|----------|------------|-------------|
+| Opening | SwapAndOpen, OpenPosition, IncreaseSize | Operations that open or increase positions |
+| Closing | CloseAndSwap, ClosePosition, DecreaseSize | Operations that close or reduce positions |
+| Collateral | AddCollateral, SwapAndAddCollateral, RemoveCollateral, RemoveCollateralAndSwap | Margin adjustments (no fees) |
+| Trigger | ExecuteTriggerWithSwap, ExecuteTriggerOrder, ExecuteLimitWithSwap, ExecuteLimitOrder | Automated order executions |
+| System | Liquidate | Protocol-initiated operations |
+
+**Instruction Name Normalization**
+
+Instruction names are normalized by stripping version suffixes to ensure consistent grouping regardless of contract version.
+
+**Fee Attribution**
+
+Each fee-generating trading operation is attributed to its instruction type based on on-chain program logs. Fee amounts are stored internally as USDC atoms and converted to USDC (divide by 1,000,000) during the attribution pipeline, then aggregated by date and type.
+
+**Update Frequency**
+
+Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- Transaction table limited to top 10 entries per view
+- Some rare operations may not have color assignments (shown in gray)
+- New instruction variants may appear with full names until normalized
+
+</details>

@@ -1,0 +1,434 @@
+---
+title: FAF Vesting Timeline
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# FAF Vesting Timeline
+
+Tracks FAF tokens locked in Streamflow vesting contracts and their unlock timeline. Shows advisory and Solana Labs vesting schedules with periodic unlock frequencies. Hover over the chart to see locked amounts at any date, and expand the per-recipient table to see how each wallet uses their unlocked FAF.
+
+## Current Metrics
+
+<BrowserOnly fallback={<div style={{ minHeight: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useFlashVestingTimeline } = require('@site/src/hooks/useFlashVestingTimeline');
+    const MetricCard = require('@site/src/components/common/MetricCard').default;
+
+    function VestingMetrics() {
+      const { data, loading, error } = useFlashVestingTimeline();
+
+      if (loading) return <LoadingSpinner />;
+      if (error || !data) return null;
+
+      const { schedules, daily_timeline, metadata } = data;
+      const stakedTimeline = data.staked_by_vesting_wallets_timeline || {};
+      const heldTimeline = data.held_by_vesting_wallets_timeline || {};
+
+      const totalFaf = schedules.reduce((sum, s) => sum + (s.allocation || s.total_faf), 0);
+      const remainingFaf = schedules.reduce((sum, s) => sum + s.remaining_faf, 0);
+
+      // Use the latest date present in all three timelines to avoid missing-key fallbacks
+      const today = new Date().toISOString().slice(0, 10);
+      const stakedDates = Object.keys(stakedTimeline);
+      const lastStaked = stakedDates.length > 0 ? stakedDates.sort().pop() : today;
+      const cap = lastStaked < today ? lastStaked : today;
+      const dates = Object.keys(daily_timeline).filter(d => d <= cap).sort();
+      const latestDate = dates[dates.length - 1];
+      const d7 = new Date(latestDate);
+      d7.setDate(d7.getDate() - 7);
+      const date7dAgo = d7.toISOString().slice(0, 10);
+      const locked7dAgo = daily_timeline[date7dAgo];
+      const lockedNow = daily_timeline[latestDate];
+
+      // Remaining locked as percentage
+      const remainingPctNow = lockedNow != null ? (lockedNow / totalFaf) * 100 : null;
+      const remainingPct7dAgo = locked7dAgo != null ? (locked7dAgo / totalFaf) * 100 : null;
+      const remainingPctChange = remainingPctNow != null && remainingPct7dAgo != null
+        ? remainingPctNow - remainingPct7dAgo
+        : null;
+
+      // Vesting wallet conviction: (staked + held) / unlocked
+      const stakedNow = stakedTimeline[latestDate] || 0;
+      const heldNow = heldTimeline[latestDate] || 0;
+      const unlockedNow = totalFaf - (lockedNow || 0);
+      const convictionNow = unlockedNow > 0 ? ((stakedNow + heldNow) / unlockedNow) * 100 : null;
+
+      const staked7dAgo = stakedTimeline[date7dAgo] || 0;
+      const held7dAgo = heldTimeline[date7dAgo] || 0;
+      const unlocked7dAgo = totalFaf - (locked7dAgo || 0);
+      const conviction7dAgo = unlocked7dAgo > 0 ? ((staked7dAgo + held7dAgo) / unlocked7dAgo) * 100 : null;
+      const convictionChange = convictionNow != null && conviction7dAgo != null
+        ? convictionNow - conviction7dAgo
+        : null;
+
+      return (
+        <div className="usage-summary-grid">
+          <MetricCard
+            title="Total Vesting"
+            value={totalFaf / 1e6}
+            format="number"
+            decimals={2}
+            suffix=" M FAF"
+            tooltip={`Sum of FAF allocated across all Streamflow vesting contracts.\n${((totalFaf / metadata.total_supply) * 100).toFixed(2)}% of total FAF supply.`}
+          />
+          <MetricCard
+            title="Remaining Locked"
+            value={remainingPctNow}
+            format="percent"
+            decimals={1}
+            change={remainingPctChange}
+            tooltip={`${(remainingFaf / 1e6).toFixed(2)} M FAF still locked in Streamflow vesting contracts.\nChange vs. 7 days ago in percentage points.`}
+          />
+          <MetricCard
+            title="Vesting Wallet Conviction"
+            value={convictionNow}
+            format="percent"
+            decimals={1}
+            change={convictionChange}
+            tooltip={`(Staked + held) / unlocked across all vesting wallets.\nMeasures how much unlocked FAF recipients retain.\n>100% means wallets acquired extra FAF beyond their unlocked amount.\nChange vs. 7 days ago in percentage points.`}
+          />
+        </div>
+      );
+    }
+
+    return <VestingMetrics />;
+  }}
+</BrowserOnly>
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useFlashVestingTimeline } = require('@site/src/hooks/useFlashVestingTimeline');
+    const { tableStyles, tableRowHoverHandlers, linkHoverHandlers } = require('@site/src/styles/tableStyles');
+    const UnlockTimelineChart = require('@site/src/components/Vesting/UnlockTimelineChart').default;
+
+    function FlashVestingTimelinePage() {
+      const { data, loading, error } = useFlashVestingTimeline();
+
+      if (loading) {
+        return (
+          <div style={{ padding: '48px', textAlign: 'center' }}>
+            <LoadingSpinner />
+            <p style={{ marginTop: '16px', color: 'var(--ifm-color-emphasis-600)' }}>
+              Loading vesting data...
+            </p>
+          </div>
+        );
+      }
+
+      if (error || !data) {
+        return (
+          <div className="alert alert--danger" role="alert">
+            <h4>Error Loading Vesting Data</h4>
+            <p>{error || 'Failed to load vesting timeline data.'}</p>
+          </div>
+        );
+      }
+
+      const { schedules, daily_timeline, cancelled_contracts } = data;
+
+      return (
+        <>
+          {/* Unlock Timeline Chart */}
+          {(() => {
+            const stakedRaw = data.staked_by_vesting_wallets_timeline || {};
+            const heldRaw = data.held_by_vesting_wallets_timeline || {};
+            const stakedKeys = Object.keys(stakedRaw);
+            const lastStakedDate = stakedKeys.length > 0 ? stakedKeys.sort().pop() : null;
+            const allDates = [...new Set([...stakedKeys, ...Object.keys(heldRaw)])]
+              .filter(d => !lastStakedDate || d <= lastStakedDate).sort();
+            const combinedTimeline = Object.fromEntries(
+              allDates.map(d => [d, (stakedRaw[d] || 0) + (heldRaw[d] || 0)])
+            );
+            return (
+              <UnlockTimelineChart
+                timeline={daily_timeline}
+                stakedTimeline={combinedTimeline}
+                totalSchedules={schedules.length}
+                tokenSymbol="FAF"
+                secondaryLineLabel="Staked + held"
+              />
+            );
+          })()}
+
+          {/* Vesting Schedules - Transposed (metrics as rows, wallets as columns) */}
+          {(() => {
+            const walletBalances = data.wallet_balances || {};
+            const perWalletStaked = data.per_wallet_staked || {};
+            const fmt = (v) => v.toLocaleString(undefined, { maximumFractionDigits: 0 });
+
+            const cols = schedules
+              .slice()
+              .sort((a, b) => (b.allocation || b.total_faf) - (a.allocation || a.total_faf))
+              .map(s => {
+                const allocation = s.allocation || s.total_faf;
+                const unlocked = allocation - s.remaining_faf;
+                const staked = perWalletStaked[s.recipient] || 0;
+                const held = walletBalances[s.recipient] || 0;
+                const transferred = Math.max(0, unlocked - staked - held);
+                const delta = (staked + held) - unlocked;
+                return { ...s, allocation, unlocked, staked, held, transferred, delta };
+              });
+
+            const labelStyle = { ...tableStyles.headerCell, textAlign: 'left', whiteSpace: 'nowrap' };
+            const valStyle = tableStyles.amountCell;
+
+            // Compute totals column
+            const totals = {
+              allocation: cols.reduce((s, c) => s + c.allocation, 0),
+              remaining_faf: cols.reduce((s, c) => s + c.remaining_faf, 0),
+              unlocked: cols.reduce((s, c) => s + c.unlocked, 0),
+              staked: cols.reduce((s, c) => s + c.staked, 0),
+              held: cols.reduce((s, c) => s + c.held, 0),
+              transferred: cols.reduce((s, c) => s + c.transferred, 0),
+              delta: cols.reduce((s, c) => s + c.delta, 0),
+            };
+
+            const deltaColor = (v) => Math.abs(v) < 1 ? 'var(--ifm-color-emphasis-600)' : v > 0 ? 'var(--ifm-color-success)' : 'var(--ifm-color-danger)';
+            const deltaFmt = (v) => Math.abs(v) < 1 ? '0' : (v > 0 ? '+' : '') + fmt(v);
+
+            const metricRows = [
+              { label: 'FAF allocated', render: (c) => fmt(c.allocation), total: fmt(totals.allocation), spacingAfter: true },
+              { label: 'Unlocked so far', render: (c) => fmt(c.unlocked), total: fmt(totals.unlocked) },
+              { label: 'Currently staked', render: (c) => fmt(c.staked), total: fmt(totals.staked) },
+              { label: 'Currently held', render: (c) => fmt(c.held), total: fmt(totals.held) },
+              { label: 'Transferred out', render: (c) => fmt(c.transferred), total: fmt(totals.transferred) },
+              { label: 'Current vs. Unlocked', render: (c) => deltaFmt(c.delta), colorFn: (c) => deltaColor(c.delta), total: deltaFmt(totals.delta), totalColorFn: () => deltaColor(totals.delta), borderTop: true, spacingAfter: true },
+              { label: 'Remaining (locked)', render: (c) => fmt(c.remaining_faf), highlight: true, total: fmt(totals.remaining_faf) },
+              { label: 'Unlock period', render: (c) => `${(c.period_seconds / 86400).toFixed(0)} days`, align: 'center', total: '' },
+              { label: 'Start', render: (c) => c.start_time.split('T')[0], align: 'center', total: '' },
+              { label: 'End', render: (c) => c.end_time.split('T')[0], align: 'center', total: '' },
+            ];
+
+            return (
+              <div style={{
+                background: 'var(--ifm-background-surface-color)',
+                border: '1px solid var(--ifm-toc-border-color)',
+                borderRadius: 'var(--ifm-global-radius)',
+                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                padding: '24px',
+                marginBottom: '24px',
+              }}>
+                <h3 style={{ marginTop: 0 }}>Vesting Schedules</h3>
+                <p style={{ fontSize: '13px', color: 'var(--ifm-color-emphasis-600)', marginBottom: '16px' }}>
+                  Per-recipient breakdown of vesting parameters and what they have done with unlocked FAF.
+                  A positive Current vs. Unlocked means the wallet holds more FAF than what has been unlocked (acquired from other sources).
+                </p>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ ...tableStyles.table, minWidth: '600px' }}>
+                    <thead>
+                      <tr style={tableStyles.headerRow}>
+                        <th style={tableStyles.headerCell}></th>
+                        {cols.map((c, i) => (
+                          <th key={i} style={{ ...tableStyles.headerCell, textAlign: 'center', lineHeight: '1.3' }}>
+                            {c.label.includes(' ') ? c.label.split(' ').reduce((acc, word, j, arr) => {
+                              const mid = Math.ceil(arr.length / 2);
+                              if (j === mid) return [...acc, <br key={`br-${i}`} />, word];
+                              if (j > 0) return [...acc, ' ', word];
+                              return [word];
+                            }, []) : c.label}
+                          </th>
+                        ))}
+                        <th style={{ ...tableStyles.headerCell, textAlign: 'center', fontWeight: 'bold' }}>
+                          Total
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {metricRows.map((row, ri) => {
+                        const topBorder = row.borderTop ? { borderTop: '2px solid var(--ifm-color-emphasis-300)' } : {};
+                        const spacing = row.spacingAfter ? { paddingBottom: '12px' } : {};
+                        return (
+                        <tr key={ri} style={tableStyles.bodyRow} {...tableRowHoverHandlers}>
+                          <td style={{ ...labelStyle, ...(row.labelStyle || {}), ...topBorder, ...spacing }}>{row.label}</td>
+                          {cols.map((c, ci) => (
+                            <td key={ci} style={{
+                              ...(row.align === 'center' ? { ...tableStyles.cell, textAlign: 'center' } : valStyle),
+                              ...(row.highlight ? { color: 'var(--ifm-color-primary)', fontWeight: 'bold' } : {}),
+                              ...(row.colorFn ? { color: row.colorFn(c), fontWeight: 'bold' } : {}),
+                              ...topBorder,
+                              ...spacing,
+                            }}>
+                              {row.render(c)}
+                            </td>
+                          ))}
+                          <td style={{
+                            ...(row.total ? valStyle : { ...tableStyles.cell, textAlign: 'center' }),
+                            ...(row.highlight ? { color: 'var(--ifm-color-primary)', fontWeight: 'bold' } : { fontWeight: 'bold' }),
+                            ...(row.totalColorFn ? { color: row.totalColorFn() } : {}),
+                            ...topBorder,
+                            ...spacing,
+                          }}>
+                            {row.total}
+                          </td>
+                        </tr>
+                        );
+                      })}
+                      {/* Links row */}
+                      <tr style={tableStyles.bodyRow} {...tableRowHoverHandlers}>
+                        <td style={labelStyle}>Links</td>
+                        {cols.map((c, ci) => (
+                          <td key={ci} style={{ ...tableStyles.cell, textAlign: 'center' }}>
+                            <a
+                              href={`https://app.streamflow.finance/contract/solana/mainnet/${c.contract_address}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={tableStyles.link}
+                              {...linkHoverHandlers}
+                            >
+                              Contract
+                            </a>
+                            {' | '}
+                            <a
+                              href={`https://solscan.io/account/${c.recipient}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={tableStyles.link}
+                              {...linkHoverHandlers}
+                            >
+                              Wallet
+                            </a>
+                          </td>
+                        ))}
+                        <td style={{ ...tableStyles.cell, textAlign: 'center' }}></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Cancelled Contracts */}
+          {cancelled_contracts && cancelled_contracts.length > 0 && (
+            <details style={{ marginBottom: '24px' }}>
+              <summary style={{ cursor: 'pointer', padding: '12px', background: 'var(--ifm-background-surface-color)', border: '1px solid var(--ifm-toc-border-color)', borderRadius: 'var(--ifm-global-radius)' }}>
+                <strong>Cancelled Contracts ({cancelled_contracts.length})</strong>
+              </summary>
+              <div style={{
+                marginTop: '16px',
+                background: 'var(--ifm-background-surface-color)',
+                border: '1px solid var(--ifm-toc-border-color)',
+                borderRadius: 'var(--ifm-global-radius)',
+                padding: '16px',
+              }}>
+                {cancelled_contracts.map((contract, idx) => (
+                  <div key={idx} style={{ marginBottom: '8px', fontSize: '14px' }}>
+                    <strong>{contract.label}</strong>: {contract.contract_address.substring(0, 8)}...
+                    {contract.cancelled_at && ` (cancelled ${contract.cancelled_at.split('T')[0]})`}
+                    {contract.replaced_by && ` - replaced by ${contract.replaced_by.substring(0, 8)}...`}
+                  </div>
+                ))}
+              </div>
+            </details>
+          )}
+        </>
+      );
+    }
+
+    return <FlashVestingTimelinePage />;
+  }}
+</BrowserOnly>
+
+## Contract History
+
+Per the [Token Transparency Report](https://flash-trade.notion.site/Token-transparency-report), 5.825% of FAF supply (58.25M) is allocated to Streamflow vesting: Advisory 4.25M (0.425%) and Solana Labs 54M (5.4%).
+
+All vesting is intended to start at TGE (April 12, 2025), but the Streamflow contracts were created later: Advisory on April 21-23, Solana Labs on October 7. To compensate, recipients received a direct transfer covering the portion that would have vested between TGE and contract creation. These direct transfers were never technically locked in a contract, but we treat them as part of the vesting allocation because the FAF was not available to recipients before TGE. The chart models this by locking the full 58.25M at TGE and distributing the pre-contract unlocks periodically, matching each contract's unlock cadence.
+
+The allocation amounts are proven on-chain by tracing the intermediary account (`5Arak...` / [2dT2ih...](https://solscan.io/account/2dT2ihztFs5hVdL21AMDVQGHdCGScnT5MiwERh6zUeJC)):
+
+**Advisory (4,250,000 FAF)**, funded 2025-04-21 from team treasury, contracts created 9-11 days after TGE:
+
+| Recipient | Direct transfer | Streamflow contract | Total |
+|-----------|----------------|---------------------|-------|
+| Advisory 0.15% | 0 | 1,500,000 | 1,500,000 |
+| Advisory 0.175% | 801,025 | 948,975 | 1,750,000 |
+| Advisory 0.1% | 0 | 1,000,000 | 1,000,000 |
+
+**Solana Labs (54,000,000 FAF)**, funded 2025-10-07 from team treasury ([tx](https://solscan.io/tx/52P2ggEYSKvhjmnxfmEPaY5hdiHT7xz573tpsrJYoja13WbBTE9apvsjm2A9cwKEvv6zVsKjm1X4czL7JANqZqZf)), contracts created ~178 days after TGE:
+
+| Recipient | Direct transfer | Streamflow contract | Total |
+|-----------|----------------|---------------------|-------|
+| Tranche 1 | 8,400,000 | 26,600,000 | 35,000,000 |
+| Tranche 2 | 4,605,600 | 14,394,400 | 19,000,000 |
+
+The direct transfers closely match the theoretical periodic vesting from TGE to contract creation (e.g. SL T1: 35M x 178/731 days = 8.52M theoretical vs 8.4M actual, with minor differences from discrete weekly vesting periods).
+
+## Use Cases
+
+This page helps you:
+
+- **Track locked token supply**: Monitor total FAF tokens remaining in Streamflow vesting contracts
+- **Plan for upcoming unlocks**: See when the next unlock events will occur and how much FAF will be released
+- **Analyze recipient behavior**: Check whether vesting recipients stake, hold, or transfer their unlocked FAF
+- **Assess potential sell pressure**: Understand the unlock schedule relative to total circulating supply
+- **Verify vesting parameters**: Examine individual contract details including allocation, unlock period, and start/end dates
+- **Audit on-chain provenance**: Trace allocation amounts through intermediary accounts and contract replacements
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+**Summary Cards:**
+- **Total Vesting**: Sum of FAF allocated across all Streamflow vesting contracts (tooltip shows percentage of total FAF supply)
+- **Remaining Locked**: Percentage of total vesting allocation still locked in contracts
+- **Vesting Wallet Conviction**: Ratio of (staked + held) to unlocked FAF across all vesting wallets. Values above 100% indicate wallets acquired additional FAF beyond their unlocked vesting amount
+
+**Unlock Timeline Chart:**
+- **X-axis**: Date (chronological, extending into future)
+- **Y-axis**: Total FAF remaining locked across all vesting contracts
+- **Decreasing line**: Shows locked FAF being released over time as unlocks occur
+- **Step drops**: Sudden decreases mark individual unlock events
+- **Staked + held overlay** (if available): Shows staked FAF plus FAF held in wallets with vesting contracts as a single combined daily timeline derived from on-chain history.
+
+**Vesting Schedules Table:**
+- Transposed layout with recipients as columns and metrics as rows
+- **FAF allocated**: Total allocation per recipient
+- **Remaining (locked)**: FAF still in the vesting contract (highlighted)
+- **Unlocked so far**: FAF that has vested and become available (includes direct pre-contract transfers)
+- **Currently staked / Currently held / Transferred out**: Breakdown of what recipients did with unlocked FAF
+- **Current vs. Unlocked**: Difference between (staked + held) and unlocked amount. Green = wallet holds more than unlocked (acquired extra FAF), red = less, grey = equal
+- **Unlock period / Start / End**: Contract timing parameters
+- **Links**: Direct links to Streamflow contract and recipient wallet on Solscan
+
+**Cancelled Contracts (expandable):**
+- Lists any contracts that were replaced, with cancellation dates and replacement info
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Data Sources**
+
+- **Streamflow Finance**: Vesting contracts queried directly on-chain from [Streamflow](https://streamflow.finance/) program (`strmRqUCoQUgGUan5YhzUZa6KqdzwX5L6FpUxfmKg5m`)
+- **Contract Parameters**: Start time, end time, cliff, period, and amounts decoded from on-chain account data via RPC
+- **Live Status**: Withdrawn amounts reflect current on-chain state
+- **Allocation Proof**: Traced via intermediary token account `2dT2ihztFs5hVdL21AMDVQGHdCGScnT5MiwERh6zUeJC`
+
+**Calculation Process**
+
+- **Contract Discovery**: Known vesting contract addresses from Token Transparency Report
+- **On-Chain Query**: Fetch account data via RPC and decode Streamflow's `TokenStreamData` account structure
+- **Timeline Calculation**: Build daily locked FAF timeline from TGE to contract end dates. For contracts created after TGE, pre-contract vesting is modeled as periodic unlocks from TGE to contract start, matching the contract's unlock period
+- **Unlock Schedule**: Calculate individual unlock events based on period parameters
+- **Wallet Balance History**: For each recipient, fetch all FAF token account transactions and replay to build a daily held-balance timeline
+- **Allocation Verification**: Old contract withdrawal history combined with intermediary account flow analysis
+
+**Limitations**
+
+- Pre-contract vesting is modeled as periodic unlocks matching each contract's cadence; actual direct transfer amounts may differ slightly from theoretical due to rounding to discrete periods
+- Cancelled contracts show final state at cancellation; mid-contract history is not tracked
+
+**Update Frequency**
+
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
+
+</details>

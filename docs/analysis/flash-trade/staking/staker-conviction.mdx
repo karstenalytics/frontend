@@ -1,0 +1,97 @@
+---
+title: Staker Conviction
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Staker Conviction
+
+Shows how many Flash.Trade FAF stakers reinvest their epoch rewards, broken down by stake size tier. Toggle between wallet count and FAF-weighted views: wallet count treats every staker equally, while FAF-weighted measures what percentage of distributed FAF was actually re-staked.
+
+## Current Metrics
+
+<BrowserOnly fallback={<LoadingSpinner />}>
+  {() => {
+    const StakerConvictionMetrics = require('@site/src/components/FlashTrade/StakerConvictionMetrics').default;
+    return <StakerConvictionMetrics />;
+  }}
+</BrowserOnly>
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const ConvictionEpochChart = require('@site/src/components/FlashTrade/ConvictionEpochChart').default;
+    return <ConvictionEpochChart />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This chart helps you:
+
+- **Assess protocol conviction**: Measure how many stakers reinvest FAF rewards vs. hold or sell them
+- **Identify loyalty trends**: Track whether the compound rate is rising or falling across epochs
+- **Analyze behavior by stake size**: See if whales are more or less likely to compound than smaller stakers
+- **Evaluate reward strategies**: Understand which staker segments reinvest most aggressively
+- **Compare across epochs**: Identify whether conviction changes around specific protocol events or market conditions
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+- **Compound Rate card**: Percentage of wallets that re-staked within 7 days of claiming, aggregated across all epochs
+- **FAF Compound Rate card**: Percentage of total distributed FAF that was re-staked (weighted by amount, not wallet count)
+- **FAF Distributed to Stakers card**: Total FAF rewards distributed across all epochs
+- **X-axis**: Epoch number (monthly reward distribution periods, 15th to 14th of the following month)
+- **Y-axis**: Compound rate as a percentage
+- **Toggle**: Switch between wallet count view and FAF-weighted view
+- **Color-coded lines**: Each stake size tier shown separately (less than 10K, 10K-100K, 100K-1M, 1M-10M, 10M+ FAF)
+- **Dashed line**: All Stakers aggregate
+- **Hover**: See sample sizes (number of wallets) per tier per epoch, shown regardless of toggle selection
+- **Asterisk (*)**: Current epoch in progress. The rate may still change during the first 7 days after distribution as stakers claim and re-stake
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Compound Rate Calculation**
+
+- **FAF Token Claims** (`CollectTokenReward`): FAF rewards are distributed monthly after each epoch ends (on the 15th)
+- **Time Window**: 7 days after claiming
+- **Compound Criteria**: A wallet is considered a "compounder" for a given epoch if it stakes FAF within 7 days of any claim in that epoch
+- **Formula**: `Compound Rate = (Wallets that re-staked within 7 days) / (Total wallets with claims) x 100`, counted per epoch then aggregated across all epochs
+- **FAF-weighted variant**: Uses claimed FAF amounts instead of wallet counts
+
+**Stake Size Tiers**
+
+- **Less than 10K FAF**: Small stakers, **10K-100K FAF**: Medium stakers, **100K-1M FAF**: Large stakers, **1M-10M FAF**: Whales, **10M+ FAF**: Mega whales
+- Wallets are grouped by their staked FAF balance at the start of each epoch (the 15th), enabling analysis of how conviction differs by wallet size over time
+
+**Why FAF Token Rewards?**
+
+- FAF stakers also receive USDC revenue share (`CollectRevenue`), but only FAF token rewards are used because they represent the re-investment decision: a staker must actively choose to re-stake FAF rather than hold or sell it. USDC rewards cannot be directly re-staked.
+
+**Data Source**
+
+- On-chain staking events from the Flash.Trade perpetuals program, starting April 12, 2025
+- FAF token claims (`CollectTokenReward`) and re-stakes (`DepositTokenStake`) tracked per wallet
+
+**Update Frequency**
+
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- **Data window**: Staking data starts April 12, 2025; claims before this date are not captured
+- **Pre-window balances**: Wallets that were already staking before April 12, 2025 have their initial balance estimated from subsequent events
+- **Re-stake definition**: Only direct FAF deposits (`DepositTokenStake`) count as compounding; staking via NFT conversion (`BurnAndStake`) is not counted
+- **Epoch 1 not shown**: Epoch 1 (April 15 - May 14, 2025) has no data in the chart because FAF token rewards were first distributed on May 15, 2025
+- **Epoch boundaries approximated**: Epochs are assumed to start at UTC midnight on the 15th. On-chain, the actual transition is the `distribute_token_reward` instruction, which historically fires later on the 15th (typically between 01:00-10:00 UTC). Claims between midnight and the actual distribution are rare and the impact on compound rates is negligible
+
+</details>

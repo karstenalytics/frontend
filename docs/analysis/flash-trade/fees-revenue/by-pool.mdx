@@ -1,0 +1,322 @@
+---
+title: By Pool
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+export const poolFilter = {
+  _pools: null,
+  _cbs: new Set(),
+  get() { return this._pools; },
+  set(v) { this._pools = v; this._cbs.forEach(fn => fn(v)); },
+  sub(fn) { this._cbs.add(fn); return () => this._cbs.delete(fn); },
+};
+
+# Fees & Revenue by Pool
+
+Displays protocol fees and revenue categorized by liquidity pool over time. Toggle between daily and cumulative views, and switch between fee and revenue metrics to compare pool contributions.
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '800px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useState, useEffect } = require('react');
+    const PoolModule = require('@site/src/components/FlashTrade/PoolStackedAreaChart');
+    const PoolStackedAreaChart = PoolModule.default;
+
+    function ChartSection() {
+      const [visiblePools, setLocalPools] = useState(poolFilter.get());
+
+      useEffect(() => {
+        poolFilter._cbs.add(setLocalPools);
+        return () => poolFilter._cbs.delete(setLocalPools);
+      }, []);
+
+      const setVisiblePools = (pools) => {
+        poolFilter.set(pools);
+      };
+
+      return (
+        <PoolStackedAreaChart
+          visiblePools={visiblePools}
+          onVisibilityChange={setVisiblePools}
+        />
+      );
+    }
+
+    return <ChartSection />;
+  }}
+</BrowserOnly>
+
+## Top Transactions
+
+The table displays the largest individual transactions contributing to protocol fees and revenue.
+
+<BrowserOnly fallback={<div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useState, useEffect } = require('react');
+    const { POOL_COLORS } = require('@site/src/components/FlashTrade/PoolStackedAreaChart');
+    const { tableStyles, tableRowHoverHandlers, linkHoverHandlers } = require('@site/src/styles/tableStyles');
+
+    function TransactionsTable() {
+      const [topTxData, setTopTxData] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+      const [visiblePools, setLocalPools] = useState(poolFilter.get());
+
+      useEffect(() => {
+        poolFilter._cbs.add(setLocalPools);
+        return () => poolFilter._cbs.delete(setLocalPools);
+      }, []);
+
+      useEffect(() => {
+        fetch('/data/flash-trade/top_transactions_pool.json')
+          .then(r => r.ok ? r.json() : null)
+          .then(topTx => {
+            setTopTxData(topTx);
+            setLoading(false);
+          })
+          .catch(err => {
+            setError(err.message);
+            setLoading(false);
+          });
+      }, []);
+
+      const consolidatePoolName = (name) => name.replace(/ \(V[0-9](?:\/V[0-9])?\)$/, '');
+
+      const clearFilter = () => {
+        poolFilter.set(null);
+      };
+
+      if (loading) {
+        return (
+          <div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      if (error) {
+        return (
+          <div style={{
+            padding: '32px',
+            background: 'var(--ifm-background-surface-color)',
+            border: '1px solid var(--ifm-color-danger)',
+            borderRadius: 'var(--ifm-global-radius)',
+            color: 'var(--ifm-color-danger)',
+          }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '8px' }}>Error Loading Data</div>
+            <p>{error}</p>
+          </div>
+        );
+      }
+
+      const allTransactions = topTxData?.transactions || [];
+      const filteredTransactions = visiblePools
+        ? allTransactions.filter(tx => visiblePools.includes(consolidatePoolName(tx.pool)))
+        : allTransactions;
+      const displayTransactions = filteredTransactions.slice(0, 10);
+
+      return (
+        <div>
+          {visiblePools && (
+            <div style={{
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
+              <span style={{ fontSize: '14px', color: 'var(--ifm-color-secondary)' }}>
+                {visiblePools.length === 1
+                  ? <>Filtered by: <strong style={{ color: POOL_COLORS[visiblePools[0]] || 'var(--ifm-font-color-base)' }}>{visiblePools[0]}</strong></>
+                  : <>Showing {visiblePools.length} pools</>
+                }
+              </span>
+              <button
+                onClick={clearFilter}
+                style={{
+                  padding: '6px 12px',
+                  fontSize: '13px',
+                  background: 'var(--ifm-color-emphasis-200)',
+                  border: '1px solid var(--ifm-toc-border-color)',
+                  borderRadius: 'var(--ifm-global-radius)',
+                  cursor: 'pointer',
+                  color: 'var(--ifm-font-color-base)',
+                }}
+              >
+                Clear Filter
+              </button>
+            </div>
+          )}
+
+          {topTxData ? (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={tableStyles.table}>
+                <thead>
+                  <tr style={tableStyles.headerRow}>
+                    <th style={tableStyles.headerCell}>#</th>
+                    <th style={tableStyles.headerCell}>Date</th>
+                    <th style={tableStyles.headerCell}>Pool</th>
+                    <th style={tableStyles.headerCell}>Type</th>
+                    <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>Fee (USDC)</th>
+                    <th style={tableStyles.headerCell}>Transaction</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayTransactions.length > 0 ? displayTransactions.map((tx, idx) => {
+                    const poolName = consolidatePoolName(tx.pool);
+                    const color = POOL_COLORS[poolName] || '#888888';
+                    return (
+                      <tr key={tx.signature} style={tableStyles.bodyRow} {...tableRowHoverHandlers}>
+                        <td style={{ ...tableStyles.cell, fontWeight: 600 }}>{idx + 1}</td>
+                        <td style={tableStyles.dateCell}>{tx.date}</td>
+                        <td style={tableStyles.cell}>
+                          <span style={{
+                            display: 'inline-block',
+                            width: '10px',
+                            height: '10px',
+                            borderRadius: '2px',
+                            backgroundColor: color,
+                            marginRight: '6px',
+                          }} />
+                          {poolName}
+                        </td>
+                        <td style={tableStyles.cell}>{tx.type}</td>
+                        <td style={{ ...tableStyles.cell, textAlign: 'right', fontWeight: 600 }}>
+                          ${tx.fee_usdc.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                        <td style={tableStyles.addressCell}>
+                          <a
+                            href={`https://solscan.io/tx/${tx.signature}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={tableStyles.link}
+                            {...linkHoverHandlers}
+                          >
+                            {tx.signature.slice(0, 8)}...{tx.signature.slice(-8)}
+                          </a>
+                        </td>
+                      </tr>
+                    );
+                  }) : (
+                    <tr>
+                      <td colSpan={6} style={{ ...tableStyles.cell, textAlign: 'center', padding: '24px' }}>
+                        {visiblePools ? 'No transactions found for selected pools' : 'No transactions available'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={{
+              padding: '32px',
+              textAlign: 'center',
+              background: 'var(--ifm-background-surface-color)',
+              border: '1px solid var(--ifm-toc-border-color)',
+              borderRadius: 'var(--ifm-global-radius)',
+              color: 'var(--ifm-color-secondary)',
+            }}>
+              Transaction data not yet available. The data pipeline will generate this file on the next run.
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return <TransactionsTable />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This chart helps you:
+
+- **Track fee and revenue trends**: Monitor how each pool's contribution changes over time
+- **Explore fee composition**: Use the metric toggles to compare Fees (trading + non-trading) and Revenue (protocol fee distributions)
+- **Identify top performers**: See which perpetual markets generate the most protocol fees
+- **Compare fee magnitudes**: Switch metrics to see how gross fees compare to protocol revenue distributions
+- **Assess pool concentration**: Determine if revenue is concentrated in specific markets or distributed
+- **Investigate specific pools**: Click on a pool to filter the transactions table and examine individual trades
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+**Fees/Revenue Chart:**
+- **X-axis**: Date (UTC days) from April 12, 2025 onwards
+- **Y-axis**: Fees/Revenue in USDC (stacked, auto-scales to active metric)
+- **View modes**: Toggle between "Daily" (stacked bar chart) and "Cumulative" (stacked area chart, running total)
+- **Metric toggles**: Switch between Fees (trading + non-trading) and Revenue (MoveProtocolFees distributions). The y-axis auto-scales to the active metric.
+- **Colored areas/bars**: Each color represents a different pool's contribution
+- **Total height**: In daily mode, sum of all pools for that day; in cumulative mode, total up to that date
+- **Interactions**:
+  - Use the Daily/Cumulative toggle at the top right to switch views
+  - Use the metric toggle to switch between Fees and Revenue
+  - Click legend items to filter the transactions table
+  - Double-click legend to isolate a single pool
+  - Hover to see values per pool
+
+**Top Transactions Table:**
+- **Date**: When the transaction occurred (UTC)
+- **Pool**: Which market generated the fee
+- **Type**: Trading operation type (CloseAndSwap, OpenPosition, Liquidate, etc.)
+- **Fee (USDC)**: Fee amount in USDC
+- **Transaction**: Signature (links to Solscan for detailed exploration)
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Data Sources**
+
+- **Treasury transactions**: On-chain data from the Flash.Trade stake pool authority
+- **Fee attribution**: Internal fee events decoded from transaction logs
+- **Pool identification**: Borsh-encoded pool identifiers in CPI event data
+
+**Pool Types**
+
+Flash.Trade operates multiple perpetual markets (pools):
+
+| Pool | Market | Description |
+|------|--------|-------------|
+| Crypto.1 | BTC/ETH/SOL | Main crypto perpetuals (largest volume) |
+| Governance.1 | Governance tokens | Governance token perpetuals |
+| Community.1 | Community tokens | Community/meme token perpetuals |
+| Community.2 | Community tokens | Additional community markets |
+| Community.3 | Community tokens | Additional community markets (last active July 2025) |
+| Trump.1 | TRUMP | TRUMP memecoin perpetuals |
+| Ore.1 | ORE | ORE token perpetuals |
+| Virtual.1 | Virtual tokens | Virtual token perpetuals |
+| Remora.1 | Remora tokens | Remora perpetuals |
+
+**Pool Version Consolidation**
+
+The backend tracks contract versions separately (e.g., "Crypto.1 (V1/V2)", "Crypto.1 (V3)"). The data pipeline strips all version suffixes (V1, V2, V3, V1/V2) and consolidates by base name before delivery, as the version distinction is an implementation detail not relevant for revenue analysis.
+
+**Fee Attribution**
+
+Each trading operation generates fees that are attributed to a specific pool:
+- Parse internal fee events from transaction logs
+- Decode Borsh-encoded pool identifier
+- Map to human-readable pool name
+- Aggregate by date and pool
+
+**Update Frequency**
+
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- Transaction table stores up to 10 entries per pool (90 total) and displays the top 10 for the active view; applying a pool filter reveals that pool's individual top 10
+- Pool versions are consolidated (V1/V2 shown together)
+- New pools may appear with generated names until manually labeled
+- Revenue metric shows zero for April 12 - June 18, 2025 because MoveProtocolFees tracking began on June 19, 2025
+- Fees metric shows trading + non-trading fees; LP fees are excluded (less than 1% of total)
+
+</details>

@@ -1,0 +1,87 @@
+---
+title: Effective Take Rate
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Effective Take Rate
+
+Shows the share of gross fees swept as protocol revenue each week, broken down by pool and displayed as a rolling average.
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const EffectiveRevenueRateChart = require('@site/src/components/FlashTrade/EffectiveRevenueRateChart').default;
+    return <EffectiveRevenueRateChart />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This chart helps you:
+
+- **Verify protocol economics**: Compare the observed take rate against documented fee splits to confirm the revenue model works as expected
+- **Track fee structure changes**: Monitor whether effective take rates shift over time due to vault composition changes
+- **Compare pool economics**: See which pools retain more or less revenue based on their staking/compounding vault splits
+- **Evaluate the Overall rate**: Understand how the aggregate take rate is dominated by the largest fee-generating pool (Crypto.1)
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+**Line Chart:**
+- **X-axis**: Weekly midpoints (Wednesday of each ISO week)
+- **Y-axis**: Take rate as a percentage (0-50%)
+- **Colored lines**: Each line represents an individual pool's take rate
+- **Bold line (Overall)**: The aggregate take rate across all pools, weighted by fee volume
+- **Window toggle**: Switch between 1-week and 4-week rolling
+
+**Interpreting the values:**
+- A stable line means the pool's fee structure has not changed
+- Wider rolling windows produce smoother lines; narrower windows show more recent shifts
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Staking vs. Compounding Vault Blending**
+
+The [official fee distribution](https://docs.flash.trade/flash-trade/flash-trade-protocol/technical-architecture/fee-distribution) documents the protocol share for the **staking vault** only (e.g. 30% for Crypto Pool, 20% for Meme Pool). The compounding vault typically has a lower protocol share, so the effective rate is a blend of both vaults weighted by their LP composition. For pools where both vaults share the same split (like Crypto.1 at 70/30), the effective rate equals the documented rate. For pools with a more favorable compounding split (like Trump.1 at 80/20 staking, 95/5 compounding), the effective rate is lower than the docs suggest.
+
+**Data Source**
+
+Weekly pool metrics are pre-computed from daily fee and revenue data. Each ISO week aggregates:
+- **Gross fees**: Sum of `gross_fees_usdc` across all days in the week
+- **Revenue**: Sum of MoveProtocolFees distributions (`revenue`) across all days
+
+**Take Rate Calculation (Rolling Window)**
+
+Fees are generated when trades happen (SwapFeeInternal), but revenue is swept later by MoveProtocolFees (every ~6 hours). This timing lag means a single week's ratio can spike above the theoretical maximum when a sweep catches up on accumulated fees from prior weeks. To eliminate this artifact, the chart uses a **trailing rolling window**:
+
+```
+take_rate = sum(revenue_usdc over window) / sum(fees_usdc over window)
+```
+
+Available windows:
+- **1-Week**: Shows raw weekly ratios, more volatile due to timing lag
+- **4-Week** (default): Smooths out most timing artifacts while still showing trends
+
+Per-pool and overall rates are computed independently. The overall rate is the ratio of total revenue to total fees, not an average of per-pool rates.
+
+**Weekly Aggregation**
+
+- Data is grouped by ISO week (Monday-Sunday)
+- Partial weeks at the start and end of the dataset are flagged and excluded from the chart
+- This prevents edge effects from incomplete data inflating or deflating apparent rates
+
+**Update Frequency**
+
+Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+
+</details>

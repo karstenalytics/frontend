@@ -1,0 +1,288 @@
+---
+title: Active Stakers
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Active Stakers
+
+Tracks the number of unique wallets holding active FAF stakes over time. The count increases when new wallets stake and decreases when wallets request a full unstake.
+
+## Current Metrics
+
+<BrowserOnly fallback={<div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const MetricCard = require('@site/src/components/common/MetricCard').default;
+    const { useActiveStakers } = require('@site/src/hooks/useActiveStakers');
+
+    function StakerMetrics() {
+      const { data, loading, error } = useActiveStakers('flash-trade');
+
+      if (loading) {
+        return (
+          <div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      if (error || !data) {
+        return (
+          <div style={{
+            padding: '32px',
+            background: 'var(--ifm-background-surface-color)',
+            border: '1px solid var(--ifm-color-danger)',
+            borderRadius: 'var(--ifm-global-radius)',
+            color: 'var(--ifm-color-danger)',
+          }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '8px' }}>Error Loading Staker Metrics</div>
+            <p>{error || 'Unknown error'}</p>
+          </div>
+        );
+      }
+
+      return (
+        <div className="usage-summary-grid">
+          <MetricCard
+            title="Active Stakers"
+            value={data.current_active_stakers}
+            format="number"
+            change={data.active_stakers_change_pct}
+            tooltip={"Number of wallets currently holding staked FAF. Increases when new wallets stake, decreases when wallets fully unstake.\nChange compares the current count to 30 days ago."}
+          />
+          <MetricCard
+            title="Top 50 Concentration"
+            value={data.top50_concentration_pct}
+            format="percent"
+            change={data.top50_concentration_change_pp}
+            tooltip={"Share of all staked FAF held by the 50 largest stakers. A higher value indicates more concentrated staking power.\nChange shows the percentage point difference vs. 30 days ago."}
+          />
+          <MetricCard
+            title="Top 50 at Peak"
+            value={data.top50_at_peak_pct}
+            format="percent"
+            change={data.top50_at_peak_change_pp}
+            tooltip={"Share of the top 50 stakers currently at their all-time-high staked balance. Wallets whose current balance equals their historical maximum are counted, including recent first-time stakers.\nChange shows the percentage point difference vs. 30 days ago."}
+          />
+        </div>
+      );
+    }
+
+    return <StakerMetrics />;
+  }}
+</BrowserOnly>
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const UsageTimeSeriesChart = require('@site/src/components/Usage/UsageTimeSeriesChart').default;
+    const { useActiveStakers } = require('@site/src/hooks/useActiveStakers');
+
+    function StakerChart() {
+      const { data, loading, error, config } = useActiveStakers('flash-trade');
+
+      if (loading) {
+        return (
+          <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      if (error || !data) return null;
+
+      return (
+        <UsageTimeSeriesChart
+          title="Active Stakers"
+          data={data.daily_counts}
+          yAxisLabel="Wallets with Active Stakes"
+        />
+      );
+    }
+
+    return <StakerChart />;
+  }}
+</BrowserOnly>
+
+## Top 50 Stakers
+
+<BrowserOnly fallback={<div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useActiveStakers } = require('@site/src/hooks/useActiveStakers');
+    const { tableStyles, tableRowHoverHandlers, linkHoverHandlers, actionButtonHoverHandlers } = require('@site/src/styles/tableStyles');
+
+    function StakerTable() {
+      const { data, loading, error } = useActiveStakers('flash-trade');
+
+      if (loading) {
+        return (
+          <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      if (error || !data) return null;
+
+      return (
+        <>
+          <p style={{ marginBottom: '16px', color: 'var(--ifm-color-emphasis-700)' }}>
+            Largest FAF staking positions ranked by current staked balance.
+          </p>
+
+          <div style={{ overflowX: 'auto' }}>
+            <table style={tableStyles.table}>
+              <thead>
+                <tr style={tableStyles.headerRow}>
+                  <th style={tableStyles.headerCell}>Rank</th>
+                  <th style={tableStyles.headerCell}>Address</th>
+                  <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>Current Stake</th>
+                  <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>% of Total</th>
+                  <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>vs. Peak</th>
+                  <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>30d Change (pp)</th>
+                  <th style={{ ...tableStyles.headerCell, textAlign: 'center' }}>Timeline</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.top_stakers.map((staker, idx) => {
+                  const change = staker.change_30d_pp;
+                  const changeColor = change === null ? 'var(--ifm-color-emphasis-600)'
+                    : change > 0 ? 'var(--ifm-color-success)'
+                    : change < 0 ? 'var(--ifm-color-danger)'
+                    : 'inherit';
+                  const changeText = change === null ? '--'
+                    : `${change >= 0 ? '+' : ''}${change.toFixed(2)} pp`;
+                  return (
+                    <tr key={staker.address} style={tableStyles.bodyRow} {...tableRowHoverHandlers}>
+                      <td style={{ ...tableStyles.cell, fontWeight: 600 }}>{idx + 1}</td>
+                      <td style={tableStyles.addressCell}>
+                        <a
+                          href={`https://solscan.io/account/${staker.address}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={tableStyles.link}
+                          {...linkHoverHandlers}
+                        >
+                          {staker.address.slice(0, 4)}...{staker.address.slice(-4)}
+                        </a>
+                      </td>
+                      <td style={{ ...tableStyles.cell, textAlign: 'right', fontWeight: 600 }}>
+                        {staker.current_balance.toLocaleString(undefined, { maximumFractionDigits: 0 })} FAF
+                      </td>
+                      <td style={{ ...tableStyles.cell, textAlign: 'right' }}>
+                        {staker.share_pct.toFixed(2)}%
+                      </td>
+                      <td style={{ ...tableStyles.cell, textAlign: 'right' }}>
+                        {staker.vs_peak_pct.toFixed(0)}%
+                      </td>
+                      <td style={{ ...tableStyles.cell, textAlign: 'right', color: changeColor }}>
+                        {changeText}
+                      </td>
+                      <td style={{ ...tableStyles.cell, textAlign: 'center' }}>
+                        <a
+                          href={`/analysis/flash-trade/staking/wallet-timeline?wallet=${staker.address}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={tableStyles.actionButton}
+                          {...actionButtonHoverHandlers}
+                        >
+                          See details
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      );
+    }
+
+    return <StakerTable />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This chart helps you:
+
+- **Track protocol adoption**: Monitor growth in the number of wallets participating in FAF staking
+- **Assess user retention**: Identify periods of staker growth vs. churn (unstaking)
+- **Evaluate engagement trends**: Compare active staker counts over time
+- **Assess whale concentration**: Use the Top 50 Stakers table to see how staking power is distributed among the largest holders
+
+## How to Read This Page
+
+<details>
+<summary>Click to expand reading guide</summary>
+
+**Summary Cards:**
+- **Active Stakers**: Current count of wallets with staked FAF > 0. Change badge shows the percentage change vs. 30 days ago.
+- **Top 50 Concentration**: Combined share of all staked FAF held by the 50 largest stakers. Change badge shows the percentage point shift vs. 30 days ago.
+- **Top 50 at Peak**: Percentage of the top 50 stakers currently at their all-time-high staked balance. Includes first-time stakers who are trivially at their peak. Change badge shows the percentage point shift vs. 30 days ago.
+
+**Active Stakers Time Series:**
+- **X-axis**: Date (UTC days)
+- **Y-axis**: Number of unique wallets with staked FAF balance > 0
+- **Line trend**: Shows the snapshot count of wallets with a positive staked balance at the end of each day
+- **Increases**: New stakers, wallets that restaked, or wallets that cancelled a pending unstake request
+- **Decreases**: Wallets that requested a full unstake (entering the unstake queue)
+
+**Top 50 Stakers Table:**
+- **Rank**: Position by current staked balance (descending)
+- **Address**: Solana address of the staker (links to Solscan)
+- **Current Stake**: Current staked FAF balance
+- **% of Total**: Wallet's share of all currently staked FAF
+- **vs. Peak**: Current balance as a percentage of the wallet's all-time-high staked balance (100% = at peak, lower = has partially unstaked)
+- **30d Change (pp)**: Change in % of Total over the last 30 days, in percentage points. "--" if wallet was first seen after the 30-day snapshot date
+- **Timeline**: "See details" button linking to the wallet's full staking timeline page
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Data Sources**
+
+- **Staking transactions**: On-chain staking instructions from Flash.Trade staking program
+- **Staker cache**: Compressed event log containing all staking activity
+
+**Active Staker Calculation**
+
+A wallet is counted as an **active staker** on a given day if:
+- Its staked FAF balance > 0 at 23:59:59 UTC
+- The balance is calculated by processing all stake/unstake events chronologically
+- Wallets with FAF only in the unstake queue (pending balance > 0, staked balance = 0) are **not** counted as active. The count drops when a wallet submits an unstake request, not when the FAF is physically withdrawn.
+
+**Summary Cards**
+
+- **Active Stakers**: Number of wallets with staked FAF > 0 at the latest data point. Change badge shows the percentage change vs. 30 days ago.
+- **Top 50 Concentration**: Sum of the "% of Total" column for the 50 largest stakers. Change badge shows the percentage point difference vs. the top-50 concentration 30 days ago (recomputed from the snapshot's top 50).
+- **Top 50 at Peak**: Percentage of the current top 50 stakers whose staked balance equals their all-time high. First-time stakers are trivially at their peak and are included. Change badge shows the percentage point difference vs. the snapshot 30 days ago.
+
+**30-Day Change Calculation**
+
+All 30-day change badges compare the current value against a snapshot taken at the most recent day with data at or before 30 days ago. On sparse datasets (e.g. a quiet weekend with no events), the snapshot may be slightly older than 30 days.
+
+**Top Stakers Ranking**
+
+The Top 50 Stakers table ranks by:
+- **Current staked balance**: Wallets sorted by their FAF balance at the latest data point (descending)
+- **% of Total**: Each wallet's share of the total staked FAF across all wallets
+- **vs. Peak**: Compares current balance to the wallet's all-time-high staked balance, showing retention
+- **30d Change**: Difference in share percentage between now and 30 days ago, showing trend
+
+**Active Staker Threshold**
+
+A wallet is counted as active when its replayed staked balance exceeds 0.001 tokens. Summing thousands of floating-point stake/unstake deltas in the browser can produce residual rounding dust (e.g. 10^-10) for wallets whose true balance is zero. The threshold eliminates these false positives and ensures the count matches the server-side computation on the Overview page, which uses fixed-precision decimal arithmetic.
+
+**Update Frequency**
+
+Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+
+</details>
