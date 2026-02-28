@@ -1,0 +1,223 @@
+---
+title: Pools vs. Types
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Pools vs. Types
+
+This page shows a revenue breakdown of how transaction types interact with liquidity pools. Click any chart segment to filter the transactions table.
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const PoolTypeMatrixChart = require('@site/src/components/Dashboard/PoolTypeMatrixChart').default;
+
+    function ChartSection() {
+      const handleSegmentClick = (poolId, poolLabel, displayName, technicalTypes) => {
+        window.dispatchEvent(new CustomEvent('poolTypeSegmentClick', {
+          detail: { poolId, poolLabel, displayName, technicalTypes }
+        }));
+      };
+      return <PoolTypeMatrixChart onSegmentClick={handleSegmentClick} />;
+    }
+
+    return <ChartSection />;
+  }}
+</BrowserOnly>
+
+## Top 10 Transactions
+
+The table displays the top 10 individual transactions contributing to treasury revenue. By default, it shows all transactions across all pool-type combinations, sorted by SOL amount.
+
+**Filtering**: Click any segment in the Marimekko chart above to filter the table to that specific pool-type combination's transactions.
+
+<BrowserOnly fallback={<div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useState, useEffect } = require('react');
+    const TopTransactionsTable = require('@site/src/components/Dashboard/TopTransactionsTable').default;
+    const useBaseUrl = require('@docusaurus/useBaseUrl').default;
+
+    function TransactionsSection() {
+      const [selectedSegment, setSelectedSegment] = useState(null);
+      const [topTransactionsPool, setTopTransactionsPool] = useState({});
+      const [topTransactionsPoolType, setTopTransactionsPoolType] = useState({});
+      const [summary, setSummary] = useState(null);
+      const [loading, setLoading] = useState(true);
+
+      const topTransactionsPoolPath = useBaseUrl('/data/defituna/top_transactions_pool.json');
+      const topTransactionsPoolTypePath = useBaseUrl('/data/defituna/top_transactions_pool_type.json');
+      const summaryPath = useBaseUrl('/data/defituna/summary.json');
+
+      useEffect(() => {
+        const handler = (e) => setSelectedSegment(e.detail);
+        window.addEventListener('poolTypeSegmentClick', handler);
+        return () => window.removeEventListener('poolTypeSegmentClick', handler);
+      }, []);
+
+      useEffect(() => {
+        Promise.all([
+          fetch(topTransactionsPoolPath).then(res => res.json()),
+          fetch(topTransactionsPoolTypePath).then(res => res.json()),
+          fetch(summaryPath).then(res => res.json())
+        ])
+          .then(([poolData, poolTypeData, summaryData]) => {
+            setTopTransactionsPool(poolData);
+            setTopTransactionsPoolType(poolTypeData);
+            setSummary(summaryData);
+            setLoading(false);
+          })
+          .catch(err => {
+            console.error('Error loading transaction data:', err);
+            setLoading(false);
+          });
+      }, [topTransactionsPoolPath, topTransactionsPoolTypePath, summaryPath]);
+
+      const handleClearFilter = () => setSelectedSegment(null);
+
+      return (
+        <>
+          {selectedSegment && (
+            <div style={{
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
+              <span style={{ fontSize: '14px', color: 'var(--ifm-color-secondary)' }}>
+                Filtered by: <strong>{selectedSegment.poolLabel}</strong>
+                {selectedSegment.displayName && (
+                  <>
+                    <span style={{ margin: '0 8px' }}>{'\u2192'}</span>
+                    <strong>{selectedSegment.displayName}</strong>
+                  </>
+                )}
+              </span>
+              <button
+                onClick={handleClearFilter}
+                style={{
+                  padding: '6px 12px',
+                  fontSize: '13px',
+                  background: 'var(--ifm-color-emphasis-200)',
+                  border: '1px solid var(--ifm-toc-border-color)',
+                  borderRadius: 'var(--ifm-global-radius)',
+                  cursor: 'pointer',
+                  color: 'var(--ifm-font-color-base)',
+                }}
+              >
+                Clear Filter
+              </button>
+            </div>
+          )}
+
+          {!loading && (
+            <TopTransactionsTable
+              topTransactionsToken={{}}
+              topTransactionsType={{}}
+              topTransactionsPool={topTransactionsPool}
+              topTransactionsPoolType={topTransactionsPoolType}
+              groupMode="pool"
+              selectedFilter={selectedSegment?.poolId}
+              selectedFilterLabel={selectedSegment?.poolLabel}
+              typeFilter={selectedSegment?.technicalTypes}
+              summary={summary}
+            />
+          )}
+        </>
+      );
+    }
+
+    return <TransactionsSection />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Identify high-value combinations**: Find pool-type pairs generating the most revenue by looking for large rectangular areas
+- **Assess pool specialization**: Determine if pools focus on specific transaction types or maintain diverse compositions
+- **Evaluate revenue concentration**: Check if revenue is driven by specific pool-type combinations
+- **Spot unusual patterns**: Identify gaps in expected pool-type pairs or unexpected concentrations
+- **Cross-reference with single-dimension views**: Combine insights from [By Type](/analysis/defituna/fees-revenue/tx-type-per-day) and [By Pool](/analysis/defituna/fees-revenue/by-pool) to understand pool-type interactions
+- **Track temporal changes**: Use [Tx Type per Day](/analysis/defituna/fees-revenue/tx-type-per-day) to see how pool-type patterns evolve daily, or [Orca vs. Fusion](/analysis/defituna/fees-revenue/orca-vs-fusion) to compare the two major protocol ecosystems
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+**Understanding the Marimekko Format**
+
+The Marimekko (also called mosaic) chart provides a two-dimensional view of revenue where both dimensions matter:
+
+**Width Mode Toggle:**
+- **Equal** (default): All pools get the same column width, making it easy to compare transaction type composition across pools. Pool labels show each pool's share of total revenue in parentheses.
+- **Proportional**: Column width scales with each pool's share of total revenue. Wider columns = larger revenue contribution. In this mode, the area of each segment is proportional to that combination's share of total revenue.
+
+**Chart Dimensions:**
+- **X-axis (Width)**: Each vertical strip represents a **liquidity pool**. In Proportional mode, width reflects revenue share; in Equal mode, all columns are the same width.
+- **Y-axis (Height)**: Within each pool, segments show **transaction types**. Height represents the percentage share of pool revenue for that type (0-100%). Segments are stacked to show composition.
+- **Area**: In Proportional mode, the area of each colored segment is proportional to that pool-type combination's share of total revenue. In Equal mode, area reflects only the type's share within that pool.
+
+**Visual Interpretation:**
+
+This chart answers:
+- Which pool generates the most revenue? (widest strip)
+- What transaction types dominate each pool? (tallest segments)
+- Which pool-type combinations are most valuable? (largest areas)
+- How does transaction composition vary across pools? (segment patterns)
+
+**Color Coding:**
+- Each color represents a specific transaction type
+- Same color across pools = same transaction type in different pools
+- Legend shows all transaction types present in the data
+
+**Interactive Features:**
+- **Equal / Proportional toggle**: Switch between equal column widths (default, for easier composition comparison) and proportional widths (reflecting revenue share)
+- **Hover**: See exact SOL amounts and percentages for each pool-type segment
+- **Click segments**: Filter the transaction table by specific pool-type combinations
+- **Legend**: Click legend items to show/hide specific transaction types
+
+**Special Labels:**
+- **Other / Not Applicable**: Transactions that could not be attributed to a specific named liquidity pool, including protocol-level fee collections, liquidations, staking operations (e.g., Initialize Staking Position), and direct token transfers
+
+**Pattern Recognition:**
+
+Watch for:
+- **Large rectangular areas**: Pool-type combinations with substantial revenue (high-value segments to optimize)
+- **Narrow but tall segments**: High concentration in one type within a small pool
+- **Wide but short segments**: Revenue spread thinly across many types in a major pool
+- **Missing combinations**: Pool-type pairs with no revenue (gaps in expected patterns)
+- **Similar pool patterns**: Pools with comparable transaction type distributions
+- **Unique pool patterns**: Pools with distinctive type compositions
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Cross-Dimensional Revenue Attribution**
+
+This visualization combines two classification systems to create a matrix view:
+
+- **Pool attribution**: Each transaction is linked to the liquidity pool where it occurred, identified by protocol (Orca or Fusion) and token pair, or classified as "Other / Not Applicable"
+- **Type classification**: Each transaction is categorized by its operation type using log-based pattern matching
+- **Cross-tabulation**: Revenue is aggregated by each unique pool-type combination
+- **Sizing modes**: In Equal mode (default), all columns have uniform width for easier composition comparison. In Proportional mode, column width represents each pool's share of total revenue and segment area is proportional to that combination's share of total revenue. Height always represents each type's percentage share within that pool.
+
+**Data Accuracy**
+
+All values maintain 100% attribution accuracy. Each transaction is counted exactly once, assigned to one pool and one type. The chart shows the top 10 pools by revenue, covering approximately 90-95% of total revenue; remaining pools are excluded for visual clarity.
+
+For complete pipeline details, see [Data Pipeline](/analysis/data-pipeline).
+
+**Update Frequency**
+
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
+
+</details>

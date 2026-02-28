@@ -104,6 +104,12 @@ export interface DataContext {
   snapshot_date?: string;
 }
 
+export interface LoyaltyChanges {
+  loyalty_score_pct: number | null;
+  compound_rate_pct: number | null;
+  compound_only_users_pct: number | null;
+}
+
 export interface StakerLoyaltyData {
   generated_at: string;
   date_range: {
@@ -116,6 +122,7 @@ export interface StakerLoyaltyData {
   daily_trends?: DailyTrend[];
   visualizations?: Visualizations;
   context?: DataContext;
+  changes?: LoyaltyChanges;
 }
 
 export interface UseStakerLoyaltyResult {

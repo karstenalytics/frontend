@@ -19,8 +19,9 @@ export default function BehaviorPieChart({
   const { colorMode } = useColorMode();
   const template = getPlotlyTemplate(colorMode === 'dark');
 
-  // Detect mobile viewport
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 996 : false
+  );
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 996);
@@ -30,252 +31,270 @@ export default function BehaviorPieChart({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const plotRef1 = useRef<HTMLDivElement>(null);
-  const plotRef2 = useRef<HTMLDivElement>(null);
-
-  useChartTracking(plotRef1, {
-    chartName: 'Staker Activity Overview',
-    trackClick: true,
-    trackZoom: true,
-  });
-
-  useChartTracking(plotRef2, {
-    chartName: 'Reward Management Breakdown',
+  const plotRef = useRef<HTMLDivElement>(null);
+  useChartTracking(plotRef, {
+    chartName: 'Staker Reward Behavior Waterfall',
     trackClick: true,
     trackZoom: true,
   });
 
   const { by_behavior } = userSegments;
+  const compoundOnly = by_behavior.compound_only.count;
+  const mixed = by_behavior.mixed.count;
+  const claimOnly = by_behavior.claim_only.count;
 
-  // Calculate non-active stakers if currentActiveStakers is provided
-  const nonActiveCount = currentActiveStakers ? currentActiveStakers - totalUsers : 0;
+  const hasActiveStakers = currentActiveStakers != null && currentActiveStakers > 0;
+  const withoutRewardActivity = hasActiveStakers ? currentActiveStakers - totalUsers : 0;
 
-  if (!currentActiveStakers) {
-    // Fallback to single chart if no active staker data
-    return (
-      <div
-        ref={plotRef1}
-        style={{
-          background: 'var(--ifm-background-surface-color)',
-          border: '1px solid var(--ifm-color-emphasis-200)',
-          borderRadius: 'var(--ifm-global-radius)',
-          padding: '24px',
-          marginBottom: '32px',
-        }}
-      >
-        <h3 style={{ marginTop: 0 }}>How Stakers Manage Their Rewards</h3>
+  const tealColor = '#00A3B4';
+  const grayColor = '#9CA3AF';
+  const greenColor = '#22C55E';
+  const amberColor = '#F59E0B';
+  const redColor = '#EF4444';
 
-        <Plot
-          data={[
-            {
-              type: 'pie',
-              labels: ['Compound-only', 'Mixed Behavior', 'Claim-only'],
-              values: [
-                by_behavior.compound_only.count,
-                by_behavior.mixed.count,
-                by_behavior.claim_only.count,
-              ],
-              marker: {
-                colors: ['#22C55E', '#F59E0B', '#EF4444'],
-              },
-              textinfo: 'label+percent',
-              textposition: 'auto',
-              hovertemplate: '<b>%{label}</b><br>' +
-                '%{value} stakers (%{percent})<br>' +
-                '<extra></extra>',
-            },
-          ]}
-          layout={{
-            ...template.layout,
-            showlegend: true,
-            legend: {
-              orientation: 'h',
-              yanchor: 'bottom',
-              y: -0.2,
-              xanchor: 'center',
-              x: 0.5,
-            },
-            margin: { l: 10, r: 10, t: 20, b: 80 },
-            height: 400,
-            autosize: true,
-            dragmode: isMobile ? false : 'zoom',
-          }}
-          config={{
-            ...getResponsivePlotlyConfig(),
-            staticPlot: false,
-            scrollZoom: !isMobile,
-          }}
-          style={{ width: '100%', height: '400px' }}
-          useResizeHandler={true}
-        />
+  const pctOf = (value: number, total: number): string => {
+    if (total === 0) return '';
+    return `${((value / total) * 100).toFixed(1)}%`;
+  };
 
-        <p style={{ color: 'var(--ifm-color-emphasis-700)', marginTop: '16px', marginBottom: 0 }}>
-          Based on <strong>{totalUsers.toLocaleString()}</strong> unique stakers
-        </p>
-      </div>
-    );
+  const traces: Plotly.Data[] = [];
+
+  if (hasActiveStakers) {
+    const xLabels = [
+      isMobile ? 'All Active' : 'All Active\nStakers',
+      isMobile ? 'No Rewards' : 'Without Reward\nActivity',
+      isMobile ? 'With Rewards' : 'With Reward\nActivity',
+      isMobile ? 'Compound' : 'Compound-\nonly',
+      isMobile ? 'Mixed' : 'Mixed\nBehavior',
+      isMobile ? 'Claim' : 'Claim-\nonly',
+    ];
+
+    // Bar heights (all positive)
+    const yValues = [
+      currentActiveStakers,    // pos 1: full height
+      withoutRewardActivity,   // pos 2: floats at top
+      totalUsers,              // pos 3: anchored to 0
+      compoundOnly,            // pos 4: floats at top of bar 3
+      mixed,                   // pos 5: floats below bar 4
+      claimOnly,               // pos 6: anchored to 0
+    ];
+
+    // Base positions (where each bar starts)
+    const baseValues = [
+      0,                                          // pos 1: starts at 0
+      totalUsers,                                 // pos 2: starts at totalUsers, reaches currentActiveStakers
+      0,                                          // pos 3: starts at 0
+      totalUsers - compoundOnly,                  // pos 4: top slice of bar 3
+      totalUsers - compoundOnly - mixed,          // pos 5: below bar 4
+      0,                                          // pos 6: bottom slice, anchored to 0
+    ];
+
+    const barColors = [
+      tealColor, grayColor, tealColor,
+      greenColor, amberColor, redColor,
+    ];
+
+    const textLabels = [
+      currentActiveStakers.toLocaleString(),
+      `${withoutRewardActivity.toLocaleString()} (${pctOf(withoutRewardActivity, currentActiveStakers)})`,
+      totalUsers.toLocaleString(),
+      `${compoundOnly.toLocaleString()} (${pctOf(compoundOnly, totalUsers)})`,
+      `${mixed.toLocaleString()} (${pctOf(mixed, totalUsers)})`,
+      `${claimOnly.toLocaleString()} (${pctOf(claimOnly, totalUsers)})`,
+    ];
+
+    const hoverTexts = [
+      `<b>All Active Stakers</b><br>${currentActiveStakers.toLocaleString()} stakers`,
+      `<b>Without Reward Activity</b><br>${withoutRewardActivity.toLocaleString()} stakers (${pctOf(withoutRewardActivity, currentActiveStakers)} of all active)`,
+      `<b>With Reward Activity</b><br>${totalUsers.toLocaleString()} stakers (${pctOf(totalUsers, currentActiveStakers)} of all active)`,
+      `<b>Compound-only</b><br>${compoundOnly.toLocaleString()} stakers (${pctOf(compoundOnly, totalUsers)} of reward-active)`,
+      `<b>Mixed Behavior</b><br>${mixed.toLocaleString()} stakers (${pctOf(mixed, totalUsers)} of reward-active)`,
+      `<b>Claim-only</b><br>${claimOnly.toLocaleString()} stakers (${pctOf(claimOnly, totalUsers)} of reward-active)`,
+    ];
+
+    traces.push({
+      type: 'bar',
+      x: xLabels,
+      y: yValues,
+      base: baseValues,
+      marker: { color: barColors },
+      text: textLabels,
+      textposition: 'auto',
+      textfont: { size: isMobile ? 10 : 12 },
+      hovertemplate: '%{customdata}<extra></extra>',
+      customdata: hoverTexts,
+      showlegend: false,
+    });
+  } else {
+    // Fallback: simple bar chart with just behavior breakdown
+    const xLabels = [
+      isMobile ? 'Compound' : 'Compound-\nonly',
+      isMobile ? 'Mixed' : 'Mixed\nBehavior',
+      isMobile ? 'Claim' : 'Claim-\nonly',
+    ];
+
+    traces.push({
+      type: 'bar',
+      x: xLabels,
+      y: [compoundOnly, mixed, claimOnly],
+      marker: { color: [greenColor, amberColor, redColor] },
+      text: [
+        `${compoundOnly.toLocaleString()} (${pctOf(compoundOnly, totalUsers)})`,
+        `${mixed.toLocaleString()} (${pctOf(mixed, totalUsers)})`,
+        `${claimOnly.toLocaleString()} (${pctOf(claimOnly, totalUsers)})`,
+      ],
+      textposition: 'auto',
+      textfont: { size: isMobile ? 10 : 12 },
+      hovertemplate: '<b>%{x}</b><br>%{y:,} stakers<br><extra></extra>',
+      showlegend: false,
+    });
   }
+
+  // Connector lines between bars 1→2 and 1→3
+  // Categorical axis maps labels to integers 0,1,2... ; bars ~0.8 wide
+  const shapes: Partial<Plotly.Shape>[] = [];
+  if (hasActiveStakers) {
+    const connectorStyle = {
+      color: 'var(--ifm-color-emphasis-400)',
+      width: 1,
+      dash: 'dot' as const,
+    };
+    // Bar 1 → Bar 2 (y = currentActiveStakers)
+    shapes.push({
+      type: 'line',
+      x0: 0.4, x1: 0.6,
+      y0: currentActiveStakers, y1: currentActiveStakers,
+      xref: 'x', yref: 'y',
+      line: connectorStyle,
+    });
+    // Bar 2 → Bar 3 (y = totalUsers, bar 2 base = bar 3 top)
+    shapes.push({
+      type: 'line',
+      x0: 1.4, x1: 1.6,
+      y0: totalUsers, y1: totalUsers,
+      xref: 'x', yref: 'y',
+      line: connectorStyle,
+    });
+    // Bar 3 → Bar 4 (y = totalUsers, bar 3 top = bar 4 top)
+    shapes.push({
+      type: 'line',
+      x0: 2.4, x1: 2.6,
+      y0: totalUsers, y1: totalUsers,
+      xref: 'x', yref: 'y',
+      line: connectorStyle,
+    });
+    // Bar 4 → Bar 5 (y = totalUsers - compoundOnly, bar 4 base = bar 5 top)
+    shapes.push({
+      type: 'line',
+      x0: 3.4, x1: 3.6,
+      y0: totalUsers - compoundOnly, y1: totalUsers - compoundOnly,
+      xref: 'x', yref: 'y',
+      line: connectorStyle,
+    });
+    // Bar 5 → Bar 6 (y = claimOnly, bar 5 base = bar 6 top)
+    shapes.push({
+      type: 'line',
+      x0: 4.4, x1: 4.6,
+      y0: totalUsers - compoundOnly - mixed, y1: totalUsers - compoundOnly - mixed,
+      xref: 'x', yref: 'y',
+      line: connectorStyle,
+    });
+  }
+
+  const chartHeight = isMobile ? 380 : 450;
 
   return (
     <div
+      ref={plotRef}
       style={{
         background: 'var(--ifm-background-surface-color)',
         border: '1px solid var(--ifm-toc-border-color)',
         borderRadius: 'var(--ifm-global-radius)',
-        padding: '24px',
+        padding: isMobile ? '16px 0px 16px 0px' : '24px',
         marginBottom: '24px',
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       }}
     >
-      <h3 style={{ marginTop: 0, textAlign: 'center' }}>How Stakers Manage Their Rewards</h3>
-
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: isMobile ? '1fr' : '1fr auto 1fr',
-        gap: isMobile ? '24px' : '48px',
-        alignItems: 'center'
-      }}>
-        {/* Left Pie: Overall Activity Split */}
-        <div ref={plotRef1}>
-          <h4 style={{ textAlign: 'center', marginTop: 0, marginBottom: '16px', fontSize: isMobile ? '14px' : '16px' }}>
-            All Active Stakers
-          </h4>
-          <Plot
-            data={[
-              {
-                type: 'pie',
-                labels: ['Without Reward Activity', 'With Reward Activity'],
-                values: [nonActiveCount, totalUsers],
-                marker: {
-                  colors: ['#9CA3AF', '#00A3B4'],
-                },
-                textinfo: 'label+percent',
-                textposition: 'inside',
-                insidetextorientation: 'horizontal',
-                rotation: 120,
-                direction: 'clockwise',
-                textfont: {
-                  size: 14, 
-                },
-                hovertemplate: '<b>%{label}</b><br>' +
-                  '%{value} stakers (%{percent})<br>' +
-                  '<extra></extra>',
-              },
-            ]}
-            layout={{
-              ...template.layout,
-              showlegend: false,
-              margin: { l: 10, r: 10, t: 10, b: 40 },
-              height: 450,
-              autosize: true,
-            }}
-            config={getResponsivePlotlyConfig()}
-            style={{ width: '100%', height: '450px' }}
-            useResizeHandler={true}
-          />
-          <p style={{
-            textAlign: 'center',
-            fontSize: '14px',
-            color: 'var(--ifm-color-emphasis-700)',
-            marginTop: '8px',
-            marginBottom: 0,
-          }}>
-            {currentActiveStakers.toLocaleString()} Total Active Stakers
-          </p>
+      <Plot
+        data={traces}
+        layout={{
+          ...template.layout,
+          title: {
+            text: 'How Stakers Manage Their Rewards',
+            font: { size: isMobile ? 15 : 18, weight: 600 },
+          },
+          hovermode: 'closest',
+          xaxis: {
+            ...template.layout.xaxis,
+            title: '',
+            tickfont: { size: isMobile ? 9 : 12 },
+            showspikes: false,
+          },
+          yaxis: {
+            ...template.layout.yaxis,
+            title: isMobile ? '' : {
+              text: 'Number of Stakers',
+              font: { size: 14 },
+            },
+            tickfont: { size: isMobile ? 9 : 12 },
+            showspikes: false,
+            rangemode: 'tozero',
+          },
+          showlegend: false,
+          shapes,
+          dragmode: isMobile ? false : 'zoom',
+          ...(isMobile ? {
+            margin: { l: 45, r: 10, t: 40, b: 70 },
+          } : {
+            margin: { l: 70, r: 24, t: 50, b: 80 },
+          }),
+          height: chartHeight,
+          autosize: true,
+        }}
+        config={{
+          ...getResponsivePlotlyConfig(),
+          staticPlot: false,
+          scrollZoom: !isMobile,
+        }}
+        style={{ width: '100%', height: `${chartHeight}px` }}
+        useResizeHandler={true}
+      />
+      {isMobile && (
+        <div style={{
+          fontSize: '13px',
+          color: 'var(--ifm-color-secondary)',
+          marginTop: '0px',
+          marginLeft: '16px',
+          lineHeight: '1.6',
+        }}>
+          <div>{'\u2191'} Stakers</div>
         </div>
-
-        {/* Arrow Indicator - hidden on mobile */}
-        {!isMobile && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '0 16px',
-          }}>
-            <svg width="60" height="32" viewBox="0 0 60 32">
-              <defs>
-                <marker
-                  id="arrowhead"
-                  markerWidth="12"
-                  markerHeight="12"
-                  refX="10"
-                  refY="6"
-                  orient="auto"
-                  fill="#00A3B4"
-                >
-                  <polygon points="0 0, 12 6, 0 12" />
-                </marker>
-              </defs>
-              <line
-                x1="0"
-                y1="16"
-                x2="56"
-                y2="16"
-                stroke="#00A3B4"
-                strokeWidth="3"
-                markerEnd="url(#arrowhead)"
-              />
-            </svg>
-          </div>
-        )}
-
-        {/* Right Pie: Reward Activity Breakdown */}
-        <div
-          ref={plotRef2}
-        >
-          <h4 style={{ textAlign: 'center', marginTop: 0, marginBottom: '16px', fontSize: isMobile ? '14px' : '16px' }}>
-            Stakers Actively Managing Rewards
-          </h4>
-          <Plot
-            data={[
-              {
-                type: 'pie',
-                labels: ['Compound-only', 'Mixed Behavior', 'Claim-only'],
-                values: [
-                  by_behavior.compound_only.count,
-                  by_behavior.mixed.count,
-                  by_behavior.claim_only.count,
-                ],
-                marker: {
-                  colors: ['#22C55E', '#F59E0B', '#EF4444'],
-                },
-                textinfo: 'label+percent',
-                textposition: 'auto',
-                textfont: {
-                  size: 14,
-                },
-                hovertemplate: '<b>%{label}</b><br>' +
-                  '%{value} stakers (%{percent})<br>' +
-                  '<extra></extra>',
-              },
-            ]}
-            layout={{
-              ...template.layout,
-              showlegend: false,
-              margin: { l: 10, r: 10, t: 10, b: 40 },
-              height: 450,
-              autosize: true,
-            }}
-            config={getResponsivePlotlyConfig()}
-            style={{ width: '100%', height: '450px' }}
-            useResizeHandler={true}
-          />
-          <p style={{
-            textAlign: 'center',
-            fontSize: '14px',
-            color: 'var(--ifm-color-emphasis-700)',
-            marginTop: '8px',
-            marginBottom: 0,
-          }}>
-            {totalUsers.toLocaleString()} Stakers with Reward Activity
-          </p>
-        </div>
-      </div>
-
-      <p style={{ color: 'var(--ifm-color-emphasis-700)', marginTop: '24px', marginBottom: 0, textAlign: 'center' }}>
-        <strong>{totalUsers.toLocaleString()}</strong> of <strong>{currentActiveStakers.toLocaleString()}</strong> active stakers
-        ({((totalUsers / currentActiveStakers) * 100).toFixed(1)}%) actively managed rewards during the analysis period
-      </p>
+      )}
+      {hasActiveStakers && (
+        <p style={{
+          color: 'var(--ifm-color-emphasis-700)',
+          marginTop: '16px',
+          marginBottom: 0,
+          textAlign: 'center',
+          marginLeft: isMobile ? '16px' : 0,
+          marginRight: isMobile ? '16px' : 0,
+        }}>
+          <strong>{totalUsers.toLocaleString()}</strong> of <strong>{currentActiveStakers.toLocaleString()}</strong> active stakers
+          ({pctOf(totalUsers, currentActiveStakers)}) actively managed rewards during the analysis period
+        </p>
+      )}
+      {!hasActiveStakers && (
+        <p style={{
+          color: 'var(--ifm-color-emphasis-700)',
+          marginTop: '16px',
+          marginBottom: 0,
+          textAlign: 'center',
+          marginLeft: isMobile ? '16px' : 0,
+          marginRight: isMobile ? '16px' : 0,
+        }}>
+          Based on <strong>{totalUsers.toLocaleString()}</strong> unique stakers
+        </p>
+      )}
     </div>
   );
 }

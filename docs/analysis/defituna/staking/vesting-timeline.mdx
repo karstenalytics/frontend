@@ -7,7 +7,97 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Vesting Timeline
 
-Tracks TUNA tokens locked in vesting schedules and their unlock timeline. The chart shows how locked TUNA decreases over time as unlock events occur, reveals the next upcoming unlocks, and displays all active vesting schedules with their cliff periods and unlock frequencies. Also shows how much TUNA is currently held in wallets with vesting schedules.
+Tracks TUNA tokens locked in vesting schedules and their unlock timeline, showing how locked TUNA decreases as unlock events occur and what vesting wallets do with their unlocked tokens.
+
+## Current Metrics
+
+<BrowserOnly fallback={<div style={{ minHeight: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useVestingTimeline } = require('@site/src/hooks/useVestingTimeline');
+    const MetricCard = require('@site/src/components/common/MetricCard').default;
+
+    function VestingMetrics() {
+      const { data, loading, error } = useVestingTimeline();
+
+      if (loading) return <LoadingSpinner />;
+      if (error || !data) return null;
+
+      const { schedules, daily_timeline, metadata } = data;
+      const stakedTimeline = data.staked_by_vesting_wallets_timeline || {};
+      const heldTimeline = data.held_by_vesting_wallets_timeline || {};
+
+      const totalTuna = schedules.reduce((sum, s) => sum + s.locked_tuna, 0);
+
+      // Use the latest date present in all three timelines to avoid missing-key fallbacks
+      const today = new Date().toISOString().slice(0, 10);
+      const stakedDates = Object.keys(stakedTimeline);
+      const lastStaked = stakedDates.length > 0 ? stakedDates.sort().pop() : today;
+      const cap = lastStaked < today ? lastStaked : today;
+      const dates = Object.keys(daily_timeline).filter(d => d <= cap).sort();
+      const latestDate = dates[dates.length - 1];
+      if (!latestDate) return null;
+      const d7 = new Date(latestDate);
+      d7.setDate(d7.getDate() - 7);
+      const date7dAgo = d7.toISOString().slice(0, 10);
+      const locked7dAgo = daily_timeline[date7dAgo];
+      const lockedNow = daily_timeline[latestDate];
+
+      // Remaining locked as percentage
+      const remainingPctNow = lockedNow != null ? (lockedNow / totalTuna) * 100 : null;
+      const remainingPct7dAgo = locked7dAgo != null ? (locked7dAgo / totalTuna) * 100 : null;
+      const remainingPctChange = remainingPctNow != null && remainingPct7dAgo != null
+        ? remainingPctNow - remainingPct7dAgo
+        : null;
+
+      // Vesting wallet conviction: (staked + held) / unlocked
+      const stakedNow = stakedTimeline[latestDate] || 0;
+      const heldNow = heldTimeline[latestDate] || 0;
+      const unlockedNow = totalTuna - (lockedNow || 0);
+      const convictionNow = unlockedNow > 0 ? ((stakedNow + heldNow) / unlockedNow) * 100 : null;
+
+      const staked7dAgo = stakedTimeline[date7dAgo] || 0;
+      const held7dAgo = heldTimeline[date7dAgo] || 0;
+      const unlocked7dAgo = totalTuna - (locked7dAgo || 0);
+      const conviction7dAgo = unlocked7dAgo > 0 ? ((staked7dAgo + held7dAgo) / unlocked7dAgo) * 100 : null;
+      const convictionChange = convictionNow != null && conviction7dAgo != null
+        ? convictionNow - conviction7dAgo
+        : null;
+
+      const totalSupply = metadata?.total_supply || 1000000000;
+
+      return (
+        <div className="usage-summary-grid">
+          <MetricCard
+            title="Total Vesting"
+            value={totalTuna / 1e6}
+            format="number"
+            decimals={1}
+            suffix=" M TUNA"
+            tooltip={`Sum of TUNA locked across all vesting schedules.\n${((totalTuna / totalSupply) * 100).toFixed(2)}% of total TUNA supply.`}
+          />
+          <MetricCard
+            title="Remaining Locked"
+            value={remainingPctNow}
+            format="percent"
+            decimals={1}
+            change={remainingPctChange}
+            tooltip={`${((lockedNow || 0) / 1e6).toFixed(1)} M TUNA still locked in vesting schedules.\nChange vs. 7 days ago in percentage points.`}
+          />
+          <MetricCard
+            title="Vesting Wallet Conviction"
+            value={convictionNow}
+            format="percent"
+            decimals={1}
+            change={convictionChange}
+            tooltip={`(Staked + held) / unlocked-from-vesting across all vesting wallets.\nMeasures how much of the vested (no longer locked) TUNA recipients still retain.\n>100% means wallets acquired extra TUNA beyond their vested amount.\nChange vs. 7 days ago in percentage points.`}
+          />
+        </div>
+      );
+    }
+
+    return <VestingMetrics />;
+  }}
+</BrowserOnly>
 
 ## Data
 
@@ -77,12 +167,26 @@ Tracks TUNA tokens locked in vesting schedules and their unlock timeline. The ch
 
       return (
         <>
-          {/* Unlock timeline chart */}
-          <UnlockTimelineChart
-            timeline={daily_timeline}
-            stakedTimeline={staked_by_vesting_wallets_timeline || {}}
-            totalSchedules={schedules.length}
-          />
+          {/* Unlock timeline chart with staked+held overlay */}
+          {(() => {
+            const stakedRaw = staked_by_vesting_wallets_timeline || {};
+            const heldRaw = data.held_by_vesting_wallets_timeline || {};
+            const stakedKeys = Object.keys(stakedRaw);
+            const lastStakedDate = stakedKeys.length > 0 ? stakedKeys.sort().pop() : null;
+            const allDates = [...new Set([...stakedKeys, ...Object.keys(heldRaw)])]
+              .filter(d => !lastStakedDate || d <= lastStakedDate).sort();
+            const combinedTimeline = Object.fromEntries(
+              allDates.map(d => [d, (stakedRaw[d] || 0) + (heldRaw[d] || 0)])
+            );
+            return (
+              <UnlockTimelineChart
+                timeline={daily_timeline}
+                stakedTimeline={combinedTimeline}
+                totalSchedules={schedules.length}
+                secondaryLineLabel="Staked + held"
+              />
+            );
+          })()}
 
           {/* Next unlocks table */}
           <NextUnlocksTable
@@ -104,7 +208,7 @@ Tracks TUNA tokens locked in vesting schedules and their unlock timeline. The ch
             return (
               <details style={{ marginBottom: '24px' }} open={selectedDate !== null}>
                 <summary style={{ cursor: 'pointer', padding: '12px', background: 'var(--ifm-background-surface-color)', border: '1px solid var(--ifm-toc-border-color)', borderRadius: 'var(--ifm-global-radius)' }}>
-                  <strong>All Vesting Schedules ({selectedDate ? filteredSchedules.length : schedules.length})</strong>
+                  <strong>All Vesting Schedules ({selectedDate ? filteredSchedules.filter(s => s.locked_tuna > 0).length : schedules.filter(s => s.locked_tuna > 0).length})</strong>
                 </summary>
                 {selectedDate && (
                   <div style={{
@@ -162,6 +266,7 @@ Tracks TUNA tokens locked in vesting schedules and their unlock timeline. The ch
                       </thead>
                       <tbody>
                         {filteredSchedules
+                          .filter(s => s.locked_tuna > 0)
                           .sort((a, b) => b.locked_tuna - a.locked_tuna)
                           .map((schedule, idx) => (
                           <tr
@@ -239,17 +344,17 @@ This page helps you:
 <details>
 <summary>Click to expand chart reading guide</summary>
 
+**Summary Cards:**
+- **Total Vesting**: Sum of TUNA locked across all vesting schedules (tooltip shows percentage of total TUNA supply)
+- **Remaining Locked**: Percentage of total vesting allocation still locked
+- **Vesting Wallet Conviction**: Ratio of (staked + held) to unlocked TUNA across all vesting wallets. Values above 100% indicate wallets acquired additional TUNA beyond their unlocked vesting amount
+
 **Unlock Timeline Chart:**
-- **X-axis**: Date (chronological)
+- **X-axis**: Date (chronological, extending into future)
 - **Y-axis**: Total TUNA tokens remaining locked across all vesting schedules
 - **Line trend**: Decreasing line shows locked tokens being released over time
 - **Steps/drops**: Sudden decreases indicate unlock events
-
-**Vesting Overview (info box):**
-- **Number of schedules**: Total active vesting contracts
-- **Total locked**: Sum of all TUNA initially locked across all schedules
-- **Currently locked**: TUNA still locked today (not yet unlocked)
-- **Percentage**: (Currently locked / Total locked) × 100
+- **Staked + held overlay** (if available): Shows staked TUNA plus TUNA held in wallets with vesting schedules as a single combined daily timeline derived from on-chain history
 
 **Next 10 Unlock Days Table:**
 Shows upcoming unlock events sorted by date, including:
@@ -300,9 +405,9 @@ For each vesting schedule, the unlock timeline is calculated based on:
 
 **Unlock Event Timing:**
 
-1. **First unlock**: Occurs at `start_time + cliff_period + unlock_period`
-2. **Subsequent unlocks**: Occur every `unlock_period` hours after the first unlock
-3. **Final unlock**: Last event when all locked tokens are released
+- **First unlock**: Occurs at `start_time + cliff_period + unlock_period`
+- **Subsequent unlocks**: Occur every `unlock_period` hours after the first unlock
+- **Final unlock**: Last event when all locked tokens are released
 
 Each unlock event releases a fixed amount of TUNA (the unlock rate) until the entire locked amount is distributed.
 
@@ -310,10 +415,10 @@ Each unlock event releases a fixed amount of TUNA (the unlock rate) until the en
 
 The daily timeline chart shows:
 
-1. **Daily snapshot**: Total TUNA locked across all vesting schedules on each calendar day (UTC)
-2. **Cumulative view**: Sum of locked tokens from all active schedules on that date
-3. **Decreasing total**: As unlock events occur, the total locked amount decreases by the unlock rate
-4. **Current locked**: Today's value represents TUNA still locked and not yet unlocked
+- **Daily snapshot**: Total TUNA locked across all vesting schedules on each calendar day (UTC)
+- **Cumulative view**: Sum of locked tokens from all active schedules on that date
+- **Decreasing total**: As unlock events occur, the total locked amount decreases by the unlock rate
+- **Current locked**: Today's value represents TUNA still locked and not yet unlocked
 
 **Schedule Discovery**
 
@@ -323,11 +428,15 @@ Vesting schedules are discovered by:
 - Calculating unlock dates based on start time, cliff, and unlock period
 - Tracking which schedules are still active (have locked tokens remaining)
 
+**Wallet Balance History**
+
+For each vesting wallet, the pipeline fetches all TUNA token account transactions via RPC to build a daily held-balance timeline. This feeds the "Staked + held" chart overlay and the Vesting Wallet Conviction metric.
+
 **Relationship to Other Views**
 
 This vesting timeline complements:
 - **[Staking Overview](/analysis/defituna/staking/staked-tuna)**: Shows treasury TUNA allocation (staked vs. unstaked)
-- **[Stakers](/analysis/defituna/usage-statistics/active-stakers)**: Tracks wallets executing staking instructions
+- **[Stakers](/analysis/defituna/adoption/active-stakers)**: Tracks wallets executing staking instructions
 
 Vesting locks tokens in a time-based release schedule, while staking locks tokens to earn rewards. Both restrict immediate liquidity but serve different purposes.
 

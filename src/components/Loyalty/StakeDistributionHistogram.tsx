@@ -59,8 +59,6 @@ export default function StakeDistributionHistogram({
         marginBottom: '32px',
       }}
     >
-      <h3 style={{ marginTop: 0 }}>Stake Size Distribution - Power Law Revealed</h3>
-
       <div
         style={{
           background: 'rgba(0, 163, 180, 0.1)',
@@ -112,6 +110,10 @@ export default function StakeDistributionHistogram({
         ]}
         layout={{
           ...template.layout,
+          title: {
+            text: 'Stake Size Distribution - Power Law Revealed',
+            font: { size: 18, weight: 600 },
+          },
           xaxis: {
             ...template.layout.xaxis,
             title: 'Stake Size Range (TUNA)',
@@ -122,7 +124,7 @@ export default function StakeDistributionHistogram({
             title: 'Number of Wallets',
             type: 'log',
           },
-          margin: { l: 80, r: 40, t: 20, b: 120 },
+          margin: { l: 80, r: 40, t: 50, b: 120 },
           height: 500,
         }}
         config={getResponsivePlotlyConfig()}

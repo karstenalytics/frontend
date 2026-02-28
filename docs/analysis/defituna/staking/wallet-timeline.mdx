@@ -11,7 +11,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
 
 ## Data
 
-<BrowserOnly fallback={<LoadingSpinner />}>
+<BrowserOnly fallback={<div style={{ minHeight: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
   {() => {
     const { useState, useEffect } = require('react');
     const { useWalletTimeline } = require('@site/src/hooks/useWalletTimeline');
@@ -24,24 +24,24 @@ Detailed staking history for individual wallet addresses showing balance evoluti
       { address: '63jfXXj98msQDKFJKXACpeY1uQ228CyjZeyzbFeDq7iM', name: 'DefiTuna Founder Dhirk' },
     ];
 
-    // Format date as YYYY/MM/DD
+    // Format date as YYYY/MM/DD (UTC)
     const formatDate = (dateStr) => {
       const d = new Date(dateStr);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
+      const year = d.getUTCFullYear();
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(d.getUTCDate()).padStart(2, '0');
       return `${year}/${month}/${day}`;
     };
 
-    // Format datetime as YYYY/MM/DD HH:MM:SS
+    // Format datetime as YYYY/MM/DD HH:MM:SS (UTC)
     const formatDateTime = (dateStr) => {
       const d = new Date(dateStr);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      const hours = String(d.getHours()).padStart(2, '0');
-      const minutes = String(d.getMinutes()).padStart(2, '0');
-      const seconds = String(d.getSeconds()).padStart(2, '0');
+      const year = d.getUTCFullYear();
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      const hours = String(d.getUTCHours()).padStart(2, '0');
+      const minutes = String(d.getUTCMinutes()).padStart(2, '0');
+      const seconds = String(d.getUTCSeconds()).padStart(2, '0');
       return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
     };
 
@@ -105,7 +105,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
       const [inputAddress, setInputAddress] = useState('');
       const [searchAddress, setSearchAddress] = useState(null);
       const [currentPage, setCurrentPage] = useState(0);
-      const [hoveredRow, setHoveredRow] = useState(null);
+      const [zoomRange, setZoomRange] = useState(null); // [startDate, endDate] or null for full range
       const { data, loading, error } = useWalletTimeline(searchAddress);
 
       // Parse URL parameters on mount to auto-fill wallet address
@@ -123,9 +123,10 @@ Detailed staking history for individual wallet addresses showing balance evoluti
         }
       }, []); // Run only on mount
 
-      // Reset pagination when searching new wallet
+      // Reset pagination and zoom when searching new wallet
       useEffect(() => {
         setCurrentPage(0);
+        setZoomRange(null);
       }, [searchAddress]);
 
       // Update URL when wallet changes
@@ -151,7 +152,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
         }
       };
 
-      const handleKeyPress = (e) => {
+      const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
           handleSearch();
         }
@@ -167,7 +168,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
             padding: '24px',
             marginBottom: '24px',
           }}>
-            <label style={{
+            <label htmlFor="tuna-wallet-address" style={{
               display: 'block',
               marginBottom: '12px',
               fontWeight: 600,
@@ -177,10 +178,11 @@ Detailed staking history for individual wallet addresses showing balance evoluti
             </label>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <input
+                id="tuna-wallet-address"
                 type="text"
                 value={inputAddress}
                 onChange={(e) => setInputAddress(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyDown}
                 placeholder="Enter Solana wallet address (e.g., 5MJ6Jx2SJKyTce...)"
                 style={{
                   flex: '1 1 200px',
@@ -272,16 +274,11 @@ Detailed staking history for individual wallet addresses showing balance evoluti
           {/* Loading State */}
           {loading && (
             <div style={{
-              padding: '48px',
-              textAlign: 'center',
               background: 'var(--ifm-background-surface-color)',
               border: '1px solid var(--ifm-toc-border-color)',
               borderRadius: 'var(--ifm-global-radius)',
             }}>
               <LoadingSpinner />
-              <p style={{ marginTop: '16px', color: 'var(--ifm-color-secondary)' }}>
-                Loading wallet timeline...
-              </p>
             </div>
           )}
 
@@ -406,19 +403,35 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                 </div>
               </div>
 
-              <WalletTimelineChart data={data} />
+              <WalletTimelineChart data={data} zoomRange={zoomRange} onZoomChange={(range) => { setZoomRange(range); setCurrentPage(0); }} />
 
               {/* Transactions Table */}
               {(() => {
                 const { tableStyles, tableRowHoverHandlers, linkHoverHandlers } = require('@site/src/styles/tableStyles');
 
+                // Plotly returns dates as "YYYY-MM-DD HH:MM:SS.ssss" (UTC but no Z suffix),
+                // while operation dates are ISO "YYYY-MM-DDTHH:MM:SSZ". Normalize both to UTC.
+                const toUTCMs = (s) => {
+                  if (s.includes('T')) return new Date(s).getTime();
+                  return new Date(s.replace(' ', 'T') + 'Z').getTime();
+                };
                 // Reverse operations to show newest first
-                const reversedOperations = [...data.operations].reverse();
+                const allOperations = [...data.operations].reverse();
+                const filteredOperations = zoomRange
+                  ? (() => {
+                      const lo = toUTCMs(zoomRange[0]);
+                      const hi = toUTCMs(zoomRange[1]);
+                      return allOperations.filter(op => {
+                        const t = toUTCMs(op.date);
+                        return t >= lo && t <= hi;
+                      });
+                    })()
+                  : allOperations;
                 const pageSize = 10;
-                const totalPages = Math.ceil(reversedOperations.length / pageSize);
+                const totalPages = Math.ceil(filteredOperations.length / pageSize);
                 const startIdx = currentPage * pageSize;
                 const endIdx = startIdx + pageSize;
-                const pageOperations = reversedOperations.slice(startIdx, endIdx);
+                const pageOperations = filteredOperations.slice(startIdx, endIdx);
 
                 const operationColors = {
                   initialize: '#8B5CF6',
@@ -433,7 +446,33 @@ Detailed staking history for individual wallet addresses showing balance evoluti
 
                 return (
                   <div style={tableStyles.container}>
-                    <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Wallet Transactions ({reversedOperations.length}) — Newest First ▼</h3>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+                      <h3 style={{ margin: 0 }}>
+                        Wallet Transactions ({filteredOperations.length}{zoomRange ? ` of ${allOperations.length}` : ''})
+                      </h3>
+                      {zoomRange && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)' }}>
+                            {formatDateTime(new Date(toUTCMs(zoomRange[0])).toISOString())} - {formatDateTime(new Date(toUTCMs(zoomRange[1])).toISOString())} UTC
+                          </span>
+                          <button
+                            onClick={() => setZoomRange(null)}
+                            style={{
+                              padding: '4px 12px',
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              color: 'var(--ifm-font-color-base)',
+                              background: 'var(--ifm-background-surface-color)',
+                              border: '1px solid var(--ifm-toc-border-color)',
+                              borderRadius: 'var(--ifm-global-radius)',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Reset filter
+                          </button>
+                        </div>
+                      )}
+                    </div>
 
                     <div style={{ overflowX: 'auto' }}>
                       <table style={tableStyles.table}>
@@ -511,7 +550,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                         borderTop: '1px solid var(--ifm-toc-border-color)',
                       }}>
                         <div style={{ fontSize: '14px', color: 'var(--ifm-color-secondary)' }}>
-                          Showing {startIdx + 1}-{Math.min(endIdx, reversedOperations.length)} of {reversedOperations.length}
+                          Showing {startIdx + 1}-{Math.min(endIdx, filteredOperations.length)} of {filteredOperations.length}
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
                           <button
@@ -720,7 +759,7 @@ Each transaction is classified as one of these types:
 **Relationship to Other Views**
 
 This wallet-level detail complements:
-- **[Stakers](/analysis/defituna/usage-statistics/active-stakers)**: Shows all active stakers ranked by activity
+- **[Stakers](/analysis/defituna/adoption/active-stakers)**: Shows all active stakers ranked by activity
 - **[Staking Overview](/analysis/defituna/staking/staked-tuna)**: Shows treasury's total staked/unstaked allocation
 - **[Staker Conviction](/analysis/defituna/staking/staker-conviction)**: Analyzes long-term staker behavior patterns
 

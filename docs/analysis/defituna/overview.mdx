@@ -15,125 +15,8 @@ Before I talk about DefiTuna let's start with a summary of the key metrics that 
 
 <BrowserOnly fallback={<LoadingSpinner />}>
   {() => {
-    const { useEffect, useState } = require('react');
-    const TokenDisplay = require('@site/src/components/common/TokenDisplay').default;
-
-    function KeyMetricsDisplay() {
-      const [data, setData] = useState(null);
-      const [loading, setLoading] = useState(true);
-      const [error, setError] = useState(null);
-
-      useEffect(() => {
-        fetch('/data/defituna/key_metrics.json')
-          .then(res => res.json())
-          .then(data => {
-            setData(data);
-            setLoading(false);
-          })
-          .catch(err => {
-            setError(err.message);
-            setLoading(false);
-          });
-      }, []);
-
-      if (loading) {
-        return (
-          <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <LoadingSpinner />
-          </div>
-        );
-      }
-
-      if (error || !data) {
-        return null; // Silently skip if metrics not available
-      }
-
-      const { revenue_30d, market_data, metrics } = data;
-
-      return (
-        <div className="usage-summary-grid">
-          <div className="usage-summary-card">
-            <h3>30d Protocol Revenue</h3>
-            <p>
-              {revenue_30d?.sol?.toLocaleString(undefined, { maximumFractionDigits: 0 }) || '—'}
-              {' '}
-              <TokenDisplay mint="SOL" size={16} />
-            </p>
-            <div style={{ fontSize: '0.9rem', color: 'var(--ifm-color-emphasis-600)', marginTop: '4px' }}>
-              ${revenue_30d?.usdc?.toLocaleString(undefined, { maximumFractionDigits: 0 }) || '—'}
-            </div>
-          </div>
-
-          <div className="usage-summary-card">
-            <h3>Annualized Revenue</h3>
-            <p>
-              {revenue_30d?.annualized_sol?.toLocaleString(undefined, { maximumFractionDigits: 0 }) || '—'}
-              {' '}
-              <TokenDisplay mint="SOL" size={16} />
-            </p>
-            <div style={{ fontSize: '0.9rem', color: 'var(--ifm-color-emphasis-600)', marginTop: '4px' }}>
-              ${revenue_30d?.annualized_usdc?.toLocaleString(undefined, { maximumFractionDigits: 0 }) || '—'}
-            </div>
-          </div>
-
-          <div className="usage-summary-card">
-            <h3>FDV Market Cap</h3>
-            <p>${(market_data?.fdv_usd || 0) >= 1_000_000
-              ? `${((market_data?.fdv_usd || 0) / 1_000_000).toFixed(1)}M`
-              : (market_data?.fdv_usd || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
-            <div style={{ fontSize: '0.9rem', color: 'var(--ifm-color-emphasis-600)', marginTop: '4px' }}>
-              ${market_data?.tuna_price_usd?.toFixed(4) || '—'} per{' '}
-              <TokenDisplay mint="TUNAfXDZEdQizTMTh3uEvNvYqJmqFHZbEJt8joP4cyx" size={14} symbol="TUNA" />
-            </div>
-          </div>
-
-          <div className="usage-summary-card">
-            <h3>Market Cap / Revenue</h3>
-            <p>{metrics?.mcap_to_revenue_ratio?.toFixed(2) || '—'}x</p>
-            <div style={{ fontSize: '0.9rem', color: 'var(--ifm-color-emphasis-600)', marginTop: '4px' }}>
-              annualized ratio
-            </div>
-          </div>
-
-          <div className="usage-summary-card">
-            <h3>Staking APR</h3>
-            <p>{metrics?.staking_apr_percent?.toFixed(2) || '—'}%</p>
-            <div style={{ fontSize: '0.9rem', color: 'var(--ifm-color-emphasis-600)', marginTop: '4px' }}>
-              30-day rolling
-            </div>
-          </div>
-
-          <div className="usage-summary-card">
-            <h3>Staking Wallets</h3>
-            <p>{metrics?.staking_wallets?.toLocaleString() || '—'}</p>
-            <div style={{ fontSize: '0.9rem', color: 'var(--ifm-color-emphasis-600)', marginTop: '4px' }}>
-              active wallets with stake
-            </div>
-          </div>
-
-          <div className="usage-summary-card">
-            <h3>TUNA Supply Staked</h3>
-            <p>{metrics?.percent_staked?.toFixed(2) || '—'}%</p>
-            <div style={{ fontSize: '0.9rem', color: 'var(--ifm-color-emphasis-600)', marginTop: '4px' }}>
-              {(metrics?.total_staked_tuna || 0) >= 1_000_000
-                ? `${((metrics?.total_staked_tuna || 0) / 1_000_000).toFixed(0)}M `
-                : (metrics?.total_staked_tuna || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-              <TokenDisplay mint="TUNAfXDZEdQizTMTh3uEvNvYqJmqFHZbEJt8joP4cyx" size={14} symbol="TUNA" />
-            </div>
-          </div>
-
-          <div className="usage-summary-card">
-            <h3>Weekly Active Wallets</h3>
-            <p>{metrics?.weekly_active_wallets?.toLocaleString() || '—'}</p>
-            <div style={{ fontSize: '0.9rem', color: 'var(--ifm-color-emphasis-600)', marginTop: '4px' }}>
-              7-day rolling
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    return <KeyMetricsDisplay />;
+    const KeyMetricsOverview = require('@site/src/components/DefiTuna/KeyMetricsOverview').default;
+    return <KeyMetricsOverview />;
   }}
 </BrowserOnly>
 
@@ -153,10 +36,10 @@ Before I talk about DefiTuna let's start with a summary of the key metrics that 
 ## What can I learn from the data?
 
 If you have one of the following questions, you are at the right place. Just click the link and it will bring you to the one chart I would recommend you the most for answering this question.
-- Where does DefiTuna's revenue come from? → [By Token](./revenue-breakdown/by-token), [By Type](./revenue-breakdown/by-type), [By Pool](./revenue-breakdown/by-pool)
-- What are the biggest drivers of DefiTuna's protocol revenue? → [Pools vs. Types](./revenue-breakdown/pools-vs-types)
-- Why is the protocol revenue on certain days higher than on other days? → [Types per Day](./revenue-breakdown/tx-type-per-day)
-- How big is the impact of Fusion on DefiTuna's revenue? → [Orca vs. Fusion](./revenue-breakdown/orca-vs-fusion)
+- Where does DefiTuna's revenue come from? -> [By Pool](./fees-revenue/by-pool), [By Type](./fees-revenue/tx-type-per-day)
+- What are the biggest drivers of DefiTuna's protocol revenue? → [Pools vs. Types](./fees-revenue/pools-vs-types)
+- Why is the protocol revenue on certain days higher than on other days? → [Types per Day](./fees-revenue/tx-type-per-day)
+- How big is the impact of Fusion on DefiTuna's revenue? → [Orca vs. Fusion](./fees-revenue/orca-vs-fusion)
 - Is the supply tightening because more TUNA is getting staked? Which wallets are staking or withdrawing the most? → [Staking Overview](./staking/staked-tuna)
 - What's the reward behaviour of stakers - do they compound or "just" claim? → [Staker Conviction](./staking/staker-conviction)
 - Does a certain wallet (e.g. Whales) further accumulate and stake or withdraw their staked TUNA? → [Wallet Timeline](./staking/wallet-timeline)

@@ -177,8 +177,8 @@ export default function InverseWhaleChart({
   const legendHeight = estimatedRows * rowHeight;
 
   // Legend positioning and margins (close to chart - no bottom annotations)
-  const legendY = isMobile ? -0.1 : -0.4;
-  const bottomMargin = isMobile ? legendHeight + 10 : 100;
+  const legendY = isMobile ? -0.1 : -0.15;
+  const bottomMargin = isMobile ? legendHeight + 10 : 60;
 
   // Chart height calculation
   // Horizontal bar chart needs height based on number of bars
@@ -198,13 +198,6 @@ export default function InverseWhaleChart({
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       }}
     >
-      <h3 style={{ marginTop: 0, marginLeft: isMobile ? '16px' : 0 }}>Compound Rate by Stake Size (TUNA)</h3>
-
-      <p style={{ color: 'var(--ifm-color-emphasis-700)', marginBottom: '24px', marginLeft: isMobile ? '16px' : 0 }}>
-        Distribution of staker behavior (compound-only, mixed, claim-only) across stake size tiers.
-        Each bar shows the percentage breakdown totaling 100%.
-      </p>
-
       <Plot
         data={[
           {
@@ -297,6 +290,10 @@ export default function InverseWhaleChart({
         ]}
         layout={{
           ...template.layout,
+          title: {
+            text: 'Compound Rate by Stake Size (TUNA)',
+            font: { size: isMobile ? 15 : 18, weight: 600 },
+          },
           barmode: 'stack',
           hovermode: 'closest',
           xaxis: {
@@ -331,15 +328,15 @@ export default function InverseWhaleChart({
             margin: {
               l: 80,
               r: 20,
-              t: 20,
+              t: 40,
               b: bottomMargin,
             },
           } : {
             margin: {
               l: 160,
               r: 20,
-              t: 20,
-              b: 100,
+              t: 50,
+              b: bottomMargin,
             },
           }),
           height: chartHeight,
@@ -364,6 +361,7 @@ export default function InverseWhaleChart({
           scrollZoom: !isMobile,
         }}
         style={{ width: '100%', height: `${chartHeight}px` }}
+        useResizeHandler={true}
       />
       {isMobile && (
         <div style={{

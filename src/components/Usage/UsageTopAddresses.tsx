@@ -9,6 +9,9 @@ interface UsageTopAddressesProps {
   showWeeks?: boolean;
   showMonths?: boolean;
   description?: React.ReactNode;
+  protocol?: 'defituna' | 'flash-trade';
+  detailsLabel?: string;
+  detailsPath?: string;
 }
 
 function shorten(address: string, size = 4): string {
@@ -32,8 +35,12 @@ export default function UsageTopAddresses({
   showWeeks = false,
   showMonths = false,
   description,
+  protocol = 'defituna',
+  detailsLabel = 'Staking Timeline',
+  detailsPath,
 }: UsageTopAddressesProps): React.ReactElement {
   const data = rows || [];
+  const timelineBasePath = detailsPath ?? `/analysis/${protocol}/staking/wallet-timeline`;
 
   // Track when table is viewed with data
   useEffect(() => {
@@ -63,7 +70,7 @@ export default function UsageTopAddresses({
                 <th style={tableStyles.headerCell}>Tx Count</th>
                 <th style={tableStyles.headerCell}>First Seen</th>
                 <th style={tableStyles.headerCell}>Last Seen</th>
-                <th style={{ ...tableStyles.headerCell, textAlign: 'center' }}>Staking Timeline</th>
+                <th style={{ ...tableStyles.headerCell, textAlign: 'center' }}>{detailsLabel}</th>
               </tr>
             </thead>
             <tbody>
@@ -101,7 +108,7 @@ export default function UsageTopAddresses({
                   </td>
                   <td style={{ ...tableStyles.cell, textAlign: 'center' }}>
                     <a
-                      href={`/analysis/defituna/staking/wallet-timeline?wallet=${row.address}`}
+                      href={`${timelineBasePath}?wallet=${row.address}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{

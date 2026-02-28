@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import pako from 'pako';
+import { fetchStakerCache } from './stakerCacheStore';
 
 /**
- * Raw event data structure from staker cache
- * Event structure: [signature, timestamp, slot, type_id, address, d_stake, d_pending, d_withdrawn, d_compounded, fee_payer, reward_sol, ...]
+ * Raw event data structure from staker cache.
+ * DefiTuna columns (11): [sig, ts, slot, type_id, address, d_stake, d_pending, d_withdrawn, d_compounded, fee_payer, reward_sol]
+ * Flash columns (12):    [sig, ts, slot, type_id, address, d_stake, d_pending, d_withdrawn, d_compounded, fee_payer, reward_amount, treasury_delta]
+ * Fields d_unstaked (12) and d_vested (13) are reserved but not currently populated in the cache.
  */
 type StakerEvent = [
   signature: string,
@@ -17,7 +19,10 @@ type StakerEvent = [
   d_withdrawn: number,
   d_compounded: number,
   fee_payer: string | null,
-  reward_sol: number,
+  reward_amount: number,
+  treasury_delta?: number,
+  d_unstaked?: number,
+  d_vested?: number,
   ...rest: unknown[]
 ];
 
@@ -27,7 +32,9 @@ type StakerEvent = [
 interface AddressData {
   first_event: number;
   last_event: number;
-  current: [staked: number, unstaked: number, withdrawn: number, compounded: number, total_rewards: number];
+  // DefiTuna: [staked, pending(=unstaked), withdrawn, compounded, total_rewards]
+  // Flash:    [staked, pending, withdrawn_lifetime, compound_rate, total_rewards, behavior]
+  current: number[];
 }
 
 /**
@@ -39,8 +46,8 @@ interface StakerCache {
   meta: {
     start: string;
     end: string;
-    total_wallets: number;
-    total_events: number;
+    address_count: number;
+    event_count: number;
   };
 }
 
@@ -125,18 +132,28 @@ const EVENT_TYPES: Record<number, [string, string]> = {
   4: ['compound', 'Compound'],
   5: ['claim', 'Claim Rewards'],
   6: ['set_vesting', 'Set Vesting Strategy'],
+  7: ['collect_revenue', 'Collect Revenue'],
+  8: ['collect_token_reward', 'Collect Token Reward'],
+  9: ['burn_and_stake', 'Burn & Stake'],
+  10: ['burn_and_claim', 'Burn & Claim'],
+  11: ['withdraw_unclaimed', 'Withdraw Unclaimed'],
+  13: ['cancel_unstake', 'Cancel Unstake'],
 };
 
 /**
  * Build timeline from wallet events
  * Returns [timeline, operations, vestingSchedules]
  */
-function buildBalanceTimeline(events: StakerEvent[]): [TimelinePoint[], Operation[], VestingSchedule[]] {
+function buildBalanceTimeline(
+  events: StakerEvent[],
+  protocol: 'defituna' | 'flash-trade'
+): [TimelinePoint[], Operation[], VestingSchedule[]] {
   const timeline: TimelinePoint[] = [];
   const operations: Operation[] = [];
 
   let staked = 0.0;
-  let unstaked = 0.0; // This is "pending" in the cache
+  let pending = 0.0;
+  let unstaked = 0.0; // Explicit unstaked bucket (Flash only; remains 0 for DefiTuna)
   let realized_rewards = 0.0; // Cumulative claimed + compounded (in SOL)
 
   // Track ALL vesting schedules (wallet can have multiple positions, each with own vesting)
@@ -145,49 +162,86 @@ function buildBalanceTimeline(events: StakerEvent[]): [TimelinePoint[], Operatio
   for (const event of events) {
     if (event.length < 11) continue;
 
-    // Event structure: [signature, timestamp, slot, type_id, address, d_stake, d_pending, d_withdrawn, d_compounded, fee_payer, reward_sol, ...]
+    // Event structure: [signature, timestamp, slot, type_id, address, d_stake, d_pending, d_withdrawn, d_compounded, fee_payer, reward_amount, treasury_delta?, d_unstaked?, d_vested?]
     const signature = event[0];
     const timestamp = event[1];
     const slot = event[2];
     const op_type = event[3];
-    const address = event[4];
-    const d_stake = event[5] || 0; // Change in staked amount (TUNA)
-    const d_pending = event[6] || 0; // Change in pending/unstaked amount (TUNA)
-    const d_withdrawn = event[7] || 0; // Change in withdrawn amount (TUNA)
-    const d_compounded = event[8] || 0; // Amount compounded (TUNA)
-    const fee_payer = event[9] || null;
-    const reward_sol = event[10] || 0; // Reward in SOL (already in SOL, not lamports)
+    const d_stake = event[5] || 0; // Change in staked amount
+    const d_pending = event[6] || 0; // Change in pending amount
+    const d_withdrawn = event[7] || 0; // Change in withdrawn amount
+    const d_compounded = event[8] || 0; // Amount compounded
+    const reward_amount = event[10] || 0; // Reward amount (SOL for DefiTuna, USDC for Flash)
+    const d_unstaked = (event.length > 12 ? event[12] : 0) || 0; // Flash explicit unstaked delta
 
-    const [type_id, type_label] = EVENT_TYPES[op_type] || ['unknown', 'Unknown'];
+    let [type_id, type_label] = EVENT_TYPES[op_type] || ['unknown', 'Unknown'];
+
+    // Distinguish UnstakeInstant (ds<0, dp=0, dw>0) from UnstakeRequest (ds<0, dp>0)
+    // UnstakeInstant bypasses the queue: unstake + withdraw in one step
+    if (op_type === 2 && d_pending === 0 && d_withdrawn > 0) {
+      type_id = 'unstake_instant';
+      type_label = 'Unstake Instant';
+    }
+
+    // Skip events not related to FAF staking for Flash.Trade:
+    // - type 5 (CollectStakeFees): LP staking USDC rewards
+    // - type 10 (BurnAndClaim): TGE FAF distribution, never staked
+    // - type 11 (WithdrawUnclaimed): protocol sweep of unclaimed reserve
+    // - type 12 (WithdrawInstantFees): protocol pulls accumulated instant-unstake penalties
+    if (protocol === 'flash-trade' && (op_type === 5 || op_type === 10 || op_type === 11 || op_type === 12)) continue;
 
     // Track rewards and operation amounts
     let amount = 0.0;
+    // Use max (not sum) to avoid double-counting when tokens move between buckets
+    // e.g. UnstakeRequest: d_stake=-X, d_pending=+X -> max gives X, sum would give 2X
+    const tokenDeltaMax =
+      Math.max(Math.abs(d_stake), Math.abs(d_pending), Math.abs(d_unstaked));
+
     if (op_type === 0) { // Initialize position (includes initial stake)
-      amount = Math.abs(d_stake);
+      amount = tokenDeltaMax || Math.abs(d_withdrawn);
       staked += d_stake;
-      unstaked += d_pending;
+      pending += d_pending;
+      unstaked += d_unstaked;
     } else if (op_type === 1) { // Stake
-      amount = Math.abs(d_stake);
+      amount = tokenDeltaMax || Math.abs(d_withdrawn);
       staked += d_stake;
-      unstaked += d_pending;
+      pending += d_pending;
+      unstaked += d_unstaked;
     } else if (op_type === 2) { // Unstake
-      amount = Math.abs(d_stake); // Show amount unstaked (positive value)
+      // Show combined amount moved out of stake (requests or instant)
+      amount = tokenDeltaMax || Math.abs(d_withdrawn);
       staked += d_stake;
-      unstaked += d_pending;
+      pending += d_pending;
+      unstaked += d_unstaked;
     } else if (op_type === 3) { // Withdraw
-      amount = Math.abs(d_pending); // Show amount withdrawn (positive value)
+      // Withdraws typically reduce pending/unstaked
+      amount = tokenDeltaMax || Math.abs(d_withdrawn);
       staked += d_stake;
-      unstaked += d_pending;
+      pending += d_pending;
+      unstaked += d_unstaked;
     } else if (op_type === 4) { // Compound
-      amount = reward_sol; // Show SOL rewards compounded
-      realized_rewards += reward_sol;
+      amount = reward_amount;
+      realized_rewards += reward_amount;
       staked += d_stake;
-      unstaked += d_pending;
+      pending += d_pending;
+      unstaked += d_unstaked;
     } else if (op_type === 5) { // Claim
-      amount = reward_sol; // Show SOL rewards claimed
-      realized_rewards += reward_sol;
+      amount = reward_amount;
+      realized_rewards += reward_amount;
       staked += d_stake;
-      unstaked += d_pending;
+      pending += d_pending;
+      unstaked += d_unstaked;
+    } else if (op_type === 7) { // Collect Revenue (USDC revenue share)
+      amount = reward_amount;
+      realized_rewards += reward_amount;
+      staked += d_stake;
+      pending += d_pending;
+      unstaked += d_unstaked;
+    } else if (op_type === 8) { // Collect Token Reward (FAF token rewards)
+      amount = Math.abs(d_withdrawn) || tokenDeltaMax;
+      staked += d_stake;
+      pending += d_pending;
+      unstaked += d_unstaked;
     } else if (op_type === 6) { // Set vesting strategy
       amount = Math.abs(d_stake); // Show locked_tuna amount (stored in d_stake field)
       // Vesting doesn't change balances - it just sets a lock on existing stake
@@ -219,10 +273,27 @@ function buildBalanceTimeline(events: StakerEvent[]): [TimelinePoint[], Operatio
           vestingSchedules.push(newSchedule);
         }
       }
+    } else if (op_type === 13) { // Cancel Unstake (returns FAF from queue to staked)
+      amount = tokenDeltaMax || Math.abs(d_withdrawn);
+      staked += d_stake;
+      pending += d_pending;
+      unstaked += d_unstaked;
+    } else if (op_type === 9) { // Burn & Stake (TGE event - burns LP tokens and stakes FAF)
+      amount = tokenDeltaMax || Math.abs(d_withdrawn);
+      staked += d_stake;
+      pending += d_pending;
+      unstaked += d_unstaked;
+    } else if (op_type === 10) { // Burn & Claim (TGE event - burns LP tokens and claims FAF)
+      amount = Math.abs(d_withdrawn) || tokenDeltaMax;
+      // Burn & Claim distributes FAF directly to wallet, doesn't affect staking balances
+    } else if (op_type === 11) { // Withdraw Unclaimed (protocol operation)
+      amount = Math.abs(d_withdrawn) || tokenDeltaMax;
+      // Protocol-level withdrawal, doesn't affect staking balances
     } else {
       // Unknown event type - still apply deltas
       staked += d_stake;
-      unstaked += d_pending;
+      pending += d_pending;
+      unstaked += d_unstaked;
     }
 
     // Calculate locked amount by summing across ALL vesting schedules
@@ -236,10 +307,15 @@ function buildBalanceTimeline(events: StakerEvent[]): [TimelinePoint[], Operatio
     // Cap locked to not exceed staked (locked is a subset of staked)
     const locked = Math.min(rawLocked, staked);
 
+    // For the chart's "Unstaked" area, use `pending` (queue balance from d_pending)
+    // rather than `unstaked` (d_unstaked, which is always 0 for Flash.Trade).
+    // This shows FAF sitting in the unstake queue awaiting withdrawal.
+    const chartUnstaked = pending + unstaked;
+
     timeline.push({
       date: timestamp,
       staked: Math.round(staked * 1000000) / 1000000,
-      unstaked: Math.round(unstaked * 1000000) / 1000000,
+      unstaked: Math.round(chartUnstaked * 1000000) / 1000000,
       locked: Math.round(locked * 1000000) / 1000000,
       realized_rewards: Math.round(realized_rewards * 1000000) / 1000000,
     });
@@ -260,7 +336,11 @@ function buildBalanceTimeline(events: StakerEvent[]): [TimelinePoint[], Operatio
 /**
  * Parse wallet timeline from staker cache
  */
-function parseWalletTimeline(walletAddress: string, cache: StakerCache): WalletTimelineData {
+function parseWalletTimeline(
+  walletAddress: string,
+  cache: StakerCache,
+  protocol: 'defituna' | 'flash-trade'
+): WalletTimelineData {
   const addresses = cache.addresses || {};
   const events = cache.events || [];
   const meta = cache.meta || {};
@@ -270,7 +350,7 @@ function parseWalletTimeline(walletAddress: string, cache: StakerCache): WalletT
     return {
       wallet: walletAddress,
       found: false,
-      error: `Wallet not found in cache. Total wallets: ${Object.keys(addresses).length.toLocaleString()}`,
+      error: 'This wallet did not stake FAF at any given time in the past.',
     };
   }
 
@@ -299,8 +379,16 @@ function parseWalletTimeline(walletAddress: string, cache: StakerCache): WalletT
     };
   }
 
+  // Sort events by timestamp to ensure chronological order
+  // (synthetic events like vesting may have been appended out of order)
+  walletEvents.sort((a, b) => {
+    const tsA = a[1] || '';
+    const tsB = b[1] || '';
+    return tsA < tsB ? -1 : tsA > tsB ? 1 : 0;
+  });
+
   // Build timeline
-  const [timeline, operations, vestingSchedules] = buildBalanceTimeline(walletEvents);
+  const [timeline, operations, vestingSchedules] = buildBalanceTimeline(walletEvents, protocol);
 
   if (timeline.length === 0) {
     return {
@@ -427,9 +515,16 @@ function parseWalletTimeline(walletAddress: string, cache: StakerCache): WalletT
     // Keep default
   }
 
-  const current = addrData.current || [0, 0, 0, 0, 0];
+  const current = addrData.current || [];
   const currentStaked = current[0] !== undefined ? current[0] : timeline[timeline.length - 1].staked;
-  const currentUnstaked = current[1] !== undefined ? current[1] : timeline[timeline.length - 1].unstaked;
+  let currentUnstaked = timeline[timeline.length - 1].unstaked;
+  if (protocol === 'flash-trade') {
+    // Flash current = [staked, pending, withdrawn_lifetime, compound_rate, total_rewards, behavior]
+    // Only pending (queue balance) counts as "Pending Unstake"; current[2] is withdrawn_lifetime
+    currentUnstaked = current[1] || 0;
+  } else if (current[1] !== undefined) {
+    currentUnstaked = current[1];
+  }
   const currentLocked = timeline[timeline.length - 1].locked;
 
   const summary: WalletSummary = {
@@ -454,11 +549,42 @@ function parseWalletTimeline(walletAddress: string, cache: StakerCache): WalletT
 }
 
 /**
+ * Protocol configuration for wallet timeline
+ */
+export interface ProtocolConfig {
+  protocol: 'defituna' | 'flash-trade';
+  stakeToken: string;
+  rewardToken: string;
+  cachePath: string;
+  supportsVesting?: boolean;
+}
+
+const PROTOCOL_CONFIGS: Record<string, ProtocolConfig> = {
+  'defituna': {
+    protocol: 'defituna',
+    stakeToken: 'TUNA',
+    rewardToken: 'SOL',
+    cachePath: '/data/defituna/staker_cache.json.gz',
+    supportsVesting: true,
+  },
+  'flash-trade': {
+    protocol: 'flash-trade',
+    stakeToken: 'FAF',
+    rewardToken: 'USDC',
+    cachePath: '/data/flash-trade/staker_cache.json.gz',
+    supportsVesting: false, // Streamflow vesting model incompatible with DefiTuna visualization
+  },
+};
+
+/**
  * Hook to load and parse wallet timeline from staker cache
  * Includes debouncing to prevent excessive requests during rapid input changes
+ * @param walletAddress - Wallet address to look up
+ * @param protocol - Protocol to use ('defituna' or 'flash-trade'), defaults to 'defituna'
  */
-export function useWalletTimeline(walletAddress: string | null) {
-  const dataPath = useBaseUrl('/data/defituna/staker_cache.json.gz');
+export function useWalletTimeline(walletAddress: string | null, protocol: 'defituna' | 'flash-trade' = 'defituna') {
+  const config = PROTOCOL_CONFIGS[protocol];
+  const dataPath = useBaseUrl(config.cachePath);
 
   const [data, setData] = useState<WalletTimelineData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -478,37 +604,26 @@ export function useWalletTimeline(walletAddress: string | null) {
     setError(null);
 
     try {
-      // Load compressed staker cache
-      const response = await fetch(dataPath);
-      if (!response.ok) {
-        throw new Error(`Failed to load staker cache: ${response.statusText}`);
-      }
-
-      const compressed = await response.arrayBuffer();
-
-      // Check compressed size (10MB limit to prevent DoS)
-      const MAX_COMPRESSED_SIZE = 10 * 1024 * 1024; // 10MB
-      if (compressed.byteLength > MAX_COMPRESSED_SIZE) {
-        throw new Error(`Compressed file too large: ${(compressed.byteLength / 1024 / 1024).toFixed(2)}MB (max 10MB)`);
-      }
-
-      const decompressed = pako.ungzip(new Uint8Array(compressed), { to: 'string' });
-
-      // Check decompressed size (50MB limit to prevent memory exhaustion)
-      const MAX_DECOMPRESSED_SIZE = 50 * 1024 * 1024; // 50MB
-      if (decompressed.length > MAX_DECOMPRESSED_SIZE) {
-        throw new Error(`Decompressed data too large: ${(decompressed.length / 1024 / 1024).toFixed(2)}MB (max 50MB)`);
-      }
-
-      const cache = JSON.parse(decompressed);
+      const cache = await fetchStakerCache(dataPath);
 
       // Parse timeline for this wallet
-      const result = parseWalletTimeline(address.trim(), cache);
+      const result = parseWalletTimeline(address.trim(), cache, config.protocol);
+
+      // Filter out vesting operations when vesting is disabled
+      if (result.found && result.operations && !config.supportsVesting) {
+        result.operations = result.operations.filter(op => op.type !== 'set_vesting');
+        if (result.summary) {
+          result.summary.total_operations = result.operations.length;
+        }
+      }
 
       if (isMountedRef.current) {
         setData(result);
-        if (!result.found) {
-          setError(result.error || 'Wallet not found');
+        if (!result.found && !result.error) {
+          // Wallet simply not in cache -- not an error, let the
+          // "Wallet Not Found" card render instead of the error banner.
+        } else if (!result.found) {
+          setError(result.error);
         }
       }
     } catch (err) {
@@ -562,5 +677,5 @@ export function useWalletTimeline(walletAddress: string | null) {
     };
   }, []);
 
-  return { data, loading, error };
+  return { data, loading, error, config };
 }

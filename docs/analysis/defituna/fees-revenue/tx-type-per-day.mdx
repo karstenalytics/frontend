@@ -1,0 +1,158 @@
+---
+title: By Type
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# By Type
+
+Daily time-series of DefiTuna treasury revenue broken down by transaction type. Toggle between **Daily** (stacked bars) and **Cumulative** (stacked area) views to see day-to-day composition or long-term growth trends.
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useDashboardData } = require('@site/src/components/Dashboard/useDashboardData');
+    const DailyStackedBarChart = require('@site/src/components/Dashboard/DailyStackedBarChart').default;
+
+    function RevenueDashboard() {
+      const data = useDashboardData();
+
+      if (data.loading) {
+        return (
+          <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      if (data.error) {
+        return (
+          <div style={{
+            padding: '32px',
+            background: 'var(--ifm-background-surface-color)',
+            border: '1px solid var(--ifm-color-danger)',
+            borderRadius: 'var(--ifm-global-radius)',
+            color: 'var(--ifm-color-danger)',
+          }}>
+            <h3>Error Loading Dashboard</h3>
+            <p>{data.error}</p>
+          </div>
+        );
+      }
+
+      if (!data.dailyByType || data.dailyByType.length === 0) {
+        return <div>No daily transaction type data available</div>;
+      }
+
+      return <DailyStackedBarChart data={data.dailyByType} />;
+    }
+
+    return <RevenueDashboard />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Identify growth periods**: Track upward or downward trends in daily revenue and determine which transaction types drive changes
+- **Analyze composition shifts**: See which revenue sources are gaining or losing importance over time
+- **Investigate revenue spikes**: Hover over bars to see which transaction types contributed to unusual patterns
+- **Detect protocol impact**: Validate expected outcomes from protocol changes, new features, or pool launches
+- **Spot seasonal patterns**: Identify cyclical or seasonal trends in protocol activity
+- **Assess revenue stability**: Evaluate whether revenue is consistent or volatile across different periods
+- **Track cumulative growth**: Use the cumulative view to see how total revenue and its composition evolve over the full data window
+- **Correlate with events**: Link revenue patterns to external market events or protocol milestones
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+**Daily View (Stacked Bars):**
+- **X-axis**: Date (UTC, chronological)
+- **Y-axis**: Daily revenue in SOL
+- **Stacked bars**: Each colored segment represents a different transaction type
+- **Total height**: The top of each bar shows total daily revenue across all transaction types
+- **Colors**: Liquidation types use red shades; all other types use the standard palette
+
+**Cumulative View (Stacked Area):**
+- **X-axis**: Date (UTC, chronological)
+- **Y-axis**: Cumulative revenue in SOL (running total)
+- **Stacked areas**: Each colored band shows the running total for that transaction type
+- **Top line**: The top edge of the chart shows total cumulative revenue across all types
+- **Growth slope**: Steeper slopes indicate periods of higher daily revenue
+
+**When to Use Each View:**
+- Use **Daily** to investigate specific days, spot spikes, and compare day-to-day composition
+- Use **Cumulative** to see long-term growth trends and how each type's share of total revenue evolves
+
+**What to Look For:**
+- **Spikes and anomalies** (daily): Sudden increases often indicate large liquidations or significant protocol events
+- **Compositional shifts**: Changes in the relative height of segments show evolving revenue sources
+- **Growth rate changes** (cumulative): Steepening or flattening of curves reveals acceleration or slowdown
+- **Volatility**: Fluctuation patterns indicate revenue stability or variability
+
+**Interactive Features:**
+- **Toggle**: Switch between Daily and Cumulative views using the button in the chart header
+- **Hover**: See the SOL value for a specific transaction type on that day
+- **Legend**: Click legend items to show/hide specific transaction types
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Data Sources**
+
+- **Treasury transactions**: On-chain data from DefiTuna treasury PDA (`G9XfJoY81n8A9bZKaJFhJYomRrcvFkuJ22em2g8rZuCh`)
+- **Classification system**: Log-based transaction analysis with [100% attribution accuracy](/analysis/data-quality)
+- **Daily aggregation**: Transactions grouped by UTC day
+
+**Daily Revenue Calculation**
+
+Daily revenue is calculated using the revenue attribution system:
+
+- **Transaction classification**: Each day's transactions are classified by type using log-based pattern matching
+- **Revenue grouping**: Revenue is grouped by transaction type
+- **Stacking calculation**: Values are stacked to show composition while maintaining total visibility
+- **Token conversion**: All SOL equivalents are calculated using same-day conversion rates from actual on-chain swaps
+
+**Cumulative Calculation**
+
+The cumulative view computes a running total for each transaction type independently. On any given date, the cumulative value equals the sum of all daily values from the start of the data window through that date. The stacked areas then show how total accumulated revenue is distributed across types.
+
+**Time-Series Construction**
+
+- **UTC days**: All transactions are grouped by UTC day for consistent timezone handling
+- **Daily composition**: Each bar shows the breakdown of that day's revenue by transaction type
+- **Gap handling**: Days with zero revenue have no bar
+- **Completeness**: All revenue-generating transactions are included (100% attribution accuracy)
+
+**Type Grouping**
+
+The chart shows the top 9 transaction types by total SOL value, with all remaining types combined into an "Other" category. Types with the same display name (e.g. legacy and current naming) are merged. Liquidation types are highlighted in red. Token Transfer is always grouped into Other regardless of its total, as it represents a one-time manual transfer rather than protocol-generated revenue.
+
+**Relationship to Other Views**
+
+This time-series view complements the aggregate breakdowns:
+- **[By Pool](/analysis/defituna/fees-revenue/by-pool)**: Revenue broken down by liquidity pool over time
+- **[Pools vs. Types](/analysis/defituna/fees-revenue/pools-vs-types)**: Shows cross-dimensional breakdown
+
+The daily view adds temporal context, revealing how these totals accumulated over time and when specific patterns emerged.
+
+**Update Frequency**
+
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- Chart shows realized revenue only (excludes unrealized gains from held positions)
+- Very small transaction types may not be visible in the stacked bars
+- Token conversion rates based on treasury swap prices (may differ from market mid-price by a few basis points)
+
+</details>

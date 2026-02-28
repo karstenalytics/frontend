@@ -13,6 +13,12 @@ export interface DailyDataPoint {
   [key: string]: string | number | undefined;
 }
 
+export interface DailyTypeDataPoint {
+  date: string;
+  type: string;
+  sol_equivalent: number;
+}
+
 export interface Transaction {
   signature: string;
   timestamp: number;
@@ -77,7 +83,7 @@ export interface DashboardData {
   summary: SummaryData | null;
   dailyStacked: DailyDataPoint[];
   dailyByToken: DailyDataPoint[];
-  dailyByType: DailyDataPoint[];
+  dailyByType: DailyTypeDataPoint[];
   dailyByPool: DailyDataPoint[];
   topTransactionsToken: TopTransactionsData;
   topTransactionsType: TopTransactionsData;

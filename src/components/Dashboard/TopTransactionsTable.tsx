@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import type { TopTransactionsData, GroupMode, SummaryData } from './types';
+import { tableStyles, tableRowHoverHandlers, linkHoverHandlers } from '@site/src/styles/tableStyles';
 
 interface TopTransactionsTableProps {
   topTransactionsToken: TopTransactionsData;
@@ -243,13 +244,7 @@ export default function TopTransactionsTable({
   }
 
   return (
-    <div style={{
-      background: 'var(--ifm-background-surface-color)',
-      border: '1px solid var(--ifm-toc-border-color)',
-      borderRadius: 'var(--ifm-global-radius)',
-      padding: '24px',
-      marginBottom: '24px',
-    }}>
+    <div style={tableStyles.container}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -302,76 +297,51 @@ export default function TopTransactionsTable({
         )}
       </div>
       <div style={{ overflowX: 'auto', marginTop: '16px' }}>
-        <table style={{
-          display: 'table',
-          width: '100%',
-          minWidth: '800px',
-          borderCollapse: 'collapse',
-          fontSize: '14px',
-        }}>
+        <table style={{ ...tableStyles.table, minWidth: '800px' }}>
         <thead>
-          <tr style={{ borderBottom: '2px solid var(--ifm-toc-border-color)' }}>
-            <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Rank</th>
-            <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Amount ▼</th>
-            <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Date</th>
-            {groupMode === 'token' && <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Token</th>}
-            {groupMode === 'type' && <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Type</th>}
-            {groupMode === 'pool' && <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Pool</th>}
-            {groupMode !== 'type' && <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Type</th>}
-            {groupMode !== 'pool' && <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Pool</th>}
-            {groupMode !== 'token' && <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Token</th>}
-            <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: 600 }}>Signature</th>
+          <tr style={tableStyles.headerRow}>
+            <th style={tableStyles.headerCell}>Rank</th>
+            <th style={tableStyles.headerCell}>Amount ▼</th>
+            <th style={tableStyles.headerCell}>Date</th>
+            {groupMode === 'token' && <th style={tableStyles.headerCell}>Token</th>}
+            {groupMode === 'type' && <th style={tableStyles.headerCell}>Type</th>}
+            {groupMode === 'pool' && <th style={tableStyles.headerCell}>Pool</th>}
+            {groupMode !== 'type' && <th style={tableStyles.headerCell}>Type</th>}
+            {groupMode !== 'pool' && <th style={tableStyles.headerCell}>Pool</th>}
+            {groupMode !== 'token' && <th style={tableStyles.headerCell}>Token</th>}
+            <th style={tableStyles.headerCell}>Signature</th>
           </tr>
         </thead>
         <tbody>
           {top10.map((tx, idx) => (
-            <tr key={tx.signature} style={{
-              borderBottom: '1px solid var(--ifm-toc-border-color)',
-              transition: 'background 120ms ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--ifm-toc-border-color)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-            }}>
-              <td style={{ padding: '12px 8px', color: 'var(--ifm-color-secondary)' }}>
+            <tr key={tx.signature} style={tableStyles.bodyRow} {...tableRowHoverHandlers}>
+              <td style={tableStyles.rankCell}>
                 #{idx + 1}
               </td>
-              <td style={{ padding: '12px 8px', fontWeight: 600, color: 'var(--accent)' }}>
+              <td style={tableStyles.amountCell}>
                 {formatSolAmount(tx.amount)}
               </td>
-              <td style={{ padding: '12px 8px', color: 'var(--ifm-color-secondary)', fontFamily: 'var(--ifm-font-family-base)' }}>
+              <td style={tableStyles.dateCell}>
                 {formatDate(tx.timestamp)}
               </td>
 
               {/* Primary column (first): Token, Type, or Pool based on groupMode */}
               {groupMode === 'token' && (
-                <td style={{ padding: '12px 8px' }}>
+                <td style={tableStyles.cell}>
                   <a
                     href={`https://solscan.io/token/${tx.mint}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{
-                      fontSize: '12px',
-                      color: 'var(--accent)',
-                      textDecoration: 'none',
-                      display: 'block',
-                    }}
+                    style={{ ...tableStyles.link, fontSize: '12px', display: 'block' }}
                     title={tx.mint}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.textDecoration = 'underline';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.textDecoration = 'none';
-                    }}
+                    {...linkHoverHandlers}
                   >
                     {getTokenDisplay(tx)}
                   </a>
                 </td>
               )}
               {groupMode === 'type' && (
-                <td style={{ padding: '12px 8px' }}>
+                <td style={tableStyles.cell}>
                   <div style={{
                     fontSize: '12px',
                     color: 'var(--ifm-color-secondary)',
@@ -382,7 +352,7 @@ export default function TopTransactionsTable({
                 </td>
               )}
               {groupMode === 'pool' && (
-                <td style={{ padding: '12px 8px' }}>
+                <td style={tableStyles.cell}>
                   <div style={{
                     fontSize: '12px',
                     color: 'var(--ifm-color-secondary)',
@@ -398,7 +368,7 @@ export default function TopTransactionsTable({
 
               {/* Type column (if not primary) */}
               {groupMode !== 'type' && (
-                <td style={{ padding: '12px 8px' }}>
+                <td style={tableStyles.cell}>
                   <div style={{
                     fontSize: '12px',
                     color: 'var(--ifm-color-secondary)',
@@ -411,7 +381,7 @@ export default function TopTransactionsTable({
 
               {/* Pool column (if not primary) */}
               {groupMode !== 'pool' && (
-                <td style={{ padding: '12px 8px' }}>
+                <td style={tableStyles.cell}>
                   <div style={{
                     fontSize: '12px',
                     color: 'var(--ifm-color-secondary)',
@@ -427,47 +397,27 @@ export default function TopTransactionsTable({
 
               {/* Token column (if not primary) */}
               {groupMode !== 'token' && (
-                <td style={{ padding: '12px 8px' }}>
+                <td style={tableStyles.cell}>
                   <a
                     href={`https://solscan.io/token/${tx.mint}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{
-                      fontSize: '12px',
-                      color: 'var(--accent)',
-                      textDecoration: 'none',
-                      display: 'block',
-                    }}
+                    style={{ ...tableStyles.link, fontSize: '12px', display: 'block' }}
                     title={tx.mint}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.textDecoration = 'underline';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.textDecoration = 'none';
-                    }}
+                    {...linkHoverHandlers}
                   >
                     {getTokenDisplay(tx)}
                   </a>
                 </td>
               )}
 
-              <td style={{ padding: '12px 8px' }}>
+              <td style={tableStyles.cell}>
                 <a
                   href={`https://solscan.io/tx/${tx.signature}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{
-                    fontSize: '12px',
-                    fontFamily: 'var(--ifm-font-family-monospace)',
-                    color: 'var(--accent)',
-                    textDecoration: 'none',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.textDecoration = 'underline';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.textDecoration = 'none';
-                  }}
+                  style={{ ...tableStyles.link, fontSize: '12px', fontFamily: 'var(--ifm-font-family-monospace)' }}
+                  {...linkHoverHandlers}
                 >
                   {tx.signature.slice(0, 5)}...{tx.signature.slice(-5)}
                 </a>

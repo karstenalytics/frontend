@@ -4,18 +4,19 @@ import type { Data } from 'plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
-
-// Daily by type data comes in "long format"
-interface DailyTypeDataPoint {
-  date: string;
-  type: string;
-  sol_equivalent: number;
-}
+import ChartToggle from '@site/src/components/common/ChartToggle';
+import type { DailyTypeDataPoint } from './types';
 
 interface DailyStackedBarChartProps {
   data: DailyTypeDataPoint[];
-  title?: string;
 }
+
+type ViewMode = 'daily' | 'cumulative';
+
+const VIEW_OPTIONS = [
+  { value: 'daily' as ViewMode, label: 'Daily' },
+  { value: 'cumulative' as ViewMode, label: 'Cumulative' },
+];
 
 // Type name mapping - technical to display names
 const TYPE_DISPLAY_NAMES: Record<string, string> = {
@@ -28,7 +29,7 @@ const TYPE_DISPLAY_NAMES: Record<string, string> = {
   'token_transfer': 'Token Transfer',
   'compound_fees_tuna': 'Collect & Compound (Orca)',
   'tuna_collectandcompoundfeesfusion': 'Collect & Compound (Fusion)',
-  'liquidate_position_orca_sl_tp': 'Position SL/TP (Orca)',
+  'liquidate_position_orca_sl_tp': 'Liquidate SL/TP (Orca)',
   'tuna_increasetunalppositionfusion': 'Increase LP Position (Fusion)',
   'tuna_openandincreasetunalppositionfusion': 'Open & Increase LP (Fusion)',
   'tuna_increasetunalppositionorca': 'Increase LP Position (Orca)',
@@ -41,9 +42,16 @@ const TYPE_DISPLAY_NAMES: Record<string, string> = {
   'TunaOpenandincreasetunaspotpositionfusion': 'Open & Increase Spot (Fusion)',
   'TunaDecreasetunaspotpositionfusion': 'Decrease Spot Position (Fusion)',
   'TunaLiquidatetunaspotpositionfusion': 'Liquidate Spot Position (Fusion)',
+  'TunaModifytunaspotpositionfusion': 'Modify Spot Position (Fusion)',
+  'TunaOpentunaspotposition': 'Open Spot Position',
+  'TunaOpentunaspotpositionfusion': 'Open Spot Position (Fusion)',
+  'StakingInitializeposition': 'Staking Initialize Position',
   'ExcludedNonRevenue': 'Non-Revenue',
   'Unattributed': 'Unattributed',
 };
+
+// Types that should always be folded into the "Other" bucket
+const FORCE_OTHER_TYPES = new Set(['token_transfer']);
 
 function getDisplayName(technicalType: string): string {
   return TYPE_DISPLAY_NAMES[technicalType] || technicalType
@@ -52,13 +60,23 @@ function getDisplayName(technicalType: string): string {
     .join(' ');
 }
 
+function cumulativeSum(values: number[]): number[] {
+  const result: number[] = [];
+  let total = 0;
+  for (const v of values) {
+    total += v;
+    result.push(total);
+  }
+  return result;
+}
+
 export default function DailyStackedBarChart({
   data,
-  title = 'Transaction Types per Day'
 }: DailyStackedBarChartProps): React.ReactElement {
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
   const template = getPlotlyTemplate(isDark);
+  const [view, setView] = useState<ViewMode>('daily');
 
   // Detect mobile viewport
   // Initialize with actual window size to prevent hydration mismatch
@@ -100,13 +118,13 @@ export default function DailyStackedBarChart({
 
   // Data comes in "long format": [{date, type, sol_equivalent}, ...]
   // Need to transform to get unique dates and types
-  
+
   // Filter out data points with zero or near-zero SOL values
   const filteredData = data.filter(item => Number(item.sol_equivalent) > 0.001);
-  
+
   // Get unique dates in sorted order
   const uniqueDates = Array.from(new Set(filteredData.map(d => d.date))).sort();
-  
+
   // Calculate total SOL per type across all days
   const typeTotals = new Map<string, number>();
   filteredData.forEach(item => {
@@ -117,7 +135,7 @@ export default function DailyStackedBarChart({
 
   // Group types by display name to combine them
   const displayNameTotals = new Map<string, { displayName: string; types: string[]; total: number }>();
-  
+
   Array.from(typeTotals.entries()).forEach(([type, total]) => {
     const displayName = getDisplayName(type);
     if (displayNameTotals.has(displayName)) {
@@ -129,16 +147,20 @@ export default function DailyStackedBarChart({
     }
   });
 
-  // Filter out types with zero total and sort by total
-  const sortedDisplayNames = Array.from(displayNameTotals.values())
-    .filter(group => group.total > 0)  // Exclude types with 0 SOL
+  // Separate forced-other groups from normal groups
+  const allGroups = Array.from(displayNameTotals.values()).filter(g => g.total > 0);
+  const normalGroups = allGroups
+    .filter(g => !g.types.every(t => FORCE_OTHER_TYPES.has(t)))
     .sort((a, b) => b.total - a.total);
-  
+  const forcedOtherGroups = allGroups.filter(g => g.types.every(t => FORCE_OTHER_TYPES.has(t)));
+
   // Show top 9 + "Other" = 10 total traces (if there are more than 10 types)
   // Or show all types if 10 or fewer
-  const hasOther = sortedDisplayNames.length > 10;
-  const top10Groups = hasOther ? sortedDisplayNames.slice(0, 9) : sortedDisplayNames.slice(0, 10);
-  const otherGroups = hasOther ? sortedDisplayNames.slice(9) : [];
+  const hasOverflow = normalGroups.length > 10;
+  const top10Groups = hasOverflow ? normalGroups.slice(0, 9) : normalGroups.slice(0, 10);
+  const overflowGroups = hasOverflow ? normalGroups.slice(9) : [];
+  const otherGroups = [...overflowGroups, ...forcedOtherGroups];
+  const hasOther = otherGroups.length > 0;
 
   // Build a map for quick lookup: date -> type -> sol_equivalent
   const dataMap = new Map<string, Map<string, number>>();
@@ -146,7 +168,7 @@ export default function DailyStackedBarChart({
     const date = String(item.date);
     const type = String(item.type || 'Unknown');
     const sol = Number(item.sol_equivalent) || 0;
-    
+
     if (!dataMap.has(date)) {
       dataMap.set(date, new Map());
     }
@@ -170,7 +192,7 @@ export default function DailyStackedBarChart({
     'rgba(220, 38, 38, 0.8)',   // red-600
     'rgba(185, 28, 28, 0.8)',   // red-700
   ];
-  
+
   const getColor = (displayName: string, index: number): string => {
     // Only types that START with "Liquidate" get red
     if (displayName.startsWith('Liquidate')) {
@@ -181,7 +203,7 @@ export default function DailyStackedBarChart({
   };
 
   // Calculate dynamic legend positioning based on number of items and container width
-  const numLegendItems = hasOther ? 10 : top10Groups.length;
+  const numLegendItems = hasOther ? top10Groups.length + 1 : top10Groups.length;
 
   // Use viewport width as fallback if container not yet measured
   const effectiveWidth = containerWidth > 0 ? containerWidth : (typeof window !== 'undefined' ? window.innerWidth : 600);
@@ -212,54 +234,26 @@ export default function DailyStackedBarChart({
   const plotAreaBase = isMobile ? 350 : 450;
   const chartHeight = isMobile ? 30 + plotAreaBase + bottomMargin : 500;
 
-  // DEBUG: Log layout calculations
-  console.log('=== DAILY STACKED BAR LAYOUT DEBUG ===');
-  console.log(`isMobile: ${isMobile}`);
-  console.log(`Viewport: ${typeof window !== 'undefined' ? window.innerWidth : 'N/A'}px`);
-  console.log(`Container Width: ${containerWidth}px`);
-  console.log(`Effective Width (used): ${effectiveWidth}px`);
-  console.log(`Margin Subtraction: ${marginSubtraction}px`);
-  console.log(`Available Width: ${availableWidth}px`);
-  console.log(`Avg Item Width: ${avgItemWidth}px`);
-  console.log(`Num Legend Items: ${numLegendItems}`);
-  console.log(`Estimated Columns: ${estimatedColumns}`);
-  console.log(`Estimated Rows: ${estimatedRows}`);
-  console.log(`Row Height: ${rowHeight}px`);
-  console.log(`Legend Height: ${legendHeight}px`);
-  console.log(`Legend Y: ${legendY}`);
-  console.log(`Bottom Margin (legend): ${bottomMargin}px`);
-  console.log(`Plot Area Base: ${plotAreaBase}px`);
-  console.log(`Chart Height (30 + ${plotAreaBase} + ${bottomMargin}): ${chartHeight}px`);
-  console.log('======================================');
-
-  // Create traces for top 10 groups + "Other"
+  // Create traces for top groups + "Other"
   const traces: Data[] = [];
 
-  // Add traces for top 10 display name groups (combining technical types with same display name)
-  top10Groups.forEach((group, index) => {
+  // Build daily values per group first (needed for both modes)
+  const groupDailyValues: { group: typeof top10Groups[0]; values: number[] }[] = [];
+
+  top10Groups.forEach((group) => {
     const values = uniqueDates.map(date => {
       const dayData = dataMap.get(date);
-      // Sum all technical types that map to this display name
       return group.types.reduce((sum, typeKey) => {
         return sum + (dayData?.get(typeKey) || 0);
       }, 0);
     });
-    
-    const color = getColor(group.displayName, index);
-
-    traces.push({
-      x: uniqueDates,
-      y: values,
-      name: group.displayName,
-      type: 'bar',
-      marker: { color },
-      hovertemplate: `<b>${group.displayName}</b><br>%{x}<br>%{y:.2f} SOL<extra></extra>`,
-    });
+    groupDailyValues.push({ group, values });
   });
 
-  // Add "Other" category if there are more than 10 groups
-  if (otherGroups.length > 0) {
-    const otherValues = uniqueDates.map(date => {
+  // Other daily values
+  let otherDailyValues: number[] | null = null;
+  if (hasOther) {
+    otherDailyValues = uniqueDates.map(date => {
       const dayData = dataMap.get(date);
       return otherGroups.reduce((sum, group) => {
         return sum + group.types.reduce((typeSum, typeKey) => {
@@ -267,37 +261,142 @@ export default function DailyStackedBarChart({
         }, 0);
       }, 0);
     });
-
-    traces.push({
-      x: uniqueDates,
-      y: otherValues,
-      name: 'Other',
-      type: 'bar',
-      marker: { color: 'rgba(156, 163, 175, 0.8)' }, // gray
-      hovertemplate: '<b>Other</b><br>%{x}<br>%{y:.2f} SOL<extra></extra>',
-    });
   }
+
+  // Build traces with view-mode branching
+  groupDailyValues.forEach(({ group, values }, index) => {
+    const color = getColor(group.displayName, index);
+    const displayValues = view === 'cumulative' ? cumulativeSum(values) : values;
+
+    if (view === 'daily') {
+      traces.push({
+        x: uniqueDates,
+        y: displayValues,
+        name: group.displayName,
+        type: 'bar',
+        marker: { color },
+        hovertemplate: `${group.displayName}: %{y:,.4f} SOL<extra></extra>`,
+      });
+    } else {
+      traces.push({
+        x: uniqueDates,
+        y: displayValues,
+        name: group.displayName,
+        type: 'scatter',
+        mode: 'none',
+        stackgroup: 'one',
+        fillcolor: color,
+        line: { width: 0, color },
+        hovertemplate: `${group.displayName}: %{y:,.4f} SOL<extra></extra>`,
+      });
+    }
+  });
+
+  // Add "Other" category
+  if (hasOther && otherDailyValues) {
+    const displayValues = view === 'cumulative' ? cumulativeSum(otherDailyValues) : otherDailyValues;
+    const otherColor = 'rgba(156, 163, 175, 0.8)'; // gray
+
+    if (view === 'daily') {
+      traces.push({
+        x: uniqueDates,
+        y: displayValues,
+        name: 'Other',
+        type: 'bar',
+        marker: { color: otherColor },
+        hovertemplate: 'Other: %{y:,.4f} SOL<extra></extra>',
+      });
+    } else {
+      traces.push({
+        x: uniqueDates,
+        y: displayValues,
+        name: 'Other',
+        type: 'scatter',
+        mode: 'none',
+        stackgroup: 'one',
+        fillcolor: otherColor,
+        line: { width: 0, color: otherColor },
+        hovertemplate: 'Other: %{y:,.4f} SOL<extra></extra>',
+      });
+    }
+  }
+
+  // Compute max y for range scaling
+  const dailyTotals = uniqueDates.map((_, i) => {
+    let total = 0;
+    for (const { values } of groupDailyValues) {
+      total += values[i];
+    }
+    if (otherDailyValues) total += otherDailyValues[i];
+    return total;
+  });
+
+  // Compute display totals for the tooltip total trace
+  const displayTotals = view === 'cumulative' ? cumulativeSum(dailyTotals) : dailyTotals;
+
+  // Invisible total trace for unified hover
+  traces.push({
+    x: uniqueDates,
+    y: displayTotals,
+    name: 'Total',
+    type: 'scatter',
+    mode: 'none',
+    hovertemplate: '<b>Total: %{y:,.4f} SOL</b><extra></extra>',
+    showlegend: false,
+  } as Data);
+
+  const maxY = view === 'cumulative'
+    ? dailyTotals.reduce((a, b) => a + b, 0)  // total cumulative at end
+    : Math.max(...dailyTotals);
+
+  const chartTitle = view === 'daily'
+    ? 'Daily Revenue by Type'
+    : 'Cumulative Revenue by Type';
+
+  const yAxisLabel = view === 'daily'
+    ? 'Daily Revenue (SOL)'
+    : 'Cumulative Revenue (SOL)';
 
   return (
     <div ref={plotRef} style={{
       background: 'var(--ifm-background-surface-color)',
       border: '1px solid var(--ifm-toc-border-color)',
       borderRadius: 'var(--ifm-global-radius)',
+      boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       padding: isMobile ? '16px 0px 16px 0px' : '16px',
       marginBottom: '24px',
     }}>
+      {/* Title and Toggle */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingLeft: isMobile ? '16px' : '0px',
+        paddingRight: isMobile ? '16px' : '0px',
+        marginBottom: '16px',
+        flexWrap: 'wrap',
+        gap: '12px',
+      }}>
+        <h3 style={{
+          margin: 0,
+          fontSize: isMobile ? '15px' : '18px',
+          fontWeight: 600,
+        }}>
+          {chartTitle}
+        </h3>
+        <ChartToggle value={view} onChange={setView} options={VIEW_OPTIONS} variant="primary" />
+      </div>
+
       <Plot
         data={traces}
         layout={{
           ...template.layout,
-          title: {
-            text: title,
-            font: { size: isMobile ? 15 : 18, weight: 600 },
-          },
+          title: undefined,
+          ...(view === 'daily' ? { barmode: 'stack' } : {}),
           xaxis: {
             ...template.layout.xaxis,
             type: 'date',
-            tickangle: isMobile ? 0 : 0,
+            tickangle: 0,
             title: isMobile ? '' : {
               text: 'Date (UTC)',
               font: { size: 14 },
@@ -307,12 +406,12 @@ export default function DailyStackedBarChart({
           yaxis: {
             ...template.layout.yaxis,
             title: isMobile ? '' : {
-              text: 'Daily Revenue (SOL)',
+              text: yAxisLabel,
               font: { size: 14 },
             },
             tickfont: { size: isMobile ? 8 : 12 },
+            range: [0, maxY * 1.05],
           },
-          barmode: 'stack',
           showlegend: true,
           legend: {
             orientation: 'h',
@@ -320,26 +419,26 @@ export default function DailyStackedBarChart({
             y: legendY,
             xanchor: 'center',
             x: 0.5,
-            font: { size: isMobile ? 8 : 12 },  // Even smaller: 9 → 8
+            font: { size: isMobile ? 8 : 12 },
             ...(isMobile ? {
-              tracegroupgap: 0,  // No gap
-              itemwidth: 20,  // Even narrower icons: 25 → 20
+              tracegroupgap: 0,
+              itemwidth: 20,
             } : {}),
           },
-          hovermode: 'closest',
+          hovermode: 'x unified',
           dragmode: isMobile ? false : 'zoom',
           ...(isMobile ? {
             margin: {
               l: 25,
               r: 5,
-              t: 30,
+              t: 10,
               b: bottomMargin,
             },
           } : {
             margin: {
               l: 60,
               r: 20,
-              t: 50,
+              t: 10,
               b: 80,
             },
           }),
@@ -360,8 +459,8 @@ export default function DailyStackedBarChart({
           marginLeft: '25px',
           lineHeight: '1.6',
         }}>
-          <div>↑ Daily Revenue (SOL)</div>
-          <div>→ Date (UTC)</div>
+          <div>{'\u2191'} {yAxisLabel}</div>
+          <div>{'\u2192'} Date (UTC)</div>
         </div>
       )}
     </div>

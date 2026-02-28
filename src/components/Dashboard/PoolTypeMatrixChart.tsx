@@ -5,6 +5,14 @@ import { useColorMode } from '@docusaurus/theme-common';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import ChartToggle from '../common/ChartToggle';
+
+type WidthMode = 'proportional' | 'equal';
+
+const WIDTH_OPTIONS = [
+  { value: 'proportional' as WidthMode, label: 'Proportional' },
+  { value: 'equal' as WidthMode, label: 'Equal' },
+];
 
 interface PoolTypeData {
   pool_id: string;
@@ -20,7 +28,7 @@ interface PoolTypeData {
 }
 
 interface PoolTypeMatrixChartProps {
-  onSegmentClick?: (poolId: string, poolLabel: string, typeName: string, technicalTypes?: string[]) => void;
+  onSegmentClick?: (poolId: string, poolLabel: string, displayName: string, technicalTypes?: string[]) => void;
 }
 
 // Type name mapping - technical to display names (same as DailyStackedBarChart)
@@ -47,6 +55,7 @@ const TYPE_DISPLAY_NAMES: Record<string, string> = {
   'TunaOpenandincreasetunaspotpositionfusion': 'Open & Increase Spot (Fusion)',
   'TunaDecreasetunaspotpositionfusion': 'Decrease Spot Position (Fusion)',
   'TunaLiquidatetunaspotpositionfusion': 'Liquidate Spot Position (Fusion)',
+  'StakingInitializeposition': 'Initialize Staking Position',
   'ExcludedNonRevenue': 'Non-Revenue',
   'Unattributed': 'Unattributed',
 };
@@ -66,6 +75,7 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
 
   const [data, setData] = useState<PoolTypeData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [widthMode, setWidthMode] = useState<WidthMode>('equal');
 
   // Detect mobile viewport
   // Initialize with actual window size to prevent hydration mismatch
@@ -224,13 +234,14 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
   });
 
   // Calculate cumulative x positions for pools
+  const equalWidth = 1 / data.length;
   let cumulativeX = 0;
   const poolPositions: Array<{ pool: string; xStart: number; xEnd: number; width: number }> = [];
 
   data.forEach(pool => {
-    const width = pool.share_of_total;
+    const width = widthMode === 'equal' ? equalWidth : pool.share_of_total;
     poolPositions.push({
-      pool: formatPoolLabel(pool.pool_label),  // Apply label formatting
+      pool: formatPoolLabel(pool.pool_label),
       xStart: cumulativeX,
       xEnd: cumulativeX + width,
       width: width,
@@ -242,12 +253,16 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
   const maxX = cumulativeX;
 
   // Create annotations for all pools (90° rotated on mobile, 45° on desktop)
-  const annotations = poolPositions.map((poolPos) => {
-    // Remove line breaks for rotated labels
-    const labelText = poolPos.pool.replace(/<br>/g, ' ');
+  const annotations = poolPositions.map((poolPos, poolIdx) => {
+    const pool = data[poolIdx];
+    const pct = (pool.share_of_total * 100).toFixed(1);
+    // In equal mode, append share percentage since widths don't convey it
+    const labelText = widthMode === 'equal'
+      ? `${poolPos.pool.replace(/<br>/g, ' ')} (${pct}%)`
+      : poolPos.pool.replace(/<br>/g, ' ');
     return {
       x: poolPos.xStart + poolPos.width / 2,
-      y: -0.02,  // Position just below the x-axis
+      y: -0.02,
       xref: 'x',
       yref: 'paper',
       text: labelText,
@@ -290,35 +305,13 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
   // Bottom margin needs space for pool labels (110px) + legend + small gap
   const bottomMargin = isMobile ? 110 + legendHeight + 10 : 140;
 
-  // Axis notation sits at natural position below chart
-  const axisNotationMarginTop = isMobile ? '0px' : '0px';
+  // Axis notation below legend on mobile
+  const axisNotationMarginTop = isMobile ? '-90px' : '0px';
 
   // Calculate total chart height
   // Mobile: top margin + plot area + bottom margin (which includes pool labels + legend)
   const plotAreaBase = isMobile ? 350 : 500;
   const chartHeight = isMobile ? 30 + plotAreaBase + bottomMargin : 600;
-
-  // DEBUG: Log layout calculations
-  // Always log to help diagnose issues
-  console.log('=== POOL TYPE MATRIX LAYOUT DEBUG ===');
-  console.log(`isMobile: ${isMobile}`);
-  console.log(`Viewport: ${typeof window !== 'undefined' ? window.innerWidth : 'N/A'}px`);
-  console.log(`Container Width: ${containerWidth}px`);
-  console.log(`Effective Width (used): ${effectiveWidth}px`);
-  console.log(`Margin Subtraction: ${marginSubtraction}px`);
-  console.log(`Available Width: ${availableWidth}px`);
-  console.log(`Avg Item Width: ${avgItemWidth}px`);
-  console.log(`Num Legend Items: ${numLegendItems}`);
-  console.log(`Estimated Columns: ${estimatedColumns}`);
-  console.log(`Estimated Rows: ${estimatedRows}`);
-  console.log(`Row Height: ${rowHeight}px`);
-  console.log(`Legend Height: ${legendHeight}px`);
-  console.log(`Legend Y: ${legendY}`);
-  console.log(`Bottom Margin (pool labels + legend): ${bottomMargin}px`);
-  console.log(`Plot Area Base: ${plotAreaBase}px`);
-  console.log(`Chart Height (30 + ${plotAreaBase} + ${bottomMargin}): ${chartHeight}px`);
-  console.log(`Axis Notation marginTop: ${axisNotationMarginTop}`);
-  console.log('=====================================');
 
   // Create traces for each display name (combining technical types with same display name)
   displayNameGroups.forEach((technicalTypes, displayName) => {
@@ -397,21 +390,41 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
       background: 'var(--ifm-background-surface-color)',
       border: '1px solid var(--ifm-toc-border-color)',
       borderRadius: 'var(--ifm-global-radius)',
+      boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       padding: isMobile ? '16px 0px 16px 0px' : '16px',
-      marginBottom: '0px',
+      marginBottom: '24px',
     }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '8px',
+        paddingRight: isMobile ? '16px' : 0,
+        paddingLeft: isMobile ? '16px' : 0,
+        marginBottom: '4px',
+      }}>
+        <span style={{ fontWeight: 600, fontSize: isMobile ? 15 : 18 }}>
+          Revenue Distribution: Pools x Transaction Types
+        </span>
+        <ChartToggle
+          value={widthMode}
+          onChange={(v) => setWidthMode(v as WidthMode)}
+          options={WIDTH_OPTIONS}
+          variant="secondary"
+        />
+      </div>
       <Plot
         data={traces}
         layout={{
           ...template.layout,
-          title: {
-            text: 'Revenue Distribution: Pools × Transaction Types',
-            font: { size: isMobile ? 15 : 18, weight: 600 },
-          },
+          title: undefined,
           xaxis: {
             ...template.layout.xaxis,
             title: isMobile ? '' : {
-              text: 'Liquidity Pools (width = share of revenue)',
+              text: widthMode === 'proportional'
+                ? 'Liquidity Pools (width = share of revenue)'
+                : 'Liquidity Pools',
               standoff: 120,
               font: { size: 14 },
             },
@@ -488,7 +501,7 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
           lineHeight: '1.6',
         }}>
           <div>↑ Share of pool revenue</div>
-          <div>→ Liquidity pools (width = share of revenue)</div>
+          <div>→ {widthMode === 'proportional' ? 'Liquidity pools (width = share of revenue)' : 'Liquidity pools (equal width)'}</div>
         </div>
       )}
     </div>

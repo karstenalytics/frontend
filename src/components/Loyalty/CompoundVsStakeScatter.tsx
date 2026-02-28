@@ -99,8 +99,6 @@ export default function CompoundVsStakeScatter({
         marginBottom: '32px',
       }}
     >
-      <h3 style={{ marginTop: 0 }}>Compound Rate vs Stake Size - The Inverse Whale Effect</h3>
-
       <div
         style={{
           background: 'rgba(0, 163, 180, 0.1)',
@@ -134,6 +132,10 @@ export default function CompoundVsStakeScatter({
         ]}
         layout={{
           ...template.layout,
+          title: {
+            text: 'Compound Rate vs Stake Size - The Inverse Whale Effect',
+            font: { size: 18, weight: 600 },
+          },
           xaxis: {
             ...template.layout.xaxis,
             title: 'Compound Rate (%)',
@@ -228,7 +230,7 @@ export default function CompoundVsStakeScatter({
               },
             },
           ],
-          margin: { l: 80, r: 40, t: 20, b: 100 },
+          margin: { l: 80, r: 40, t: 50, b: 100 },
           height: 600,
         }}
         config={getResponsivePlotlyConfig()}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import type { DashboardData, SummaryData, DailyDataPoint, TopTransactionsData } from './types';
+import type { DashboardData, SummaryData, DailyDataPoint, DailyTypeDataPoint, TopTransactionsData } from './types';
 
 // Supported protocols
 export type Protocol = 'defituna' | 'flash-trade';
@@ -105,7 +105,7 @@ export function useDashboardData(protocol: Protocol = 'defituna'): DashboardData
           summary: summary as SummaryData,
           dailyStacked: dailyStacked as DailyDataPoint[],
           dailyByToken: dailyByToken as DailyDataPoint[],
-          dailyByType: dailyByType as DailyDataPoint[],
+          dailyByType: dailyByType as DailyTypeDataPoint[],
           dailyByPool: dailyByPool as DailyDataPoint[],
           topTransactionsToken: topTransactionsToken as TopTransactionsData,
           topTransactionsType: topTransactionsType as TopTransactionsData,
