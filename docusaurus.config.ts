@@ -44,29 +44,71 @@ const config: Config = {
       '@docusaurus/plugin-client-redirects',
       {
         redirects: [
+          // Legacy paths from before DefiTuna subdirectory
           {
             from: '/analysis/staking/wallet-timeline',
             to: '/analysis/defituna/staking/wallet-timeline',
           },
           {
             from: '/analysis/usage-statistics/usage-statistics-overview',
-            to: '/analysis/defituna/usage-statistics/wallet-usage',
+            to: '/analysis/defituna/adoption/wallet-usage',
           },
           {
             from: '/analysis/usage-statistics/usage-statistics-stakers',
-            to: '/analysis/defituna/usage-statistics/active-stakers',
+            to: '/analysis/defituna/adoption/active-stakers',
           },
           {
             from: '/analysis/defituna/orca-vs-fusion',
-            to: '/analysis/defituna/revenue-breakdown/orca-vs-fusion',
+            to: '/analysis/defituna/fees-revenue/orca-vs-fusion',
           },
           {
             from: '/analysis/defituna/tx-type-per-day',
-            to: '/analysis/defituna/revenue-breakdown/tx-type-per-day',
+            to: '/analysis/defituna/fees-revenue/tx-type-per-day',
           },
           {
             from: '/analysis/defituna/staking-apy',
-            to: '/analysis/defituna/staking-apr',
+            to: '/analysis/defituna/staking/staking-apr',
+          },
+          // Old directory paths -> new directory paths
+          {
+            from: ['/analysis/defituna/revenue-breakdown/by-token', '/analysis/defituna/fees-revenue/by-token'],
+            to: '/analysis/defituna/fees-revenue/by-pool',
+          },
+          {
+            from: ['/analysis/defituna/revenue-breakdown/by-type', '/analysis/defituna/fees-revenue/by-type'],
+            to: '/analysis/defituna/fees-revenue/tx-type-per-day',
+          },
+          {
+            from: '/analysis/defituna/revenue-breakdown/by-pool',
+            to: '/analysis/defituna/fees-revenue/by-pool',
+          },
+          {
+            from: '/analysis/defituna/revenue-breakdown/pools-vs-types',
+            to: '/analysis/defituna/fees-revenue/pools-vs-types',
+          },
+          {
+            from: '/analysis/defituna/revenue-breakdown/orca-vs-fusion',
+            to: '/analysis/defituna/fees-revenue/orca-vs-fusion',
+          },
+          {
+            from: '/analysis/defituna/revenue-breakdown/tx-type-per-day',
+            to: '/analysis/defituna/fees-revenue/tx-type-per-day',
+          },
+          {
+            from: '/analysis/defituna/usage-statistics/wallet-usage',
+            to: '/analysis/defituna/adoption/wallet-usage',
+          },
+          {
+            from: '/analysis/defituna/usage-statistics/active-stakers',
+            to: '/analysis/defituna/adoption/active-stakers',
+          },
+          {
+            from: '/analysis/defituna/staking-apr',
+            to: '/analysis/defituna/staking/staking-apr',
+          },
+          {
+            from: '/analysis/defituna/pool-ramp-up',
+            to: '/analysis/defituna/fees-revenue/pool-ramp-up',
           },
         ],
       },
@@ -99,7 +141,11 @@ const config: Config = {
           // Remove this to remove the "edit this page" links.
           editUrl: undefined,
         },
-        blog: false,  // Disabled - reserved for future articles
+        blog: {
+          path: 'articles',
+          routeBasePath: 'articles',
+          showReadingTime: true,
+        },
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -117,7 +163,7 @@ const config: Config = {
         highlightSearchTermsOnTargetPage: true,
         explicitSearchResultPath: true,
         indexDocs: true,
-        indexBlog: false,
+        indexBlog: true,
         indexPages: true,
         docsRouteBasePath: '/',
         ignoreFiles: [],

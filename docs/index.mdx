@@ -9,6 +9,7 @@ sidebar_custom_props:
 ---
 
 import BrowserOnly from '@docusaurus/BrowserOnly';
+import sidebars from '@site/sidebars';
 
 <BrowserOnly>
   {() => {
@@ -20,20 +21,18 @@ import BrowserOnly from '@docusaurus/BrowserOnly';
       const [topMargin, setTopMargin] = useState('-10rem');
 
       const chartUrls = [
-        '/analysis/defituna/revenue-breakdown/by-token',
-        '/analysis/defituna/revenue-breakdown/by-type',
-        '/analysis/defituna/revenue-breakdown/by-pool',
-        '/analysis/defituna/revenue-breakdown/pools-vs-types',
-        '/analysis/defituna/revenue-breakdown/tx-type-per-day',
-        '/analysis/defituna/revenue-breakdown/tx-type-development',
-        '/analysis/defituna/revenue-breakdown/orca-vs-fusion',
-        '/analysis/defituna/usage-statistics/wallet-usage',
-        '/analysis/defituna/usage-statistics/active-stakers',
+        '/analysis/defituna/fees-revenue/by-pool',
+        '/analysis/defituna/fees-revenue/pools-vs-types',
+        '/analysis/defituna/fees-revenue/tx-type-per-day',
+        '/analysis/defituna/fees-revenue/orca-vs-fusion',
+        '/analysis/defituna/fees-revenue/pool-ramp-up',
+        '/analysis/defituna/adoption/wallet-usage',
+        '/analysis/defituna/adoption/active-stakers',
         '/analysis/defituna/staking/staked-tuna',
         '/analysis/defituna/staking/staker-conviction',
         '/analysis/defituna/staking/vesting-timeline',
         '/analysis/defituna/staking/wallet-timeline',
-        '/analysis/defituna/staking-apr',
+        '/analysis/defituna/staking/staking-apr',
       ];
 
       const buttonTexts = [
@@ -169,22 +168,61 @@ It's about building a solid foundation for thoughtful discussions on what makes 
     const { useEffect, useState } = require('react');
     const useBaseUrl = require('@docusaurus/useBaseUrl').default;
 
+    // -----------------------------------------------------------
+    // Dynamic scope cards derived from sidebar config + data files
+    //
+    // FRAGILITY NOTE — this counting assumes analysisSidebar follows:
+    //   - type:'html' items  = protocol section headings (Projects)
+    //   - type:'category'    = chart groups; leaf docs = chart pages (Analyses)
+    //   - top-level strings / type:'doc' = overviews (excluded from count)
+    //
+    // Will miscount if:
+    //   1. sidebars.ts renames 'analysisSidebar'
+    //   2. Chart pages are added as top-level items instead of categories
+    //   3. Non-chart docs (guides, etc.) are placed inside categories
+    //   4. A protocol section omits its HTML heading
+    // -----------------------------------------------------------
+    function countLeafDocs(items) {
+      let n = 0;
+      for (const item of items) {
+        if (typeof item === 'string') n++;
+        else if (typeof item === 'object' && item.type === 'doc') n++;
+        else if (typeof item === 'object' && item.type === 'category') n += countLeafDocs(item.items);
+      }
+      return n;
+    }
+
+    const analysisItems = Array.isArray(sidebars.analysisSidebar) ? sidebars.analysisSidebar : [];
+    const projectCount = analysisItems.filter(i => typeof i === 'object' && i.type === 'html').length;
+    const analysisCount = analysisItems.reduce((acc, item) => {
+      if (typeof item === 'object' && item.type === 'category') return acc + countLeafDocs(item.items);
+      return acc;
+    }, 0);
+
     function StatsCards() {
       const baseUrl = useBaseUrl('/');
       const [txCount, setTxCount] = useState(null);
       const [loading, setLoading] = useState(true);
 
+      // NOTE: add new paths here when onboarding another protocol.
+      // Each JSON must expose summary.transactions_scanned.
+      const protocolDataPaths = [
+        'data/defituna/usage_metrics.json',
+        'data/flash-trade/usage_metrics.json',
+      ];
+
       useEffect(() => {
-        fetch(`${baseUrl}data/usage_metrics.json`)
-          .then(response => response.json())
-          .then(data => {
-            setTxCount(data.summary.transactions_scanned);
-            setLoading(false);
-          })
-          .catch(err => {
-            console.error('Error loading transaction count:', err);
-            setLoading(false);
-          });
+        Promise.all(
+          protocolDataPaths.map(p =>
+            fetch(`${baseUrl}${p}`)
+              .then(r => r.json())
+              .then(d => d.summary.transactions_scanned || 0)
+              .catch(() => 0)
+          )
+        ).then(counts => {
+          setTxCount(counts.reduce((a, b) => a + b, 0));
+          setLoading(false);
+        });
       }, [baseUrl]);
 
       if (loading) {
@@ -253,7 +291,7 @@ It's about building a solid foundation for thoughtful discussions on what makes 
           {/* Projects Covered Card */}
           <div style={cardStyle}>
             <div style={labelStyle}>Projects Covered</div>
-            <div style={valueStyle}>1</div>
+            <div style={valueStyle}>{projectCount}</div>
             <div style={supplementaryStyle}>
               Deep-dive protocol analysis
             </div>
@@ -262,7 +300,7 @@ It's about building a solid foundation for thoughtful discussions on what makes 
           {/* Analyses Presented Card */}
           <div style={cardStyle}>
             <div style={labelStyle}>Analyses Presented</div>
-            <div style={valueStyle}>14</div>
+            <div style={valueStyle}>{analysisCount}</div>
             <div style={supplementaryStyle}>
               Interactive data visualizations
             </div>
