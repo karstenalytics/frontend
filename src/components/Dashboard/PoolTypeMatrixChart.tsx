@@ -272,17 +272,12 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
   const rowHeight = isMobile ? 25 : 22;
   const legendHeight = estimatedRows * rowHeight;
 
-  // Position legend below the rotated pool labels (110px space)
-  // y is relative to plot area height, so -110px / 350px = -0.314
-  // Mobile: -0.32 to give buffer below pool labels
-  // Desktop: -0.35 to push further down below rotated labels and x-axis label
-  const legendY = isMobile ? -0.32 : -0.4;
+  // Position legend below rotated pool labels (~140px at 90deg, font-size 9)
+  // -0.42 * 350px = 147px, clearing labels with ~10-20px gap
+  const legendY = isMobile ? -0.42 : -0.4;
 
-  // Bottom margin needs space for pool labels (110px) + legend + small gap
-  const bottomMargin = isMobile ? 110 + legendHeight + 10 : 140;
-
-  // Axis notation below legend on mobile
-  const axisNotationMarginTop = isMobile ? '-90px' : '0px';
+  // Bottom margin: rotated pool labels (~140px at 90deg) + legend rows + gap
+  const bottomMargin = isMobile ? 150 + legendHeight + 15 : 140;
 
   // Calculate total chart height
   // Mobile: top margin + plot area + bottom margin (which includes pool labels + legend)
@@ -472,7 +467,7 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
         <div style={{
           fontSize: '13px',
           color: 'var(--ifm-color-secondary)',
-          marginTop: axisNotationMarginTop,
+          marginTop: '0px',
           marginLeft: '25px',
           lineHeight: '1.6',
         }}>
