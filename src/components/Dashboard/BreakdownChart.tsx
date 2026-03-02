@@ -189,7 +189,7 @@ export default function BreakdownChart({ summary, groupMode, onBarClick }: Break
               standoff: 30
             },
             tickangle: isMobile ? -90 : 0,
-            tickfont: { size: isMobile ? 9 : 12 },
+            tickfont: { size: isMobile ? 8 : 10 },
           },
           yaxis: {
             ...template.layout.yaxis,

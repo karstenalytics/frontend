@@ -1,0 +1,655 @@
+---
+title: Wallet Timeline
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Staking Wallet Timeline
+
+Detailed staking history for individual wallet addresses showing balance evolution, realized rewards, and all staking operations over time. Enter any wallet address to view their staked/unstaked FAF balances, cumulative USDC rewards claimed, and complete transaction history.
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useState, useEffect } = require('react');
+    const { useWalletTimeline } = require('@site/src/hooks/useWalletTimeline');
+    const { useActiveStakers } = require('@site/src/hooks/useActiveStakers');
+    const WalletTimelineChart = require('@site/src/components/Staking/WalletTimelineChart').default;
+
+    // Format date as YYYY/MM/DD (UTC)
+    const formatDate = (dateStr) => {
+      const d = new Date(dateStr);
+      const year = d.getUTCFullYear();
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      return `${year}/${month}/${day}`;
+    };
+
+    // Format datetime as YYYY/MM/DD HH:MM:SS (UTC)
+    const formatDateTime = (dateStr) => {
+      const d = new Date(dateStr);
+      const year = d.getUTCFullYear();
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      const hours = String(d.getUTCHours()).padStart(2, '0');
+      const minutes = String(d.getUTCMinutes()).padStart(2, '0');
+      const seconds = String(d.getUTCSeconds()).padStart(2, '0');
+      return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+    };
+
+    // Vesting recipients (Streamflow contracts)
+    // Source: https://flash-trade.notion.site/Token-transparency-report-1dc1d77c7290809cb2a8e8195a6d7a21
+    const vestingWallets = [
+      { address: 'C1wmXbLDZJrxkn9VQg77xpWvpF96ba23TBP6VhEmYUYK', name: 'Solana Labs Tranche 1 (26.6M)' },
+      { address: 'AXXy1euNV4tJf6zu5JRyPczgugDoKvaWBtc7nGqNfpmX', name: 'Advisory 0.15% (1.5M)' },
+      { address: '8VfUAxXgPythY5cKqbYBnV3w252VZCVsDnDPRjnj1s2W', name: 'Advisory 0.175% (949K)' },
+    ];
+
+    // TGE airdrop recipients (April 19, 2025) - only those with staking activity
+    // Source: on-chain transfers from team treasury GzqP64zjbSQJ5MFREwMTZhvhUzfwMDVit4bPxWH52Xm
+    const airdropWallets = [
+      { address: 'qhGnYXn7HVEzN14hid1xVgFfRppywRnC395s8SQnogo', name: '771K tier' },
+      { address: 'HRkVttmA9CL5sXp2Wy5rJggyVHmA46LUuhJTrCUQUAbv', name: '771K tier' },
+      { address: '5XFbFCsUWVhjf3Dzh2geLXyS81VgZuRgudQphbvGXy1J', name: '771K tier' },
+      { address: '2Ac8nSr1KPCAPah3aNXSqwCCkNwfZQTLCoFZHZ3jvULn', name: '771K tier' },
+      { address: '99xprLBzqd8nGb1XhFJE3MgFfLoXj4g7U985eNwCTa2S', name: '771K tier' },
+      { address: 'H3KP17ksqxzMJb7Fn9htpA9pdwnvL3zmxT2bXzVaNwSx', name: '771K tier' },
+      { address: 'DgzWqku67fPeuWgmyZbNa7U7yicKRhbjM7nB86Yx2ojQ', name: '429K tier' },
+      { address: '9kCrTcCrti9fjX2GFNxiu6ZY8DEBFG3V9NuzUw5j1eTz', name: '429K tier' },
+      { address: '7x6aCLVPwuxANFi8JT5Bh8pLZbPySkd8SLaR9P9R8yFC', name: '429K tier' },
+      { address: '3WtcQ6mQbNHPGaSxyNakyMX9wdxHBJzaoddSXSqJ17Fs', name: '429K tier' },
+      { address: '4mM4xCiH2JQho1Du66DyCJ4wCW9aaYzAK12uDAFsT97Z', name: '429K tier' },
+      { address: '9j53Z6bejUaAxJCEC64BbxozLPuvsuAFsr6iqWKKDvaw', name: '429K tier' },
+      { address: '6RBkQwxeFSYEvjeuV14UFSw9dPpknkTode7JkZe4Z79L', name: '343K tier' },
+      { address: 'CVsLHqntx9otAiSUtRP5qEVj8o9fdKhnV6LKCdFuQ2w3', name: '343K tier' },
+      { address: '6VZRd4TqEhap1rEFeRodE4mWdB7kwDTnonZciUQQHQ2f', name: '343K tier' },
+      { address: 'GQUPB3MUeNp9divMriG7yUyybdbqGN2MfxBH5iLj6QbA', name: '343K tier' },
+      { address: 'CmqiHTEHCj8LxJvanr2q3mDeDxtqnpk5hwGXQpVZ5ruH', name: '343K tier' },
+      { address: 'AHeTSmeWbAs4u9r417hrvrzEyWZ1sxBd7MeU55pMsJvV', name: '343K tier' },
+      { address: 'FmTTpg3yaZwsYCta2TG7ksLwLC3BJHQDP9xQVauVD3To', name: '86K tier' },
+      { address: '9yhpCwGYTWycAAd41X3rKpH328iHSrU7TrQWeVsoGcX5', name: '86K tier' },
+      { address: 'BjKcAznmCYoE6sfqaFWQRGzWmFPYVqPMJgMjWupChPWC', name: '86K tier' },
+      { address: 'CGvgDjohXpVMf6sPVGQuCWq236CAd4EEYYcxuFfe7yWo', name: '86K tier' },
+      { address: '8FD33dGS13YazoKyYhewbYDKS5ijSE2RaHSMmY5Jv8iY', name: '86K tier' },
+    ];
+
+    function WalletTimelinePage() {
+      const [inputAddress, setInputAddress] = useState('');
+      const [searchAddress, setSearchAddress] = useState(null);
+      const [currentPage, setCurrentPage] = useState(0);
+      const [zoomRange, setZoomRange] = useState(null); // [startDate, endDate] or null for full range
+      const { data, loading, error } = useWalletTimeline(searchAddress, 'flash-trade');
+      const activeStakers = useActiveStakers('flash-trade');
+      const topStakers7d = activeStakers.data?.top_stakers_7d || [];
+      const topWithdrawers7d = activeStakers.data?.top_withdrawers_7d || [];
+
+      // Parse URL parameters on mount to auto-fill wallet address
+      useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const walletParam = params.get('wallet') || params.get('address');
+
+        if (walletParam) {
+          const trimmed = walletParam.trim();
+          if (trimmed.length >= 32 && trimmed.length <= 44) {
+            setInputAddress(trimmed);
+            setSearchAddress(trimmed);
+          }
+        }
+      }, []);
+
+      // Reset pagination and zoom when searching new wallet
+      useEffect(() => {
+        setCurrentPage(0);
+        setZoomRange(null);
+      }, [searchAddress]);
+
+      // Update URL when wallet changes
+      useEffect(() => {
+        if (searchAddress) {
+          const url = new URL(window.location.href);
+          url.searchParams.set('wallet', searchAddress);
+          window.history.replaceState({}, '', url.toString());
+        } else {
+          const url = new URL(window.location.href);
+          url.searchParams.delete('wallet');
+          window.history.replaceState({}, '', url.toString());
+        }
+      }, [searchAddress]);
+
+      const handleSearch = () => {
+        const trimmed = inputAddress.trim();
+        if (trimmed.length >= 32 && trimmed.length <= 44) {
+          setSearchAddress(trimmed);
+        } else {
+          alert('Please enter a valid Solana wallet address (32-44 characters)');
+        }
+      };
+
+      const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+          handleSearch();
+        }
+      };
+
+      return (
+        <div style={{ padding: '0' }}>
+          {/* Search Input */}
+          <div style={{
+            background: 'var(--ifm-background-surface-color)',
+            border: '1px solid var(--ifm-toc-border-color)',
+            borderRadius: 'var(--ifm-global-radius)',
+            padding: '24px',
+            marginBottom: '24px',
+          }}>
+            <label htmlFor="flash-wallet-address" style={{
+              display: 'block',
+              marginBottom: '12px',
+              fontWeight: 600,
+              fontSize: '14px',
+            }}>
+              Wallet Address
+            </label>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <input
+                id="flash-wallet-address"
+                type="text"
+                value={inputAddress}
+                onChange={(e) => setInputAddress(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Enter Solana wallet address..."
+                style={{
+                  flex: '1 1 200px',
+                  minWidth: 0,
+                  padding: '12px 16px',
+                  fontSize: '14px',
+                  fontFamily: 'var(--ifm-font-family-monospace)',
+                  border: '1px solid var(--ifm-toc-border-color)',
+                  borderRadius: 'var(--ifm-global-radius)',
+                  background: 'var(--ifm-background-color)',
+                  color: 'var(--ifm-font-color-base)',
+                }}
+              />
+              <button
+                onClick={handleSearch}
+                disabled={loading}
+                style={{
+                  padding: '12px 24px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: 'white',
+                  background: loading ? '#9CA3AF' : 'var(--accent)',
+                  border: 'none',
+                  borderRadius: 'var(--ifm-global-radius)',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  transition: 'background 120ms ease',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) e.currentTarget.style.background = 'var(--accent-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading) e.currentTarget.style.background = 'var(--accent)';
+                }}
+              >
+                {loading ? 'Loading...' : 'Analyze Wallet'}
+              </button>
+            </div>
+            <p style={{
+              marginTop: '12px',
+              marginBottom: '12px',
+              fontSize: '13px',
+              color: 'var(--ifm-color-secondary)',
+            }}>
+              Enter any wallet address from the FAF staking cache{activeStakers.data ? ` (${activeStakers.data.total_unique_stakers.toLocaleString()} wallets)` : ''}.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '12px', color: 'var(--ifm-color-secondary)' }}>
+                Quick select:
+              </span>
+              <select
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setInputAddress(e.target.value);
+                    setSearchAddress(e.target.value);
+                  }
+                }}
+                style={{
+                  padding: '6px 10px',
+                  fontSize: '12px',
+                  border: '1px solid var(--ifm-toc-border-color)',
+                  borderRadius: 'var(--ifm-global-radius)',
+                  background: 'var(--ifm-background-color)',
+                  color: 'var(--ifm-color-secondary)',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="">Select wallet...</option>
+                <optgroup label="Vesting Recipients">
+                  {vestingWallets.map((wallet) => (
+                    <option key={wallet.address} value={wallet.address}>
+                      {wallet.name}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="TGE Airdrop Recipients">
+                  {airdropWallets.map((wallet) => (
+                    <option key={wallet.address} value={wallet.address}>
+                      {wallet.address.slice(0, 4)}...{wallet.address.slice(-4)} ({wallet.name})
+                    </option>
+                  ))}
+                </optgroup>
+                {topStakers7d.length > 0 && (
+                  <optgroup label="Top Stakers (last 7 days)">
+                    {topStakers7d.map((entry, i) => (
+                      <option key={entry.address} value={entry.address}>
+                        #{i + 1} {entry.address.slice(0, 4)}...{entry.address.slice(-4)} ({(entry.amount / 1e6).toFixed(1)}M FAF)
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {topWithdrawers7d.length > 0 && (
+                  <optgroup label="Top Withdrawers (last 7 days)">
+                    {topWithdrawers7d.map((entry, i) => (
+                      <option key={'w-' + entry.address} value={entry.address}>
+                        #{i + 1} {entry.address.slice(0, 4)}...{entry.address.slice(-4)} ({(entry.amount / 1e6).toFixed(1)}M FAF)
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+              </select>
+            </div>
+          </div>
+
+          {/* Loading State */}
+          {loading && (
+            <div style={{
+              background: 'var(--ifm-background-surface-color)',
+              border: '1px solid var(--ifm-toc-border-color)',
+              borderRadius: 'var(--ifm-global-radius)',
+            }}>
+              <LoadingSpinner />
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div style={{
+              padding: '24px',
+              background: 'var(--ifm-background-surface-color)',
+              border: '1px solid var(--ifm-color-danger)',
+              borderRadius: 'var(--ifm-global-radius)',
+              color: 'var(--ifm-color-danger)',
+            }}>
+              <h3 style={{ marginTop: 0 }}>Error Loading Wallet</h3>
+              <p style={{ marginBottom: 0 }}>{error}</p>
+            </div>
+          )}
+
+          {/* Chart and Summary */}
+          {data && data.found && !loading && (
+            <>
+              {/* Summary Stats */}
+              <div style={{
+                background: 'var(--ifm-background-surface-color)',
+                border: '1px solid var(--ifm-toc-border-color)',
+                borderRadius: 'var(--ifm-global-radius)',
+                padding: '24px',
+                marginBottom: '24px',
+              }}>
+                <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Wallet Summary</h3>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '16px',
+                }}>
+                  <div>
+                    <div style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)', marginBottom: '4px' }}>
+                      Current Staked
+                    </div>
+                    <div style={{ fontSize: '20px', fontWeight: 600, color: 'var(--accent)' }}>
+                      {data.summary.current_staked.toLocaleString(undefined, { maximumFractionDigits: 0 })} FAF
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)', marginBottom: '4px' }}>
+                      Pending Unstake (Queued)
+                    </div>
+                    <div style={{ fontSize: '20px', fontWeight: 600 }}>
+                      {data.summary.current_unstaked.toLocaleString(undefined, { maximumFractionDigits: 0 })} FAF
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)', marginBottom: '4px' }}>
+                      USDC Rewards
+                    </div>
+                    <div style={{ fontSize: '20px', fontWeight: 600, color: '#10B981' }}>
+                      ${data.summary.realized_rewards.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--ifm-color-secondary)', marginTop: '4px' }}>
+                      Total claimed
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)', marginBottom: '4px' }}>
+                      Total Operations
+                    </div>
+                    <div style={{ fontSize: '20px', fontWeight: 600 }}>
+                      {data.summary.total_operations.toLocaleString()}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)', marginBottom: '4px' }}>
+                      First Activity
+                    </div>
+                    <div style={{ fontSize: '16px', fontWeight: 600 }}>
+                      {formatDate(data.summary.first_stake_date)}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)', marginBottom: '4px' }}>
+                      Last Activity
+                    </div>
+                    <div style={{ fontSize: '16px', fontWeight: 600 }}>
+                      {formatDate(data.summary.last_activity_date)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <WalletTimelineChart data={data} stakeToken="FAF" rewardToken="USDC" supportsVesting={false} zoomRange={zoomRange} onZoomChange={(range) => { setZoomRange(range); setCurrentPage(0); }} />
+
+              {/* Transactions Table */}
+              {(() => {
+                const { tableStyles, tableRowHoverHandlers, linkHoverHandlers } = require('@site/src/styles/tableStyles');
+
+                const allOperations = [...data.operations].reverse();
+                // Plotly returns dates as "YYYY-MM-DD HH:MM:SS.ssss" (UTC but no Z suffix),
+                // while operation dates are ISO "YYYY-MM-DDTHH:MM:SSZ". Normalize both to UTC.
+                const toUTCMs = (s) => {
+                  if (s.includes('T')) return new Date(s).getTime();
+                  return new Date(s.replace(' ', 'T') + 'Z').getTime();
+                };
+                const filteredOperations = zoomRange
+                  ? (() => {
+                      const lo = toUTCMs(zoomRange[0]);
+                      const hi = toUTCMs(zoomRange[1]);
+                      return allOperations.filter(op => {
+                        const t = toUTCMs(op.date);
+                        return t >= lo && t <= hi;
+                      });
+                    })()
+                  : allOperations;
+                const pageSize = 10;
+                const totalPages = Math.ceil(filteredOperations.length / pageSize);
+                const startIdx = currentPage * pageSize;
+                const endIdx = startIdx + pageSize;
+                const pageOperations = filteredOperations.slice(startIdx, endIdx);
+
+                const { OPERATION_STYLES } = require('@site/src/components/Staking/WalletTimelineChart');
+                const operationColors = Object.fromEntries(
+                  Object.entries(OPERATION_STYLES).map(([k, v]) => [k, v.color])
+                );
+                operationColors.unknown = '#6B7280';
+
+                return (
+                  <div style={tableStyles.container}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+                      <h3 style={{ margin: 0 }}>
+                        Wallet Transactions ({filteredOperations.length}{zoomRange ? ` of ${allOperations.length}` : ''})
+                      </h3>
+                      {zoomRange && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)' }}>
+                            {formatDateTime(new Date(toUTCMs(zoomRange[0])).toISOString())} - {formatDateTime(new Date(toUTCMs(zoomRange[1])).toISOString())} UTC
+                          </span>
+                          <button
+                            onClick={() => setZoomRange(null)}
+                            style={{
+                              padding: '4px 12px',
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              color: 'var(--ifm-font-color-base)',
+                              background: 'var(--ifm-background-surface-color)',
+                              border: '1px solid var(--ifm-toc-border-color)',
+                              borderRadius: 'var(--ifm-global-radius)',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Reset filter
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={tableStyles.table}>
+                        <thead>
+                          <tr style={tableStyles.headerRow}>
+                            <th style={tableStyles.headerCell}>#</th>
+                            <th style={tableStyles.headerCell}>Date</th>
+                            <th style={tableStyles.headerCell}>Type</th>
+                            <th style={tableStyles.headerCell}>Amount</th>
+                            <th style={tableStyles.headerCell}>Transaction</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {pageOperations.map((op, idx) => {
+                            const globalIdx = startIdx + idx;
+                            const isUsdcReward = op.type === 'claim' || op.type === 'collect_revenue';
+                            const isFafReward = op.type === 'collect_token_reward';
+                            const unit = isUsdcReward ? 'USDC' : 'FAF';
+                            const decimals = isUsdcReward ? 2 : (isFafReward ? 2 : 0);
+                            const prefix = isUsdcReward ? '$' : '';
+
+                            return (
+                              <tr
+                                key={globalIdx}
+                                style={tableStyles.bodyRow}
+                                {...tableRowHoverHandlers}
+                              >
+                                <td style={tableStyles.rankCell}>
+                                  #{globalIdx + 1}
+                                </td>
+                                <td style={{ ...tableStyles.dateCell, fontSize: '12px', fontFamily: 'var(--ifm-font-family-monospace)' }}>
+                                  {formatDateTime(op.date)}
+                                </td>
+                                <td style={tableStyles.cell}>
+                                  <span style={{
+                                    display: 'inline-block',
+                                    padding: '4px 8px',
+                                    borderRadius: '4px',
+                                    fontSize: '12px',
+                                    fontWeight: 600,
+                                    color: 'white',
+                                    background: operationColors[op.type] || operationColors.unknown,
+                                  }}>
+                                    {op.type_label}
+                                  </span>
+                                </td>
+                                <td style={{ ...tableStyles.cell, fontWeight: 600 }}>
+                                  {prefix}{op.amount.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}{!isUsdcReward ? ` ${unit}` : ''}
+                                </td>
+                                <td style={tableStyles.addressCell}>
+                                  <a
+                                    href={op.solscan_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={tableStyles.link}
+                                    {...linkHoverHandlers}
+                                  >
+                                    {op.signature.slice(0, 8)}...{op.signature.slice(-8)}
+                                  </a>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginTop: '16px',
+                        paddingTop: '16px',
+                        borderTop: '1px solid var(--ifm-toc-border-color)',
+                      }}>
+                        <div style={{ fontSize: '14px', color: 'var(--ifm-color-secondary)' }}>
+                          Showing {startIdx + 1}-{Math.min(endIdx, filteredOperations.length)} of {filteredOperations.length}
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                            disabled={currentPage === 0}
+                            style={{
+                              padding: '8px 16px',
+                              fontSize: '14px',
+                              fontWeight: 600,
+                              color: currentPage === 0 ? 'var(--ifm-color-secondary)' : 'var(--ifm-font-color-base)',
+                              background: 'var(--ifm-background-surface-color)',
+                              border: '1px solid var(--ifm-toc-border-color)',
+                              borderRadius: 'var(--ifm-global-radius)',
+                              cursor: currentPage === 0 ? 'not-allowed' : 'pointer',
+                            }}
+                          >
+                            Previous
+                          </button>
+                          <div style={{
+                            padding: '8px 16px',
+                            fontSize: '14px',
+                            color: 'var(--ifm-color-secondary)',
+                          }}>
+                            Page {currentPage + 1} of {totalPages}
+                          </div>
+                          <button
+                            onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+                            disabled={currentPage === totalPages - 1}
+                            style={{
+                              padding: '8px 16px',
+                              fontSize: '14px',
+                              fontWeight: 600,
+                              color: currentPage === totalPages - 1 ? 'var(--ifm-color-secondary)' : 'var(--ifm-font-color-base)',
+                              background: 'var(--ifm-background-surface-color)',
+                              border: '1px solid var(--ifm-toc-border-color)',
+                              borderRadius: 'var(--ifm-global-radius)',
+                              cursor: currentPage === totalPages - 1 ? 'not-allowed' : 'pointer',
+                            }}
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </>
+          )}
+
+          {/* Wallet Not Found */}
+          {data && !data.found && !loading && !error && (
+            <div style={{
+              padding: '48px',
+              textAlign: 'center',
+              background: 'var(--ifm-background-surface-color)',
+              border: '1px solid var(--ifm-toc-border-color)',
+              borderRadius: 'var(--ifm-global-radius)',
+            }}>
+              <h3>Wallet Not Found</h3>
+              <p style={{ color: 'var(--ifm-color-secondary)' }}>
+                {data.error || 'This wallet did not stake FAF at any given time in the past.'}
+              </p>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return <WalletTimelinePage />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Track individual staker behavior**: Monitor any wallet's FAF staking activity, reward claims, and balance changes over time
+- **Analyze whale patterns**: Study large stakers to understand when they stake, unstake, and how they manage USDC rewards
+- **Share wallet analysis**: Use URL parameters (?wallet=ADDRESS) to share pre-filled analysis links
+- **Review your own portfolio**: Analyze your wallet's staking performance and reward accumulation
+- **Identify staker archetypes**: Distinguish between compounders (re-stake rewards), claimers (collect USDC), and passive holders
+- **Investigate transactions**: Click any operation in the table to view the full transaction on Solscan
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+**How to Use:**
+
+- Enter a Solana wallet address in the search box and click "Analyze Wallet" or press Enter
+- Use the "Quick select" dropdown to pick from vesting recipients, airdrop wallets, or recent top stakers/withdrawers
+- Share direct links with pre-filled addresses using `?wallet=ADDRESS`
+
+**Wallet Summary Metrics:**
+- **Current Staked**: FAF currently locked in staking positions
+- **Pending Unstake (Queued)**: FAF in the unstaking queue awaiting withdrawal (30-day cooldown before Epoch 10; 90-day linear vesting after Epoch 10)
+- **USDC Rewards**: Cumulative USDC claimed from staking fees and revenue share
+- **Total Operations**: Count of all staking transactions
+- **First/Last Activity**: Date range of the wallet's staking history
+
+**Timeline Chart Elements:**
+- **Teal area**: Staked FAF balance over time
+- **Gray area**: Total FAF in unstaking queue (the unlock schedule is not visible -- the area shows total queued FAF, not how much has vested)
+- **Dashed line (right axis)**: Cumulative USDC rewards claimed
+- **Colored dots**: Individual staking operations (stake, unstake, collect revenue, etc.)
+
+**Wallet Transactions Table:**
+- Shows all staking operations sorted newest first
+- **Type**: Color-coded badge showing operation type (Stake, Unstake, Collect Revenue, etc.)
+- **Amount**: FAF amount (for stake/unstake/token rewards) or USDC amount (for revenue claims)
+- **Transaction**: Clickable signature linking to Solscan
+- **Pagination**: 10 transactions per page
+
+**Interactive Features:**
+- **Hover on chart**: See exact balance amounts at any point in time
+- **Zoom & Pan**: Drag on chart to zoom into a time period; table auto-filters to match
+- **Reset filter**: Click "Reset filter" to return to full view
+- **Click transaction links**: Opens full transaction details on Solscan
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+Wallet timeline data is derived from the Flash.Trade staker cache, which contains all FAF staking events. Events are filtered by wallet address and displayed chronologically with running balance calculations.
+
+**Event Types:**
+- **Stake**: FAF deposited into staking pool (DepositTokenStake)
+- **Burn & Stake**: FAF deposited from burned NFT positions (BurnAndStake)
+- **Cancel Unstake**: FAF returned from unstaking queue to staked position (CancelUnstakeTokenRequest)
+- **Unstake**: FAF withdrawal request queued (UnstakeTokenRequest)
+- **Unstake Instant**: FAF withdrawn instantly, bypassing the queue (UnstakeInstant)
+- **Withdraw**: FAF collected from the unstaking queue (WithdrawToken)
+- **Collect Revenue**: USDC revenue share collected (CollectRevenue)
+- **Collect Token Reward**: FAF token rewards collected (CollectTokenReward)
+
+**Update Frequency**
+
+Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+
+</details>

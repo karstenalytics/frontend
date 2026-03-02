@@ -1,0 +1,333 @@
+---
+title: Pools vs. Types
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Fees by Pool & Transaction Type
+
+Two-dimensional fee distribution showing how transaction types and liquidity pools interact. Click any segment to filter the transaction table by that pool-type combination.
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const FlashPoolTypeMatrixChart = require('@site/src/components/FlashTrade/FlashPoolTypeMatrixChart').default;
+
+    function ChartSection() {
+      const handleSegmentClick = (pool, type) => {
+        window.dispatchEvent(new CustomEvent('pool-type-filter', { detail: { pool, type } }));
+      };
+
+      return <FlashPoolTypeMatrixChart onSegmentClick={handleSegmentClick} />;
+    }
+
+    return <ChartSection />;
+  }}
+</BrowserOnly>
+
+## Top Transactions
+
+<BrowserOnly fallback={<div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useState, useEffect } = require('react');
+    const { buildColorMap } = require('@site/src/utils/chartColors');
+    const FilterIndicator = require('@site/src/components/common/FilterIndicator').default;
+    const { tableStyles, tableRowHoverHandlers, linkHoverHandlers } = require('@site/src/styles/tableStyles');
+
+    function TopTransactionsTable() {
+      const [selectedPool, setSelectedPool] = useState(null);
+      const [selectedType, setSelectedType] = useState(null);
+      const [topTransactionsPool, setTopTransactionsPool] = useState(null);
+      const [topTransactionsPoolType, setTopTransactionsPoolType] = useState(null);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        Promise.all([
+          fetch('/data/flash-trade/top_transactions_pool.json').then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch('/data/flash-trade/top_transactions_pool_type.json').then(r => r.ok ? r.json() : null).catch(() => null),
+        ])
+          .then(([poolData, poolTypeData]) => {
+            setTopTransactionsPool(poolData);
+            setTopTransactionsPoolType(poolTypeData);
+            setLoading(false);
+          })
+          .catch(() => setLoading(false));
+      }, []);
+
+      useEffect(() => {
+        const handler = (e) => {
+          setSelectedPool(e.detail.pool);
+          setSelectedType(e.detail.type);
+        };
+        window.addEventListener('pool-type-filter', handler);
+        return () => window.removeEventListener('pool-type-filter', handler);
+      }, []);
+
+      const handleClearFilter = () => {
+        setSelectedPool(null);
+        setSelectedType(null);
+      };
+
+      const consolidatePoolName = (name) => name.replace(/ \(V1\/V2\)$/, '');
+
+      const getFilteredTransactions = () => {
+        if (!selectedPool && !selectedType) {
+          return topTransactionsPool?.transactions || [];
+        }
+        if (selectedPool && selectedType) {
+          if (!topTransactionsPoolType) return [];
+          const key = `${selectedPool}_${selectedType}`;
+          return topTransactionsPoolType[key] || [];
+        }
+        if (selectedPool) {
+          const allTx = topTransactionsPool?.transactions || [];
+          return allTx.filter(tx => consolidatePoolName(tx.pool) === selectedPool);
+        }
+        if (selectedType) {
+          const allTx = topTransactionsPool?.transactions || [];
+          return allTx.filter(tx => tx.type === selectedType);
+        }
+        return [];
+      };
+
+      const filteredTransactions = getFilteredTransactions();
+      const displayTransactions = filteredTransactions.slice(0, 10);
+
+      if (loading) {
+        return (
+          <div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      // Compute color maps from transaction data
+      const allTx = topTransactionsPool?.transactions || [];
+      const poolTotals = {};
+      const typeTotals = {};
+      for (const tx of allTx) {
+        const pn = consolidatePoolName(tx.pool);
+        poolTotals[pn] = (poolTotals[pn] || 0) + tx.fee_usdc;
+        typeTotals[tx.type] = (typeTotals[tx.type] || 0) + tx.fee_usdc;
+      }
+      const rankedPools = Object.entries(poolTotals).sort((a, b) => b[1] - a[1]).map(([n]) => n);
+      const rankedTypes = Object.entries(typeTotals).sort((a, b) => b[1] - a[1]).map(([n]) => n);
+      const poolColorMap = buildColorMap(rankedPools);
+      const typeColorMap = buildColorMap(rankedTypes);
+
+      const filterChips = [];
+      if (selectedPool) filterChips.push({ label: selectedPool, color: poolColorMap[selectedPool] || '#888888' });
+      if (selectedType) filterChips.push({ label: selectedType, color: typeColorMap[selectedType] || '#888888' });
+
+      return (
+        <div>
+          <p style={{ marginBottom: '16px' }}>
+            The table displays individual transactions contributing to trading fees.
+            By default, it shows the top 10 transactions globally across all pools, sorted by USDC amount.
+          </p>
+
+          <FilterIndicator
+            filters={filterChips}
+            onClear={handleClearFilter}
+            separator={" \u2192 "}
+          />
+
+          {topTransactionsPool || topTransactionsPoolType ? (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={tableStyles.table}>
+                <thead>
+                  <tr style={tableStyles.headerRow}>
+                    <th style={tableStyles.headerCell}>#</th>
+                    <th style={tableStyles.headerCell}>Date</th>
+                    <th style={tableStyles.headerCell}>Pool</th>
+                    <th style={tableStyles.headerCell}>Type</th>
+                    <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>Fee (USDC)</th>
+                    <th style={tableStyles.headerCell}>Transaction</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayTransactions.length > 0 ? displayTransactions.map((tx, idx) => {
+                    const poolName = consolidatePoolName(tx.pool);
+                    const poolColor = poolColorMap[poolName] || '#888888';
+                    const typeColor = typeColorMap[tx.type] || '#888888';
+                    return (
+                      <tr key={tx.signature} style={tableStyles.bodyRow} {...tableRowHoverHandlers}>
+                        <td style={{ ...tableStyles.cell, fontWeight: 600 }}>{idx + 1}</td>
+                        <td style={tableStyles.dateCell}>{tx.date}</td>
+                        <td style={tableStyles.cell}>
+                          <span style={{
+                            display: 'inline-block',
+                            width: '10px',
+                            height: '10px',
+                            borderRadius: '2px',
+                            backgroundColor: poolColor,
+                            marginRight: '6px',
+                          }} />
+                          {poolName}
+                        </td>
+                        <td style={tableStyles.cell}>
+                          <span style={{
+                            display: 'inline-block',
+                            width: '10px',
+                            height: '10px',
+                            borderRadius: '2px',
+                            backgroundColor: typeColor,
+                            marginRight: '6px',
+                          }} />
+                          {tx.type}
+                        </td>
+                        <td style={{ ...tableStyles.cell, textAlign: 'right', fontWeight: 600 }}>
+                          ${tx.fee_usdc.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                        <td style={tableStyles.addressCell}>
+                          <a
+                            href={`https://solscan.io/tx/${tx.signature}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={tableStyles.link}
+                            {...linkHoverHandlers}
+                          >
+                            {tx.signature.slice(0, 8)}...{tx.signature.slice(-8)}
+                          </a>
+                        </td>
+                      </tr>
+                    );
+                  }) : (
+                    <tr>
+                      <td colSpan={6} style={{ ...tableStyles.cell, textAlign: 'center', padding: '24px' }}>
+                        {selectedPool || selectedType
+                          ? `No transactions found for ${selectedPool || ''}${selectedPool && selectedType ? ' \u2192 ' : ''}${selectedType || ''}`
+                          : 'No transactions available'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={{
+              padding: '32px',
+              textAlign: 'center',
+              background: 'var(--ifm-background-surface-color)',
+              border: '1px solid var(--ifm-toc-border-color)',
+              borderRadius: 'var(--ifm-global-radius)',
+              color: 'var(--ifm-color-secondary)',
+            }}>
+              Transaction data not yet available. The data pipeline will generate this file on the next run.
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return <TopTransactionsTable />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Identify high-value combinations**: Find pool-type pairs generating the most fees by looking for large rectangular areas
+- **Assess pool specialization**: Determine if pools focus on specific transaction types or maintain diverse compositions
+- **Evaluate fee concentration**: Check if fees are driven by specific pool-type combinations
+- **Spot unusual patterns**: Identify gaps in expected pool-type pairs or unexpected concentrations
+- **Cross-reference with single-dimension views**: Combine insights from [By Pool](/analysis/flash-trade/fees-revenue/by-pool) and [By Type](/analysis/flash-trade/fees-revenue/by-type) to understand pool-type interactions
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+**Understanding the Marimekko Format**
+
+The Marimekko (also called mosaic or market map) chart provides a two-dimensional view of fees where both dimensions matter:
+
+**Chart Dimensions:**
+- **X-axis (Width)**: Each vertical strip represents a **liquidity pool**. Use the Proportional/Equal toggle to switch between proportional width (wider pools = larger fee contribution) and equal-width columns. The chart opens in Equal mode by default.
+- **Y-axis (Height)**: Within each pool, segments show **transaction types**. Height represents the percentage share of that type within the pool's fees (0-100%). Segments are stacked to show composition.
+- **Area**: In Proportional mode, the area of each segment is proportional to fees from that pool-type combination. In Equal mode (default), only segment height reflects the type's share of pool fees; column width is uniform.
+
+**Visual Interpretation:**
+
+This chart answers:
+- Which pool generates the most fees? (widest strip in Proportional mode, or check the percentage in pool labels in Equal mode)
+- What transaction types dominate each pool? (tallest segments)
+- Which pool-type combinations are most valuable? (largest areas in Proportional mode)
+- How does transaction composition vary across pools? (segment patterns)
+
+**Color Coding:**
+- Each color represents a specific transaction type
+- Same color across pools = same transaction type in different pools
+- Legend shows the top 10 transaction types by total fees. Less common types are rendered in the chart but omitted from the legend
+
+**Interactive Features:**
+- **Hover**: See exact USDC amounts and percentages for each pool-type segment (USDC values are absolute totals, independent of the display mode)
+- **Click segments**: Filter the transaction table by specific pool-type combinations
+- **Legend**: Click legend items to show/hide specific transaction types
+
+**Pattern Recognition:**
+
+Watch for:
+- **Large rectangular areas**: Pool-type combinations with substantial fees (high-value segments to optimize)
+- **Narrow but tall segments**: High concentration in one type within a small pool
+- **Wide but short segments**: Fees spread thinly across many types in a major pool
+- **Missing combinations**: Pool-type pairs with no fees (gaps in expected patterns)
+- **Similar pool patterns**: Pools with comparable transaction type distributions
+- **Unique pool patterns**: Pools with distinctive type compositions
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Cross-Dimensional Fee Attribution**
+
+This visualization combines two classification systems to create a matrix view:
+
+- **Pool attribution**: Each transaction is linked to the liquidity pool where it occurred (Crypto.1, Community.1, etc.)
+- **Type classification**: Each transaction is categorized by its operation type using log-based pattern matching
+- **Cross-tabulation**: Fees are aggregated by each unique pool-type combination
+- **Sizing**: Height (types) is always scaled by share of pool fees. Width (pools) can be toggled between proportional (scaled by USDC share) and equal
+
+**Relationship to Other Views**
+
+- **[By Pool](/analysis/flash-trade/fees-revenue/by-pool)**: Aggregates all types to show total pool performance (horizontal sum of Marimekko)
+- **[By Type](/analysis/flash-trade/fees-revenue/by-type)**: Aggregates all pools to show total type performance (vertical sum of Marimekko)
+
+The Marimekko reveals interactions between pools and types that remain hidden in single-dimension views. For example, a transaction type may generate significant fees overall but only within specific pools, or a major pool may derive most of its fees from just one or two transaction types.
+
+**Pool Identification**
+
+Each transaction is attributed to a pool by:
+- Parsing internal fee events from transaction logs
+- Decoding Borsh-encoded pool identifier
+- Mapping to human-readable pool name (Crypto.1, Community.1, etc.)
+- Consolidating V1/V2 contract versions for cleaner visualization
+
+**Type Classification**
+
+Transaction types are identified using:
+- Instruction name extraction from program logs
+- Version suffix normalization via a lookup table mapping known versioned log names to canonical display names
+- Grouping into categories (Opening, Closing, Triggers, System)
+
+**Data Accuracy**
+
+All values maintain 100% attribution accuracy. Each transaction is counted exactly once, assigned to one pool and one type. The chart layout preserves both dimensions, ensuring the visual representation accurately reflects the underlying fee distribution.
+
+**Update Frequency**
+
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- Transaction table limited to top 10 entries per filter combination
+- Pool versions are consolidated (V1/V2 shown together)
+- New pools or types may appear with generated names until manually labeled
+
+</details>

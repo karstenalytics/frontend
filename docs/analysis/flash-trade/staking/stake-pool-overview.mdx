@@ -1,0 +1,173 @@
+---
+title: Staking Overview
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Staking Overview
+
+Daily time-series view of total staked FAF tokens across all wallets. The chart tracks how much FAF is staked over time, whether staked FAF is at all-time high (ATH), and identifies the most active stakers and unstakers in recent periods.
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const StakingBalanceChart = require('@site/src/components/Staking/StakingBalanceChart').default;
+    const { useStakingMetrics } = require('@site/src/hooks/useStakingMetrics');
+
+    function FlashTradeStakingOverview() {
+      const { data, loading, error, config } = useStakingMetrics('flash-trade');
+
+      if (loading) {
+        return (
+          <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      if (error || !data) {
+        return (
+          <div className="alert alert--danger" role="alert">
+            <strong>Could not load staking metrics.</strong> {error || 'Unknown error'}
+          </div>
+        );
+      }
+
+      const { daily } = data;
+
+      return (
+        <StakingBalanceChart
+          data={daily}
+          tokenSymbol="FAF"
+          initialYMin={450_000_000}
+        />
+      );
+    }
+
+    return <FlashTradeStakingOverview />;
+  }}
+</BrowserOnly>
+
+## Recent Activity
+
+The tables below show the most active stakers and unstakers over the last 7 days, ranked by FAF amount. Click "See details" to view detailed staking history for each wallet.
+
+<BrowserOnly fallback={<div style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const StakingTopTables = require('@site/src/components/Staking/StakingTopTables').default;
+    const { useStakingMetrics } = require('@site/src/hooks/useStakingMetrics');
+
+    function RecentActivity() {
+      const { data, loading, error } = useStakingMetrics('flash-trade');
+      if (loading) return <LoadingSpinner />;
+      if (error || !data) return null;
+      return (
+        <StakingTopTables
+          topStakers={data.top_stakers_7d}
+          topWithdrawers={data.top_withdrawers_7d}
+          tokenSymbol="FAF"
+          timelinePath="/analysis/flash-trade/staking/wallet-timeline"
+        />
+      );
+    }
+
+    return <RecentActivity />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Track total staked FAF**: See how the total staked FAF across all wallets changes over time
+- **Monitor staking commitment**: Check if staked FAF is at ATH or has declined from peak levels
+- **Identify active participants**: Find the most active stakers and unstakers in recent days
+- **Compare staking patterns**: Link staking activity to protocol events or market conditions
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+**Stacked Area Chart:**
+- **X-axis**: Date (chronological)
+- **Y-axis**: FAF token amount
+- **Staked FAF area** (teal): FAF locked in staking positions to earn rewards
+- **Queued FAF area** (orange): FAF in the unstaking queue (90-day linear vesting since Epoch 10)
+- **Unstaked FAF area** (gray): FAF that has completed unstaking and is withdrawable
+- **Reserved FAF area** (indigo): FAF allocated to specific recipients but not yet distributed. Initially 788M earmarked for Beast NFT holders; penalty fees from BurnAndClaim (5%) and instant unstakes (3%) also accumulate here until harvested on epoch boundaries. Dropped from 788M to near-zero on October 15, 2025 when unclaimed NFT allocations were swept; since then reflects only accumulated penalties between epoch harvests
+- **Total Height**: Combined staked + queued + unstaked + reserved FAF in the staking pool
+- **Max Staked line** (dashed red): Historical peak staked amount for comparison
+- **FAF Price line** (hidden by default): Click "FAF Price" in the legend to overlay the FAF/USD price on a secondary Y-axis
+
+**Status Indicators:**
+- **Staked FAF currently at ATH**: Current staked amount equals or exceeds all previous amounts
+- **Staked FAF X% below ATH**: Current staked amount has declined from peak by X%
+
+**Current Values:**
+The badges at the top show:
+- **Staked FAF**: Amount currently locked in staking positions
+- **Queued FAF**: Amount in the unstaking queue (vesting linearly over 90 days)
+- **Unstaked FAF**: Amount that has completed unstaking (withdrawable)
+- **Reserved FAF**: Amount allocated but not yet claimed (only visible when non-zero)
+
+**Recent Activity Tables:**
+- **Top Stakers (7d)**: Wallets that staked the most FAF in the last 7 days
+- **Top Unstakers (7d)**: Wallets that submitted the largest unstake requests in the last 7 days
+- **See details**: Links to detailed staking history for each wallet in the Wallet Timeline
+
+**Interactive Features:**
+- **Hover**: See exact amounts for any date
+- **Legend**: Click legend items to show/hide areas
+- **Double-click chart**: Reset zoom to full date range (also resets the initial Y-axis zoom on first use)
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**FAF Staking Mechanics**
+
+FAF token holders can stake their tokens to earn a share of protocol revenue:
+- **Revenue share**: Stakers receive USDC rewards from trading fees, distributed monthly on the 15th
+- **Compounding**: FAF token rewards can be re-staked to compound returns
+- **Unstaking**: FAF enters a 90-day linear vesting schedule (1/90th matures each day). Before Epoch 10 (February 15, 2026), this was a 30-day cliff
+
+**Data Sources**
+
+- On-chain staking events from the Flash.Trade perpetuals program, starting April 12, 2025
+- Daily snapshots generated from staker cache at end of each UTC day
+
+**Balance Calculation**
+
+- **Staked FAF**: Sum of all FAF locked in staking contracts across all wallets
+- **Queued FAF**: Sum of FAF in the unstaking queue (90-day linear vesting since Epoch 10)
+- **Unstaked FAF**: Sum of FAF that has completed unstaking (withdrawable)
+- **Reserved FAF**: FAF allocated to specific recipients but not yet distributed. Initially 788M earmarked for Beast NFT holders at TGE, drained by NFT burns (April-October 2025). After the unclaimed reserve was swept on October 15, 2025, this bucket reflects accumulated penalty fees (3% instant unstake + 5% BurnAndClaim) between epoch harvests
+- **Total FAF**: Staked + Queued + Unstaked + Reserved
+
+**ATH Tracking**
+
+- **Max Staked**: Historical maximum of all daily staked amounts
+- **Current deviation**: Percentage difference between current staked amount and ATH
+
+**Recent Activity Tables**
+
+- **Top Stakers (7d)**: Wallets ranked by total FAF staked in the last 7 days (new stakes and additional deposits)
+- **Top Unstakers (7d)**: Wallets ranked by total FAF entering the unstaking queue in the last 7 days (unstake requests, not completed withdrawals)
+
+**Update Frequency**
+
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- **Data window**: Staking data starts April 12, 2025; activity before this date is not captured
+- **Price data**: FAF price may be unavailable for early dates
+- **Unstaking regime change**: The chart does not visually distinguish the 30-day cliff period (before Epoch 10) from the 90-day vesting period (after Epoch 10). See the [FAF Staker Pool Deep Dive](/articles/2026/02/18/faf-staker-pool-deep-dive) article for a detailed timeline
+
+</details>

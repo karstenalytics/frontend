@@ -3247,14 +3247,6 @@
       "fee_usdc": 295.447033
     },
     {
-      "signature": "5NX97eNML6ERGijJMDNsrBCwK1HLWuaiUfF987NKBrcNNsTok8NjWnbTaJRrG9eRRogmJLK5hbhnM3GVivqiJc5x",
-      "timestamp": 1772406051,
-      "date": "2026-03-01",
-      "pool": "Remora.1",
-      "type": "ClosePosition",
-      "fee_usdc": 290.961615
-    },
-    {
       "signature": "5o3YykAWLFiBLvD7TzQezCsZPXrUFttavcU4fGTwe7hfQbNKjzzCrANio4EwBo4LgPD9PxzNJRFfgzEy7NGSoFjf",
       "timestamp": 1750018504,
       "date": "2025-06-15",
@@ -3277,6 +3269,14 @@
       "pool": "Remora.1",
       "type": "ClosePosition",
       "fee_usdc": 150.11654
+    },
+    {
+      "signature": "4wQEZPvnMFpaHKxkgBPku2gFLfCJ41LLyDzXVVuZ6AZeW4UVvEQYpa23YkWSue8isoYJVT7bLJohgFQ2p1oBRYY3",
+      "timestamp": 1758183379,
+      "date": "2025-09-18",
+      "pool": "Remora.1",
+      "type": "ClosePosition",
+      "fee_usdc": 148.782031
     }
   ],
   "Virtual.1_ClosePosition": [
@@ -3985,22 +3985,6 @@
       "fee_usdc": 73.715206
     },
     {
-      "signature": "4NpYKsBDwy9bwADiseKzW9YbqVGnXNamv75zQtou3SBdf8PJ2JTUtdBxovTJs7Q1bpJB5x22FjXLEYDuZDwhSTKg",
-      "timestamp": 1772266184,
-      "date": "2026-02-28",
-      "pool": "Remora.1",
-      "type": "DecreaseSize",
-      "fee_usdc": 72.895777
-    },
-    {
-      "signature": "2AYAgx6GoqiQjj8dw1QGfLJGbrirN3mZ13eemMn46FXdwnpia5gBDQotJYatph1SHzRytqbxH55ioTQA4dhyH9iS",
-      "timestamp": 1772224737,
-      "date": "2026-02-27",
-      "pool": "Remora.1",
-      "type": "DecreaseSize",
-      "fee_usdc": 70.277137
-    },
-    {
       "signature": "3VyWwnSCfMWGYtBQ6MSadLN6W9mZJnr1e6gg73ddQXg3PENYdE78NZHdqTMTFS7GrVAVCRdsLBuxnwqZwBVAMb3P",
       "timestamp": 1769101978,
       "date": "2026-01-22",
@@ -4015,6 +3999,22 @@
       "pool": "Remora.1",
       "type": "DecreaseSize",
       "fee_usdc": 69.074077
+    },
+    {
+      "signature": "24DET54WS4n1oSb6xCR8fa5Y67Wm8kce7BrWxA5yMdBRJK8MUUvSE9AG5p1B6bDYc4MSgXs6qQsbEx8125v4Ek1a",
+      "timestamp": 1769382212,
+      "date": "2026-01-25",
+      "pool": "Remora.1",
+      "type": "DecreaseSize",
+      "fee_usdc": 63.366569
+    },
+    {
+      "signature": "3355uwAm8A9n2ii4BGMskoYvQwCsVbsxrVJ2GpEJ4w5LRGEfFcABMgdK764Ve3RMCtMpuhbqZskvSchTh9fYxN4Y",
+      "timestamp": 1771946812,
+      "date": "2026-02-24",
+      "pool": "Remora.1",
+      "type": "DecreaseSize",
+      "fee_usdc": 54.621137
     }
   ],
   "Community.3_ExecuteTriggerOrder": [

@@ -7,16 +7,48 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Staker Conviction
 
-Protocol loyalty analysis through reward behavior patterns showing how stakers manage their rewards. Tracks the split between compounders (reinvest rewards as TUNA), claimers (claim rewards as SOL), and mixed strategists, potentially revealing conviction levels, reinvestment rates, and loyalty trends across different stake sizes.
+Tracks how stakers manage their rewards: compounding (reinvesting as TUNA), claiming (withdrawing as SOL), or mixing both. Segments the population by behavior and stake size to reveal conviction levels and reinvestment trends.
+
+## Current Metrics
+
+<BrowserOnly fallback={<div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useStakerLoyalty } = require('@site/src/hooks/useStakerLoyalty');
+    const LoyaltyStats = require('@site/src/components/Loyalty').LoyaltyStats;
+
+    function MetricsSection() {
+      const { data, loading, error } = useStakerLoyalty();
+
+      if (loading) {
+        return (
+          <div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      if (error || !data) {
+        return (
+          <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ifm-color-emphasis-600)' }}>
+            Data not yet available. Check back after cache reload.
+          </div>
+        );
+      }
+
+      return <LoyaltyStats summary={data.summary} changes={data.changes} />;
+    }
+
+    return <MetricsSection />;
+  }}
+</BrowserOnly>
 
 ## Data
 
 <BrowserOnly fallback={<LoadingSpinner />}>
   {() => {
     const { useStakerLoyalty } = require('@site/src/hooks/useStakerLoyalty');
-    const { useStakingMetrics } = require('@site/src/hooks/useStakingMetrics');
+    const { useActiveStakers } = require('@site/src/hooks/useActiveStakers');
     const {
-      LoyaltyStats,
       BehaviorPieChart,
       InverseWhaleChart,
       DailyTrendsChart,
@@ -24,9 +56,9 @@ Protocol loyalty analysis through reward behavior patterns showing how stakers m
 
     function StakerConvictionPage() {
       const { data, loading, error } = useStakerLoyalty();
-      const { data: stakingData, loading: stakingLoading, error: stakingError } = useStakingMetrics();
+      const { data: activeData, loading: activeLoading, error: activeError } = useActiveStakers('defituna');
 
-      if (loading || stakingLoading) {
+      if (loading || activeLoading) {
         return (
           <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <LoadingSpinner />
@@ -42,26 +74,19 @@ Protocol loyalty analysis through reward behavior patterns showing how stakers m
         );
       }
 
-      if (stakingError || !stakingData) {
+      if (activeError || !activeData) {
         return (
           <div className="alert alert--danger" role="alert">
-            <strong>Could not load staking data.</strong> {stakingError || 'Unknown error'}
+            <strong>Could not load staking data.</strong> {activeError || 'Unknown error'}
           </div>
         );
       }
 
-      const { summary, user_segments, daily_trends, date_range } = data;
-
-      // Get current active stakers from the latest daily count
-      const activeStakersCounts = stakingData.active_stakers?.daily_counts || [];
-      const currentActiveStakers = activeStakersCounts.length > 0
-        ? activeStakersCounts[activeStakersCounts.length - 1].count
-        : undefined;
+      const { summary, user_segments, daily_trends } = data;
+      const currentActiveStakers = activeData.current_active_stakers;
 
       return (
         <>
-          <LoyaltyStats summary={summary} />
-
           <BehaviorPieChart
             userSegments={user_segments}
             totalUsers={summary.total_users}
@@ -95,19 +120,19 @@ This page helps you:
 <summary>Click to expand chart reading guide</summary>
 
 **Loyalty Summary Statistics:**
-- **Loyalty Score**: Percentage of reward-active stakers who have ONLY compounded (never claimed)
-- **Reinvestment Rate**: Percentage of total reward SOL that was compounded rather than claimed
-- **Total Rewards**: Sum of all SOL from claim + compound operations
-- **Reward Active Stakers**: Count of wallets that have claimed or compounded at least once
-- **Current Active Stakers**: Total wallets with non-zero staking balances (for context)
+- **Compound-Only Rate**: Percentage of reward-active stakers who have ONLY compounded (never claimed) - a wallet-count-based metric
+- **Reinvestment Rate**: Percentage of total reward SOL that was compounded rather than claimed - an amount-weighted metric that is much lower than the Compound-Only Rate because large claimers (whales) dominate total SOL volume
 
-**How Stakers Manage Their Rewards (Pie Charts):**
-Shows the distribution of stakers across three behavior categories:
+**How Stakers Manage Their Rewards (Waterfall Chart):**
+Shows a hierarchical decomposition of the staker population:
+- **All Active Stakers (Teal)**: Total wallets with non-zero staking balances
+- **Without Reward Activity (Gray)**: Stakers who haven't yet managed rewards
+- **With Reward Activity (Teal)**: Stakers who have claimed or compounded at least once
 - **Compound-only (Green)**: Never claimed, always reinvest - highest conviction
 - **Mixed (Amber)**: Sometimes compound, sometimes claim - flexible strategy
 - **Claim-only (Red)**: Never compound, always claim - may indicate different liquidity strategy
 
-The left pie shows the split between all active stakers (with and without reward activity). The right pie (highlighted with teal border) shows the breakdown of behavior types among stakers who actively manage rewards.
+Dotted connector lines chain each bar to the next, showing the decomposition flow. Percentages inside bars show the share relative to the parent group. The three behavior bars (Compound-only + Mixed + Claim-only) sum to the "With Reward Activity" total.
 
 **Compound Rate by Stake Size (Stacked Bar Chart):**
 Displays how behavior differs across stake size tiers:
@@ -166,15 +191,17 @@ Stakers are classified into exactly one category based on their transaction hist
 
 **Stake Size Tiers:**
 
-Stakers are grouped by their staked TUNA balance into tiers such as: less than 1K, 1K-10K, 10K-100K, 100K+. The Inverse Whale Chart shows the compound percentage for each tier:
+Stakers are grouped by their current staked TUNA balance into six displayed tiers: &lt;10K, 10K-100K, 100K-500K, 500K-1M, 1-10M, and >=10M TUNA. For each tier, the chart shows a 100%-stacked bar with three segments:
 ```
-Tier Compound % = (Compound-only + Mixed Stakers in Tier) / (Total Stakers in Tier) × 100
+Compound-only % = Compound-only Stakers in Tier / Total Stakers in Tier × 100
+Mixed %          = Mixed Stakers in Tier / Total Stakers in Tier × 100
+Claim-only %     = Claim-only Stakers in Tier / Total Stakers in Tier × 100
 ```
 
 **Staker Population Context**
 
 - **Current Active Stakers**: Wallets with non-zero staking balance on the most recent date (from daily staker snapshots)
-- **Reward Active Stakers**: Subset of active stakers who have claimed OR compounded at least once during the analysis period
+- **Reward Active Stakers**: Subset of active stakers who currently hold a non-zero staking balance AND have claimed OR compounded at least once during the analysis period. Wallets that had reward activity but have since fully unstaked are excluded
 
 Not all active stakers have reward activity - some may have staked recently and haven't accumulated enough rewards yet, or their rewards are still unclaimed.
 
@@ -199,13 +226,13 @@ Both instruction types credit the wallet with SOL rewards, but CompoundReward im
 **Relationship to Other Views**
 
 This conviction analysis complements:
-- **[Stakers](/analysis/defituna/usage-statistics/active-stakers)**: Shows all active stakers ranked by activity frequency
+- **[Stakers](/analysis/defituna/adoption/active-stakers)**: Shows all active stakers ranked by activity frequency
 - **[Staking Overview](/analysis/defituna/staking/staked-tuna)**: Shows total staked/unstaked treasury allocation
 - **[Wallet Timeline](/analysis/defituna/staking/wallet-timeline)**: Shows individual wallet's complete staking history
 
 **Update Frequency**
 
-Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
 
 **Known Limitations**
 

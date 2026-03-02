@@ -52,6 +52,20 @@ frontend/
 └── sidebars.ts
 ```
 
+## Design Guidelines
+
+See `docs-internal/` for comprehensive design documentation:
+- **CHART_PAGE_STRUCTURE.md** - Page structure and component guidelines
+- **CARD_STYLE_GUIDE.md** - Stat card styling
+- **mobile-chart-optimization.md** - Responsive chart patterns
+
+**Key Components:**
+- `src/components/common/ChartToggle.tsx` - Shared toggle with primary (teal) / secondary (slate) variants
+
+**Color Palette:**
+- Primary Accent: Teal #00A3B4
+- Secondary: Slate #64748B
+
 ## Contributing
 
 The frontend is open source. The backend analytics pipeline (Python) is private, but all output data is publicly accessible through the static JSON files.

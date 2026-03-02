@@ -30,10 +30,9 @@ const tabs: NavTab[] = [
   },
   {
     label: 'Articles',
-    to: '/blog',
-    activePattern: /^\/(frontend\/)?blog/,
+    to: '/articles',
+    activePattern: /^\/(frontend\/)?articles/,
     Icon: NotepadIcon,
-    disabled: true,
   },
   {
     label: 'Analysis',

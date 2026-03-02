@@ -1,0 +1,216 @@
+---
+title: Orca vs. Fusion
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Orca vs. Fusion
+
+Cumulative revenue comparison between Orca Whirlpools and DefiTuna's Fusion AMM. Includes a Fusion Dominance (%) overlay on a secondary axis to show each ecosystem's relative share over time.
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useDashboardData } = require('@site/src/components/Dashboard/useDashboardData');
+    const DailyStackedChart = require('@site/src/components/Dashboard/DailyStackedChart').default;
+
+    function ChartSection() {
+      const data = useDashboardData();
+
+      if (data.loading) {
+        return (
+          <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      if (data.error) {
+        return (
+          <div
+            style={{
+              padding: '32px',
+              background: 'var(--ifm-background-surface-color)',
+              border: '1px solid var(--ifm-color-danger)',
+              borderRadius: 'var(--ifm-global-radius)',
+              color: 'var(--ifm-color-danger)',
+            }}>
+            <h3>Error Loading Dashboard</h3>
+            <p>{data.error}</p>
+            <p style={{ fontSize: '14px', color: 'var(--ifm-color-secondary)', marginTop: '16px' }}>
+              Please ensure the analytics data files are available in <code>/data/</code>
+            </p>
+          </div>
+        );
+      }
+
+      if (!data.dailyStacked || data.dailyStacked.length === 0) {
+        return <div>No daily data available</div>;
+      }
+
+      return <DailyStackedChart data={data.dailyStacked} />;
+    }
+
+    return <ChartSection />;
+  }}
+</BrowserOnly>
+
+## Top Transactions Table
+
+The table displays individual transactions contributing to treasury revenue.
+By default, it shows Orca transactions, sorted by SOL amount.
+
+**Protocol Filter**: Use the toggle to switch between Orca and Fusion transactions.
+
+<BrowserOnly fallback={<div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useDashboardData } = require('@site/src/components/Dashboard/useDashboardData');
+    const TopTransactionsTable = require('@site/src/components/Dashboard/TopTransactionsTable').default;
+
+    function TableSection() {
+      const data = useDashboardData();
+
+      if (data.loading) {
+        return (
+          <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      if (data.error || !data.topTransactionsToken) {
+        return null;
+      }
+
+      return (
+        <TopTransactionsTable
+          topTransactionsToken={data.topTransactionsToken}
+          topTransactionsType={data.topTransactionsType}
+          topTransactionsPool={data.topTransactionsPool}
+          topTransactionsPoolType={data.topTransactionsPoolType}
+          groupMode="token"
+          summary={data.summary}
+          showProtocolToggle={true}
+        />
+      );
+    }
+
+    return <TableSection />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Compare ecosystem performance**: Determine which DEX (Orca or Fusion) has generated more cumulative revenue since protocol revenue sharing is enabled
+- **Assess concentration risk**: Evaluate whether the treasury is mainly driven by one DEX
+- **Analyze growth trajectories**: Identify when each ecosystem's contribution rate accelerated or slowed
+- **Evaluate diversification**: Assess balance between established (Orca) and native (Fusion) pools
+- **Identify inflection points**: Detect when pool preferences or strategies shifted
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+**Cumulative Stacked Area Chart:**
+- **X-axis**: Date (chronological from protocol start)
+- **Y-axis**: Cumulative revenue in SOL (running total since revenue sharing is enabled)
+- **Stacked Areas**: Each colored area represents accumulated revenue from Orca and Fusion ecosystems
+- **Secondary Y-axis (right)**: Fusion Dominance (%) as a dashed orange line, showing Fusion's share of total cumulative revenue over time (can be toggled on/off via legend click)
+- **Total Height**: The top edge shows total cumulative revenue across both ecosystems
+
+**Key Comparison Metrics:**
+- **Total Contribution**: Which ecosystem has generated more cumulative revenue? (compare area sizes)
+- **Growth Trajectory**: Which ecosystem is growing faster? Steeper slopes = faster revenue accumulation, flatter slopes = slower or stable growth
+- **Inflection Points**: When did each ecosystem's contribution rate change? (look for slope changes)
+- **Relative Performance**: How does Orca revenue compare to Fusion at any point in time? (compare vertical distances)
+
+**Ecosystem Characteristics:**
+
+*Orca Whirlpools:*
+- Established concentrated liquidity DEX on Solana
+- Wide token support with many trading pairs
+- Revenue from swap fees on liquidity positions
+- Mature infrastructure with deep liquidity
+
+*DefiTuna Fusion AMM:*
+- DefiTuna's native automated market maker
+- Custom pools designed for DefiTuna's specific strategies
+- Direct integration with DefiTuna treasury
+- Strategic control over pool parameters
+
+**Interactive Features:**
+- **Hover**: Unified tooltip shows all series (Orca, Fusion, Fusion Dominance) at any date
+- **Legend**: Click legend items to show/hide individual series
+- **Protocol Toggle**: Use the table filter to view transactions by ecosystem
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Data Sources**
+
+- **Treasury transactions**: On-chain data from DefiTuna treasury PDA (`G9XfJoY81n8A9bZKaJFhJYomRrcvFkuJ22em2g8rZuCh`)
+- **Pool attribution**: Multi-source matching system (registry + auto labels) reconciled against the revenue totals described in [Data Quality](/analysis/data-quality); flows without confident matches remain in “Other” until labeled
+- **Ecosystem classification**: Pools categorized as Orca Whirlpools, Fusion AMM, or Other
+
+**Cumulative Revenue Calculation**
+
+Cumulative revenue is calculated by:
+
+- **Starting point**: Protocol's first treasury transaction
+- **Daily aggregation**: Each day's realized revenue is summed
+- **Running total**: Each day's revenue is added to the cumulative total
+- **Category separation**: Separate cumulative totals maintained for each pool ecosystem
+- **Stacking**: Totals stacked to show both composition and total growth
+
+**Why Cumulative View?**
+
+The cumulative chart differs from daily charts by showing:
+- **Total accumulated value** rather than daily fluctuations
+- **Long-term trends** more clearly (noise is smoothed out)
+- **Relative contributions** over the entire protocol lifetime
+- **Growth trajectory changes** as slope changes in the cumulative line
+
+**Ecosystem Attribution**
+
+Each transaction's revenue type label is classified into an ecosystem:
+- **Orca Whirlpools**: Labels containing "orca" or "whirlpool", plus legacy types (`openpositionwithliquidity`, `compound_fees_tuna`, `liquidity_add_tuna`) that predate the `tuna_*orca` naming convention
+- **Fusion AMM**: Labels containing "fusion" or the `collect_protocol_fees` type
+- **Pre-Fusion transfers**: Early `token_transfer` revenue attributed to Orca (all pre-Fusion era revenue was Orca-based)
+
+Residual labels (staking operations, protocol-neutral spot opens) are excluded from the chart as they represent negligible, non-AMM revenue.
+
+**Growth Metrics**
+
+Key metrics derivable from this chart:
+- **Total Revenue**: Final value (rightmost point on chart)
+- **Average Daily Revenue**: Total Revenue ÷ Number of Days
+- **Growth Rate**: Compare slopes between different time periods
+- **Ecosystem Contribution**: Height of each area shows its cumulative share
+
+**Relationship to Other Views**
+
+This cumulative comparison complements:
+- **[By Pool](/analysis/defituna/fees-revenue/by-pool)**: Shows individual pool breakdowns without time dimension
+- **[Types per Day](/analysis/defituna/fees-revenue/by-type)**: Shows daily revenue patterns instead of cumulative totals
+- **[Pools vs. Types](/analysis/defituna/fees-revenue/pools-vs-types)**: Shows pool-type combinations without ecosystem grouping
+
+**Update Frequency**
+
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- Cumulative view doesn't show daily volatility (spikes averaged into slope)
+- Ecosystem classification depends on pool registry accuracy
+- Does not account for liquidity deployed or capital efficiency (only absolute revenue)
+
+</details>

@@ -1,0 +1,223 @@
+---
+title: TUNA Staking APR
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# TUNA Staking APR
+
+Tracks rolling 7-day, 30-day, and all-time staking APR for TUNA holders, derived from on-chain treasury WSOL inflows. Enter your purchase price to see a personal Entry Price APR alongside the reference rate.
+
+<BrowserOnly fallback={<div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useEffect, useState } = require('react');
+    const { safeGetItem } = require('@site/src/utils/localStorage');
+    const MetricCard = require('@site/src/components/common/MetricCard').default;
+    const ChartToggle = require('@site/src/components/common/ChartToggle').default;
+
+    function personalApr(refApr, tunaPrice, entryPrice) {
+      if (!refApr || !tunaPrice || !entryPrice || entryPrice <= 0) return null;
+      return refApr * (tunaPrice / entryPrice);
+    }
+
+    function CurrentApr() {
+      const [data, setData] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+      const [entryPrice, setEntryPrice] = useState(null);
+      const [aprMode, setAprMode] = useState('reference');
+
+      useEffect(() => {
+        fetch('/data/defituna/apr_data.json')
+          .then(res => res.json())
+          .then(data => {
+            setData(data);
+            setLoading(false);
+          })
+          .catch(err => {
+            setError(err.message);
+            setLoading(false);
+          });
+      }, []);
+
+      useEffect(() => {
+        const saved = safeGetItem('tunaEntryPrice');
+        if (saved) {
+          const parsed = parseFloat(saved.replace(',', '.'));
+          if (Number.isFinite(parsed) && parsed > 0 && parsed < 1000) {
+            setEntryPrice(parsed);
+          }
+        }
+        const onStorage = () => {
+          const val = safeGetItem('tunaEntryPrice');
+          if (val) {
+            const p = parseFloat(val.replace(',', '.'));
+            if (Number.isFinite(p) && p > 0 && p < 1000) { setEntryPrice(p); return; }
+          }
+          setEntryPrice(null);
+        };
+        window.addEventListener('storage', onStorage);
+        return () => window.removeEventListener('storage', onStorage);
+      }, []);
+
+      if (loading) {
+        return (
+          <div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      if (error || !data) {
+        return (
+          <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ifm-color-emphasis-600)' }}>
+            Data not yet available. Check back after cache reload.
+          </div>
+        );
+      }
+
+      const tunaPrice = data.tuna_price_usd;
+      const pa7d = personalApr(data.apr_7d, tunaPrice, entryPrice);
+      const pa30d = personalApr(data.apr_30d, tunaPrice, entryPrice);
+      const paAll = personalApr(data.apr_all_time, tunaPrice, entryPrice);
+      const showPersonal = aprMode === 'personal' && pa7d !== null;
+
+      return (
+        <>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '8px',
+            marginBottom: '16px',
+          }}>
+            <h2 id="current-metrics" style={{ margin: 0 }}>Current Metrics</h2>
+            {entryPrice && (
+              <ChartToggle
+                value={aprMode}
+                onChange={setAprMode}
+                options={[
+                  { value: 'reference', label: 'Reference APR' },
+                  { value: 'personal', label: 'Entry Price APR' },
+                ]}
+                variant="secondary"
+              />
+            )}
+          </div>
+          <div className="usage-summary-grid">
+            <MetricCard
+              title="7-Day APR"
+              value={showPersonal ? pa7d : data.apr_7d}
+              format="percent"
+              decimals={2}
+              change={data.change_7d}
+              tooltip={"Annualized yield for TUNA stakers based on the last 7 days of treasury WSOL inflows. Most volatile window, reacts quickly to trading volume changes.\nChange compares to the 7-day APR one week ago."}
+            />
+            <MetricCard
+              title="30-Day APR"
+              value={showPersonal ? pa30d : data.apr_30d}
+              format="percent"
+              decimals={2}
+              change={data.change_30d}
+              tooltip={"Annualized yield for TUNA stakers smoothed over the last 30 days of treasury inflows. Provides a more stable estimate than the 7-day window.\nChange compares to the 30-day APR one month ago."}
+            />
+            <MetricCard
+              title="All-Time APR"
+              value={showPersonal ? paAll : data.apr_all_time}
+              format="percent"
+              decimals={2}
+              change={data.change_all_time}
+              tooltip={"Annualized yield for TUNA stakers since staking launch. Uses a fixed supply of 1 billion TUNA as the denominator.\nChange compares to the all-time APR one month ago."}
+            />
+          </div>
+        </>
+      );
+    }
+
+    return <CurrentApr />;
+  }}
+</BrowserOnly>
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const AprChart = require('@site/src/components/Dashboard/AprChart').default;
+    return <AprChart />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Track staking yields**: Monitor how protocol revenue translates to APR for TUNA stakers
+- **Compare time windows**: Use 7-day, 30-day, and all-time APR to distinguish short-term spikes from sustained trends
+- **Calculate personal yield**: If you set an entry price, the "Entry Price APR" toggle adjusts the reference APR to reflect your actual cost basis
+- **Analyze APR trends**: The rolling APR chart reveals whether staking yields are stable, improving, or declining
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+- **7-Day APR card**: Annualized yield based on the last 7 days of treasury inflows (most volatile window)
+- **30-Day APR card**: Smoothed over 30 days for a more stable estimate
+- **All-Time APR card**: Lifetime average since staking began (summary card only; the chart shows 7-day and 30-day rolling windows)
+- **Reference / Entry Price toggle**: Appears when an entry price is set; switches all three cards between reference APR (current TUNA market price) and entry price APR (your purchase price)
+- **Change badge**: Shows the change in percentage points (pp): 7-Day compares to one week ago, 30-Day and All-Time compare to 30 days ago
+- **Teal line (chart)**: Reference APR for the selected rolling window (7d or 30d), using that day's historical TUNA price
+- **Green dashed line (chart)**: Entry Price APR (only shown when an entry price is set)
+- **TUNA Reference Price (chart, hidden)**: Click "TUNA Reference Price" in the legend to overlay a secondary y-axis with TUNA price history
+- **7d / 30d toggle (chart)**: Switch between rolling windows (chart only; the cards always show all three)
+- **Hover**: See exact APR values and daily revenue for any date
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Formula**
+
+The staking APR is calculated as:
+
+```
+APR = (Revenue per TUNA / TUNA Price) * 100
+```
+
+Where:
+- **Revenue per TUNA**: Annualized treasury revenue divided by total TUNA supply (1 billion)
+- **TUNA Price**: USD price derived from on-chain data
+- **Annualized Revenue**: `(Rolling Revenue Sum / Days in Window) * 365`
+
+**Data Sources**
+
+- **Revenue**: Treasury WSOL inflows (validated against DefiTuna data)
+- **TUNA Price**: Derived from on-chain swap volumes, updated daily
+- **USD/SOL Rates**: Daily spot rates from DefiTuna staking revenue data
+
+**Calculation Process**
+
+- Sum treasury WSOL inflows over the rolling window (7 or 30 days)
+- Convert to USD using daily spot market rates
+- Annualize and divide by total TUNA supply to get revenue per TUNA
+- Divide by TUNA market price to get Reference APR
+- Entry Price APR = Reference APR * (TUNA Price / Your Entry Price)
+
+**Known Limitations**
+
+- For dates with less than 7 or 30 days of historical data, the APR uses all available days
+- APR is **realized yield** based on actual treasury inflows, not projected returns
+- Short-term APR (7d) can be volatile due to trading volume fluctuations
+- TUNA price is derived from on-chain swap data; low-volume days may have less accurate prices
+- APR does not account for TUNA token price changes (impermanent gain/loss)
+
+**Update Frequency**
+
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
+
+</details>

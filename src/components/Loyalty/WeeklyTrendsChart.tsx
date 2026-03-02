@@ -40,8 +40,6 @@ export default function WeeklyTrendsChart({
         marginBottom: '32px',
       }}
     >
-      <h3 style={{ marginTop: 0 }}>Reward Allocation Over Time</h3>
-
       <Plot
         data={[
           {
@@ -73,6 +71,10 @@ export default function WeeklyTrendsChart({
         ]}
         layout={{
           ...template.layout,
+          title: {
+            text: 'Reward Allocation Over Time',
+            font: { size: 18, weight: 600 },
+          },
           xaxis: {
             title: 'Week',
             tickangle: -45,
@@ -87,7 +89,7 @@ export default function WeeklyTrendsChart({
             xanchor: 'right',
             x: 1,
           },
-          margin: { l: 60, r: 40, t: 40, b: 100 },
+          margin: { l: 60, r: 40, t: 50, b: 100 },
           height: 400,
           hovermode: 'x unified',
         }}

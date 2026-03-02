@@ -40,7 +40,7 @@ Daily time-series view of treasury TUNA allocation showing the split between sta
 
       return (
         <>
-          <StakingBalanceChart data={daily} maxSupply={supply?.max} />
+          <StakingBalanceChart data={daily} tokenSymbol="TUNA" initialYMin={800_000_000} />
 
           <div style={{ marginTop: '32px' }}>
             <h2 id="top-stakers-withdrawers">Recent Activity</h2>
@@ -152,7 +152,7 @@ These tables help identify the most impactful participants in recent staking act
 **Relationship to Other Views**
 
 This overview complements:
-- **[Stakers](/analysis/defituna/usage-statistics/active-stakers)**: Shows unique wallets executing staking instructions over all time
+- **[Stakers](/analysis/defituna/adoption/active-stakers)**: Shows unique wallets executing staking instructions over all time
 - **[Wallet Timeline](/analysis/defituna/staking/wallet-timeline)**: Detailed staking history for individual wallets
 - **[Staker Conviction](/analysis/defituna/staking/staker-conviction)**: Analyzes long-term staker behavior and loyalty
 
@@ -165,7 +165,7 @@ Data is automatically updated once a day. Check the "Last updated" timestamp in 
 - Shows treasury allocation only (does not include TUNA held outside of the treasury)
 - Daily snapshots may miss intraday fluctuations
 - Recent activity tables limited to 7-day window
-- Does not show staking APR or rewards earned (see [Staking APR](/analysis/defituna/staking-apr) for that)
+- Does not show staking APR or rewards earned (see [Staking APR](/analysis/defituna/staking/staking-apr) for that)
 - Unstaked TUNA may include tokens allocated for other purposes (operations, liquidity, etc.)
 
 </details>

@@ -1,0 +1,196 @@
+---
+title: By Pool
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# By Pool
+
+Protocol revenue over time, broken down by liquidity pool. Click a pool in the legend or chart to filter the transactions table.
+
+## Data
+
+<BrowserOnly fallback={<LoadingSpinner />}>
+  {() => {
+    const { useState, useEffect } = require('react');
+    const { useDashboardData } = require('@site/src/components/Dashboard/useDashboardData');
+    const PoolStackedAreaChart = require('@site/src/components/Dashboard/PoolStackedAreaChart').default;
+    const { buildColorMap } = require('@site/src/utils/chartColors');
+    const TopTransactionsTable = require('@site/src/components/Dashboard/TopTransactionsTable').default;
+    const FilterIndicator = require('@site/src/components/common/FilterIndicator').default;
+
+    function RevenueDashboard() {
+      const data = useDashboardData();
+      const [visiblePools, setVisiblePools] = useState(null);
+
+      // Fix scroll position after component loads
+      useEffect(() => {
+        if (!data.loading && window.location.hash) {
+          setTimeout(() => {
+            const id = window.location.hash.slice(1);
+            const element = document.getElementById(id);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 100);
+        }
+      }, [data.loading]);
+
+      if (data.loading) {
+        return (
+          <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      if (data.error) {
+        return (
+          <div style={{
+            padding: '32px',
+            background: 'var(--ifm-background-surface-color)',
+            border: '1px solid var(--ifm-color-danger)',
+            borderRadius: 'var(--ifm-global-radius)',
+            color: 'var(--ifm-color-danger)',
+          }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '8px' }}>Error Loading Dashboard</div>
+            <p>{data.error}</p>
+          </div>
+        );
+      }
+
+      const summary = data.summary;
+      if (!summary) {
+        return <div>No data available</div>;
+      }
+
+      // Map visiblePools (labels) to pool_ids for table filtering
+      const selectedPoolIds = (() => {
+        if (!visiblePools || !summary.top_pools_by_value) return null;
+        const labelToId = {};
+        for (const p of summary.top_pools_by_value) {
+          labelToId[p.pool_label] = p.pool_id;
+        }
+        return visiblePools.map(label => labelToId[label]).filter(Boolean);
+      })();
+
+      const poolLabels = (summary.top_pools_by_value || [])
+        .filter(p => p.pool_label !== 'Others')
+        .slice(0, 8)
+        .map(p => p.pool_label);
+      const colorMap = buildColorMap([...poolLabels, 'Others']);
+
+      const filterChips = visiblePools
+        ? visiblePools.map(label => ({ label, color: colorMap[label] || '#888888' }))
+        : [];
+
+      return (
+        <div>
+          {/* Stacked Chart */}
+          <PoolStackedAreaChart
+            visiblePools={visiblePools}
+            onVisibilityChange={setVisiblePools}
+          />
+
+          {/* Table Section */}
+          <div id="transactions-table-section" style={{ marginTop: '32px' }}>
+            <h2 id="top-transactions">Top Transactions Table</h2>
+
+            <p style={{ marginBottom: '16px' }}>
+              The table displays individual transactions contributing to treasury revenue.
+              By default, it shows all transactions across all pools, sorted by SOL amount.
+            </p>
+
+            <FilterIndicator filters={filterChips} onClear={() => setVisiblePools(null)} />
+
+            <TopTransactionsTable
+              topTransactionsToken={data.topTransactionsToken}
+              topTransactionsType={data.topTransactionsType}
+              topTransactionsPool={data.topTransactionsPool}
+              topTransactionsPoolType={data.topTransactionsPoolType}
+              groupMode="pool"
+              selectedFilter={selectedPoolIds}
+              selectedFilterLabel={visiblePools && visiblePools.length === 1 ? visiblePools[0] : null}
+              summary={summary}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    return <RevenueDashboard />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This chart helps you:
+
+- **Assess pool concentration**: Determine if revenue is driven by specific pools or broadly distributed
+- **Track trends over time**: See how individual pool contributions change day-to-day
+- **Compare pool performance**: Toggle between daily and cumulative views to spot growing or declining pools
+- **Cross-reference pool activity**: Link pool data with [By Type](./by-type) and [Pools vs. Types](./pools-vs-types) breakdowns
+- **Investigate specific pools**: Click a pool in the legend to isolate it and examine its top transactions
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+- **Daily view** (stacked bars): Each bar segment shows a pool's daily revenue in SOL. The total bar height is the sum across all pools for that day.
+- **Cumulative view** (stacked area): Each band shows a pool's running total revenue over time. The top of the chart represents total cumulative revenue.
+- **Legend**: Lists the top 8 pools by total revenue plus an "Others" bucket. Click a pool name in the legend to toggle its visibility.
+- **Colors**: Each pool has a consistent color across daily and cumulative views.
+- **Interactions**:
+  - Click a bar/area segment to isolate that pool (click again to restore all)
+  - Click legend items to show/hide individual pools
+  - Hover over the chart to see per-pool and total SOL values (daily values in daily view, running totals in cumulative view)
+  - Selected pools also filter the transactions table below
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Data Sources**
+
+- **Treasury transactions**: On-chain data from DefiTuna treasury PDA (`G9XfJoY81n8A9bZKaJFhJYomRrcvFkuJ22em2g8rZuCh`)
+- **Pool attribution**: Multi-source matching system (registry lookups + auto labels) reconciled against the revenue totals described in [Data Quality](/analysis/data-quality); flows that cannot be confidently matched remain in "Other" until labeled
+- **Pool labels**: Automatically created and manually curated pool names maintained in the backend
+
+For complete pipeline details, see [Data Pipeline](/analysis/data-pipeline).
+
+**Pool Attribution System**
+
+Pools are identified through a multi-source matching system:
+
+- **Direct address matching**: Compares transaction account addresses against a registry of known pool addresses
+- **Alias resolution**: Maps alternative addresses (position accounts, vault accounts) to canonical pool IDs
+- **Token pair hints**: Uses mint addresses involved in transfers to identify pools when direct matches aren't found
+- **Protocol detection**: Uses each pool's known protocol (Orca, Fusion, etc.) to generate fallback labels when no manual name exists
+
+This hybrid approach ensures comprehensive coverage while maintaining accurate, user-friendly pool names.
+
+**Top-N Grouping**
+
+The chart displays the top 8 pools ranked by total SOL revenue. All remaining pools are aggregated into an "Others" bucket. This grouping is computed client-side from the summary ranking and applied to the daily time-series data.
+
+**Common Pool Types**
+
+- **Orca Whirlpools**: Concentrated liquidity pools on the Orca DEX (e.g., SOL-USDC, SOL-CBBTC)
+- **Fusion Pools**: DefiTuna's native liquidity pools (e.g., SOL-USDC, SOL-TUNA)
+
+**Update Frequency**
+
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- Pool labels may show addresses for newly discovered pools until manual names are added
+- The "Others" bucket aggregates all pools outside the top 8, which may include meaningful individual pools
+- The "Other / Not Applicable" named pool represents system-level or unattributed revenue (e.g., direct transfers, protocol operations). It appears inside the top-8 series if it ranks high enough, otherwise it is included in the "Others" aggregation bucket
+
+</details>

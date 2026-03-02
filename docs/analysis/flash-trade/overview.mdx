@@ -1,0 +1,70 @@
+---
+title: Overview & Intro
+sidebar_custom_props:
+  icon: Info
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Overview & Intro
+
+## Key metrics
+
+Summary of key metrics for Flash.Trade protocol revenue:
+
+<BrowserOnly fallback={<LoadingSpinner />}>
+  {() => {
+    const KeyMetricsOverview = require('@site/src/components/FlashTrade/KeyMetricsOverview').default;
+    return <KeyMetricsOverview />;
+  }}
+</BrowserOnly>
+
+## What is Flash.Trade?
+
+**Flash.Trade** is a decentralized perpetuals exchange on Solana where traders can open leveraged positions (up to 100x) on crypto assets and memecoins with low fees and minimal price impact. All settlements are denominated in USDC.
+
+**What sets Flash.Trade apart** is its pool-to-peer architecture: instead of matching buyers with sellers via an order book, traders open positions against multi-asset liquidity pools. This means LPs collectively act as the counterparty to every trade, earning real yield from trading fees rather than relying on token emissions.
+
+The protocol's mission is to create genuine economic ownership for its participants. FAF token holders are positioned as real owners of the protocol's revenue stream, not just governance voters. Revenue from trading fees flows directly to LPs and FAF stakers in USDC, aligning incentives between the protocol and its community.
+
+### How it works
+
+**Liquidity pools**: Each perpetual market (Crypto.1, Trump.1, Community.1, etc.) has its own pool backed by crypto assets. LPs deposit into these pools and receive one of two token types:
+
+- **FLP** (Flash Liquidity Provider): Fees auto-compound into the token price. FLP is freely tradable, making it a passive, set-and-forget option.
+- **sFLP** (Staked FLP): Fees are paid out in USDC every hour. Non-tradable but gives LPs direct stablecoin income.
+
+Both token types earn from the same fee sources: position open/close fees, margin fees from leveraged positions, swap fees, and liquidation bonuses.
+
+**Fee distribution**: Trading fees are split between LPs and the protocol. The LP share varies by pool (70-90%), with the remainder going to the protocol treasury. Half of protocol revenue is distributed to FAF stakers in USDC; the other half funds protocol development.
+
+**FAF staking**: Staking the FAF token unlocks a share of protocol revenue (paid in USDC), trading fee discounts, higher referral rebates, and boosted LP yields. Governance follows a futarchy model (FAFtarchy) where prediction markets guide protocol decisions rather than traditional token-weighted voting.
+
+## What can I learn from the data?
+
+- Where do Flash.Trade's fees and revenue come from? -> [By Pool](./fees-revenue/by-pool), [By Type](./fees-revenue/by-type)
+- How do fees break down across pools and transaction types? -> [Pools vs Types](./fees-revenue/pools-vs-types)
+- What share of fees does the protocol capture as revenue? -> [Effective Take Rate](./fees-revenue/effective-take-rate)
+- How active is the Flash.Trade user base? -> [Wallet Usage](./adoption/wallet-usage)
+- How many stakers are actively participating on-chain? -> [Active Stakers](./adoption/active-stakers)
+- How much FAF is staked and what are the yields? -> [Stake Pool Overview](./staking/stake-pool-overview), [FAF Staking APR](./staking/faf-staking-apr)
+- What does a specific staker's history look like? -> [Wallet Timeline](./staking/wallet-timeline)
+- Are stakers compounding or claiming rewards? -> [Staker Conviction](./staking/staker-conviction)
+- When do vesting contracts unlock? -> [Vesting Timeline](./staking/vesting-timeline)
+
+## About the data presented in this section
+
+**Coverage**: Data begins on April 12, 2025 (the launch of Flash.Trade's FAF token) and is current through the latest daily update.
+
+**On-chain sources**: The pipeline monitors approximately 50 on-chain addresses across the Flash.Trade protocol, including:
+
+- **Stake Pool Authority** ([81xGA...biiG](https://solscan.io/account/81xGAvJ27ZeRThU2JEfKAUeT4Fx6qCCd8WHZpujZbiiG)): The PDA that owns the staking pool's token accounts. Protocol fee sweep events move revenue through this account to the staking vault and protocol treasury. FAF staking, unstaking, reward collection, and compounding events also flow through here, powering the staker analytics, conviction analysis, and APR calculations.
+- **Pool and custody accounts**: Each perpetual market (Crypto.1, Trump.1, etc.) has a pool program account and custody accounts that track fee generation from trading operations. This is where per-pool and per-type breakdowns come from.
+- **LP vault accounts**: Staked and compounding LP vaults for each pool, capturing LP token flows and third-party integrations (e.g., Loopscale CPI calls).
+
+**What we track**: Fees, protocol revenue, revenue distribution to stakers, FAF staking activity, and wallet-level usage.
+
+**What we don't track**: Trading volume, open interest, PnL, or liquidation sizes. While we see the underlying trading transactions, we extract only the fee components and don't decode position data (size, leverage, entry price).
+
+For a detailed explanation of how raw transactions are transformed into the charts you see here, see the [Data Pipeline](/analysis/data-pipeline) page.

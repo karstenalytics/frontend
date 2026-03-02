@@ -20,56 +20,84 @@ const sidebars: SidebarsConfig = {
     'analysis/defituna/overview',
     {
       type: 'category',
-      label: 'Treasury Analysis',
+      label: 'Fees & Revenue',
       customProps: {
-        icon: 'Vault',
+        icon: 'ChartPieSlice',
       },
       items: [
-        {
-          type: 'category',
-          label: 'Revenue Breakdown',
-          customProps: {
-            icon: 'ChartPieSlice',
-          },
-          items: [
-            'analysis/defituna/revenue-breakdown/by-token',
-            'analysis/defituna/revenue-breakdown/by-type',
-            'analysis/defituna/revenue-breakdown/by-pool',
-            'analysis/defituna/revenue-breakdown/pools-vs-types',
-            {
-              type: 'doc',
-              id: 'analysis/defituna/revenue-breakdown/tx-type-per-day',
-              label: 'Types per Day',
-            },
-            'analysis/defituna/revenue-breakdown/orca-vs-fusion',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Users / Wallets',
-          customProps: {
-            icon: 'ChartLineUp',
-          },
-          items: [
-            'analysis/defituna/usage-statistics/wallet-usage',
-            'analysis/defituna/usage-statistics/active-stakers',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Staking Analysis',
-          customProps: {
-            icon: 'Stack',
-          },
-          items: [
-            'analysis/defituna/staking/staked-tuna',
-            'analysis/defituna/staking/vesting-timeline',
-            'analysis/defituna/staking/wallet-timeline',
-            'analysis/defituna/staking/staker-conviction',
-          ],
-        },
-        'analysis/defituna/staking-apr',
-        'analysis/defituna/pool-ramp-up',
+        'analysis/defituna/fees-revenue/by-pool',
+        'analysis/defituna/fees-revenue/by-type',
+        'analysis/defituna/fees-revenue/pools-vs-types',
+        'analysis/defituna/fees-revenue/orca-vs-fusion',
+        'analysis/defituna/fees-revenue/pool-ramp-up',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Adoption',
+      customProps: {
+        icon: 'ChartLineUp',
+      },
+      items: [
+        'analysis/defituna/adoption/wallet-usage',
+        'analysis/defituna/adoption/active-stakers',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Staking',
+      customProps: {
+        icon: 'Stack',
+      },
+      items: [
+        'analysis/defituna/staking/staked-tuna',
+        'analysis/defituna/staking/staking-apr',
+        'analysis/defituna/staking/wallet-timeline',
+        'analysis/defituna/staking/vesting-timeline',
+        'analysis/defituna/staking/staker-conviction',
+      ],
+    },
+    {
+      type: 'html',
+      value: '<span class="sidebar-heading">FLASH.TRADE</span>',
+    },
+    'analysis/flash-trade/overview',
+    {
+      type: 'category',
+      label: 'Fees & Revenue',
+      customProps: {
+        icon: 'ChartPieSlice',
+      },
+      items: [
+        'analysis/flash-trade/fees-revenue/by-pool',
+        'analysis/flash-trade/fees-revenue/by-type',
+        'analysis/flash-trade/fees-revenue/pools-vs-types',
+        'analysis/flash-trade/fees-revenue/effective-take-rate',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Adoption',
+      customProps: {
+        icon: 'ChartLineUp',
+      },
+      items: [
+        'analysis/flash-trade/adoption/wallet-usage',
+        'analysis/flash-trade/adoption/active-stakers',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Staking',
+      customProps: {
+        icon: 'Stack',
+      },
+      items: [
+        'analysis/flash-trade/staking/stake-pool-overview',
+        'analysis/flash-trade/staking/faf-staking-apr',
+        'analysis/flash-trade/staking/wallet-timeline',
+        'analysis/flash-trade/staking/vesting-timeline',
+        'analysis/flash-trade/staking/staker-conviction',
       ],
     },
   ],

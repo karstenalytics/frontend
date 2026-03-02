@@ -16,12 +16,13 @@ If you just want to see the numbers, feel free to skip this page.
 The data pipeline transforms raw blockchain transactions into interactive analytics through five major stages:
 
 ```mermaid
+%%{init: {'flowchart': {'useMaxWidth': false}}}%%
 graph LR
-    A[Solana Blockchain] -->|RPC Queries| B[Data Collection]
-    B -->|Raw Transactions| C[Transaction Classification]
-    C -->|Classified Data| D[Multi-Dimensional Attribution]
-    D -->|Attributed Data| E[Token Normalization]
-    E -->|Aggregated JSON| F[Frontend Presentation]
+    A((Solana RPC)) -->|raw transactions| B[Collect]
+    B -->|cached transactions| C[Classify]
+    C -->|instructions / events| D[Attribute]
+    D -->|time, pool, token, wallet| E[Normalize]
+    E -->|JSON files| F[Present]
 
     style A fill:#00A3B4,color:#fff
     style B fill:#00A3B4,color:#fff
@@ -33,42 +34,39 @@ graph LR
 
 **Pipeline Overview:**
 
-1. **Data Collection** - Enumerate transaction signatures for monitored accounts, fetch full transaction data with logs via Helius RPC, and store in compressed daily cache files
-2. **Transaction Classification** - Parse program execution logs to identify what each transaction represents (fees, swaps, liquidations, etc.) and map to human-readable names using configuration files
-3. **Multi-Dimensional Attribution** - Attribute each classified transaction across multiple dimensions simultaneously (token, transaction type, liquidity pool, wallet, time) enabling flexible analysis
-4. **Token Normalization** - Track token accumulation in accounts, apply same-day conversion rates from actual on-chain swaps, and attribute converted SOL back to originating transaction types
-5. **Frontend Presentation** - Aggregate attributed data into dimension-specific JSON files, host as static assets, and render through interactive Plotly charts with filtering
+1. **Collect** - Enumerate transaction signatures for monitored accounts, fetch full transaction data with logs via Helius RPC, store in compressed daily cache files
+2. **Classify** - Identify the instructions and events executed in each transaction by parsing program logs and decoding CPI event data
+3. **Attribute** - Resolve the context for each classified transaction: when it happened (time), which pool, which token, which wallet
+4. **Normalize** - Convert multi-token values to a common base denomination using on-chain swap rates, so figures are comparable across days and tokens
+5. **Present** - Aggregate into JSON files per dimension (by token, by pool, by type, etc.), host as static assets, render as interactive Plotly charts
 
 **Processing Model:**
 
-All processing happens offline in a separate backend repository. The frontend displays pre-computed results as static JSON files, ensuring fast load times regardless of data volume. This architecture enables complex multi-dimensional analysis while maintaining simple, reliable hosting.
-
-Each section below includes a detailed diagram showing the internal flow for that pipeline stage.
+All processing happens offline in a separate backend repository. The frontend displays pre-computed JSON files, so page loads are fast regardless of data volume.
 
 ---
 
-## Data Collection
+## 1. Collect
 
 ```mermaid
+%%{init: {'flowchart': {'useMaxWidth': false}}}%%
 graph LR
-    A[Monitored Accounts] -->|Treasury PDA| B[Signature Enumeration]
-    A -->|Token Accounts ATAs| B
-    A -->|Program IDs| B
-    B -->|Signature List| C[Batch RPC Fetching]
-    C -->|Full Transaction Data| D[Cache Storage]
-    D -->|.jsonl.gz Files| E[Daily Cache Files]
+    A((Account Addresses)) -->|treasury, ATAs, program IDs| B[Enumerate Signatures]
+    B -->|signature list| C[Fetch Transactions]
+    C -->|full transaction data| D[Store in Daily Cache]
 
     style A fill:#00A3B4,color:#fff
+    style B fill:#00A3B4,color:#fff
     style C fill:#00A3B4,color:#fff
-    style E fill:#00A3B4,color:#fff
+    style D fill:#00A3B4,color:#fff
 ```
 
 ### What Gets Monitored
 
-Analysis focuses on accounts relevant to understanding protocol operations:
-- **Program accounts** - Smart contract interactions revealing protocol activity, e.g. Treasury accounts
+Which accounts get monitored depends on the analysis objective:
+- **Treasury accounts** - Where protocol revenue accumulates
+- **Token accounts (ATAs)** - Holding protocol-relevant tokens
 - **Wallet addresses** - Key addresses involved in protocol operations
-- **Token accounts** - Accounts holding protocol-relevant tokens (ATAs)
 
 The specific accounts monitored depend on the analysis objective. Revenue analysis tracks treasury addresses. Staking analysis monitors staking program interactions. Position analysis follows liquidity pool accounts.
 
@@ -86,203 +84,147 @@ Data updates run daily via automated GitHub Actions workflow in the backend repo
 
 ---
 
-## Transaction Classification
+## 2. Classify
 
 ```mermaid
+%%{init: {'flowchart': {'useMaxWidth': false}}}%%
 graph LR
-    A[Raw Transaction] -->|Extract| B[Program Logs]
-    B -->|Parse| C[Instruction Names]
-    C -->|Match| D[Config Mapping]
-    D -->|Apply| E[Transaction Type]
-    E -->|Enriched| F[Classified Transaction]
+    A((Cached Transaction)) -->|program logs| B[Extract Instructions]
+    B -->|instruction names, CPI events| C[Map to Config]
+    C -->|transaction type + display name| D[Classified Transaction]
 
     style A fill:#00A3B4,color:#fff
+    style B fill:#00A3B4,color:#fff
+    style C fill:#00A3B4,color:#fff
     style D fill:#00A3B4,color:#fff
-    style F fill:#00A3B4,color:#fff
 ```
 
-Understanding what each transaction represents is fundamental to my analysis. Classification examines transaction logs to identify transaction purposes. **The core objective is identifying which Instruction is being executed** from the Program/Account I am observing.
+The core objective is **identifying which instruction is being executed** in each transaction touching the accounts I monitor.
 
 ### Log-Based Classification
 
-**Solana programs themselves emit log messages during execution** as part of the blockchain's native logging system. These logs are not added by Helius, Solscan, or other data providers—they are produced directly by the on-chain programs and included in the transaction results returned by RPC nodes.
+**Solana programs emit log messages during execution** as part of the blockchain's native logging system. These logs are not added by Helius, Solscan, or other data providers. They come directly from the on-chain programs.
 
-These logs contain instruction names describing operations. The classification system:
-1. **Extracts instruction names** from the program logs
-2. **Maps instruction names** to transaction categories based on a predefined configuration
-3. ***Optional (protocol-specific)***: For certain analyses (e.g., staking loyalty) additional decoders parse Anchor IDLs to extract account-level context, but the core classification remains log-based for determinism
-
-**Why Instructions Matter:** Instructions are the atomic operations in Solana programs. Understanding them is critical because:
-- They reveal the exact purpose of each transaction (swap, stake, fee collection, etc.)
-- Different protocols use different instruction names for similar operations
-- IDL decoding provides structured information about parameters and accounts involved
-- Accurate instruction identification enables precise revenue attribution and analytics
-
-For example:
-- A log containing "Instruction: CollectFees" represents collection of fees that have piled up in a certain market accouunt
-- A log containing "Instruction: Stake" represents a staking operation
-- IDL decoding reveals which accounts received fees or which pools were involved
+The classification system:
+1. **Extracts instruction names** from program logs (e.g. "Instruction: CollectFees", "Instruction: Stake")
+2. **Maps instruction names** to transaction categories via a configuration file
+3. **Decodes structured event data** where needed. Some protocols emit additional data through CPI events or Anchor IDL-encoded parameters that provide amounts, account details, and state changes not visible in log lines alone
 
 ### Classification Configuration
 
 A configuration file maintains the mapping between instruction names and their meanings. This includes:
 - Display names for user-facing labels (instead of technical strings)
 - Categorization for grouping related transactions (there might be different instruction types I want to sum up and display as one type)
-- Revenue flags indicating which transactions represent value generation. E.g. there are SwapReward transactions that convert tokens into SOL to distribute it to stakers. They are important but do not actually create the revenue
+- Revenue flags indicating which transactions generate value versus those that merely convert or move it (e.g. a token swap distributes existing revenue but does not create new revenue)
 - Color schemes for consistent visualization (e.g. liquidations should always have a red-ish color)
 
 When protocols introduce new transaction types, the configuration is updated and historical data is reprocessed for consistency.
 
 ---
 
-## Multi-Dimensional Attribution
+## 3. Attribute
 
 ```mermaid
-graph TB
-    A[Classified Transaction] --> B[Token Dimension]
-    A --> C[Type Dimension]
-    A --> D[Pool Dimension]
-    A --> E[Wallet Dimension]
-    A --> F[Time Dimension]
-
-    B --> G[Multi-Dimensional Record]
-    C --> G
-    D --> G
-    E --> G
-    F --> G
+%%{init: {'flowchart': {'useMaxWidth': false}}}%%
+graph LR
+    A((Classified Transaction)) -->|accounts, mints, logs| B[Resolve Dimensions]
+    B -->|time, pool, token, wallet| C[Attributed Transaction]
 
     style A fill:#00A3B4,color:#fff
-    style G fill:#00A3B4,color:#fff
+    style B fill:#00A3B4,color:#fff
+    style C fill:#00A3B4,color:#fff
 ```
 
-Transactions are attributed across multiple dimensions simultaneously, enabling flexible analysis from different perspectives.
+Each classified transaction is tagged across several dimensions so the same data can be sliced in different ways:
 
 ### Attribution Dimensions
-
-Common attribution dimensions include:
 - **Token** - Which asset was involved (SOL, USDC, protocol tokens)
 - **Transaction Type** - What operation occurred (fees, swaps, stakes)
 - **Pool** - Which liquidity pool or program was involved
 - **Wallet** - Which addresses participated
 - **Time** - When the transaction occurred
 
-Each transaction receives labels for all applicable dimensions, allowing the same data to power different analytical views.
+This means a single fee transaction can show up in a "revenue by token" chart, a "revenue by pool" chart, and a "top wallets" table without any duplication or re-processing.
 
 ### Pool Identification
 
-**Pool identification works automatically** through a multi-source matching system. The system:
+Pool identification uses several fallback strategies:
 
 1. **Direct address matching** - Compares transaction account addresses against a registry of known pool addresses maintained in configuration files
 2. **Alias resolution** - Maps alternative addresses (like position accounts or vault accounts) to their canonical pool IDs
-3. **Token pair hints** - Uses mint addresses involved in transfers to identify pools when direct matches aren't found (e.g., a transaction involving SOL and USDC mints likely uses a SOL-USDC pool)
-4. **Protocol detection** - Identifies the protocol (Orca, Fusion, etc.) from program IDs to generate fallback labels when pools aren't in the registry
+3. **Token pair hints** - Uses mint addresses involved in transfers to identify pools when direct matches aren't found (e.g., a transaction involving SOL and USDC mints likely belongs to a SOL-USDC pool)
 
-The pool registry combines manually verified entries with auto-discovered pools. When a new pool is encountered, it's assigned a generated label (like "Orca pool abc1...def2") and can be promoted to the manual registry with a human-readable name. This hybrid approach ensures comprehensive coverage while maintaining accurate, user-friendly pool names.
+The pool registry combines manually verified entries with auto-discovered pools. When a new pool is encountered, it gets a generated label and can be promoted to the manual registry with a human-readable name.
 
 ---
 
-## Token Normalization
+## 4. Normalize
 
 ```mermaid
+%%{init: {'flowchart': {'useMaxWidth': false}}}%%
 graph LR
-    A[Day N: +100 USDC] -->|Track in Ledger| B[Pending Ledger]
-    B -->|Day N+X| C[SwapReward: 100 USDC → 0.5 SOL]
-    C -->|Calculate Rate| D[Rate: 0.005 SOL/USDC]
-    D -->|Attribute Back| E[Fees: 0.5 SOL]
-    E -->|Aggregate| F[Daily SOL Totals]
+    A((Attributed Transactions)) -->|multi-token values| B[Track Pending Tokens]
+    B -->|on-chain swap observed| C[Apply Conversion Rate]
+    C -->|single-denomination values| D[Normalized Records]
 
     style A fill:#00A3B4,color:#fff
+    style B fill:#00A3B4,color:#fff
     style C fill:#00A3B4,color:#fff
-    style F fill:#00A3B4,color:#fff
+    style D fill:#00A3B4,color:#fff
 ```
 
-To compare and aggregate transactions involving different tokens, values are normalized to a common denomination (typically SOL for Solana protocols).
+To compare and aggregate transactions involving different tokens, values are normalized to a common base denomination. Which denomination depends on the protocol. For example, a protocol that distributes SOL to stakers normalizes to SOL, while one that collects fees directly in USDC may need no conversion at all.
 
 ### Conversion Approach
 
-**On-chain rates:** When tokens are swapped, the actual exchange rate provides precise valuation for that moment. If there are multiple swaps per day, I use the multiple conversion rates to build an average daily price.
+**On-chain rates only.** I never use external price feeds. When tokens are swapped on-chain, the actual exchange rate provides precise valuation for that moment. If there are multiple swaps per day, the conversion rates are combined into an average daily price.
 
-**Same-day pricing:** Conversion rates are applied only to transactions occurring on the same day, ensuring that historical values are never retroactively adjusted based on future price changes. See "Pending Conversions" below.
+**Same-day pricing.** Conversion rates are applied only to transactions occurring on the same day, ensuring historical values are never retroactively adjusted based on future price changes.
 
-*Example:* If the treasury receives 100 USDC on Day 1 and swaps it for 0.5 SOL on Day 5, the Day 1 revenue is recorded as 100 USDC (unconverted). On Day 5, the swap reveals the rate (100 USDC = 0.5 SOL), and Day 5's attribution includes both the swap and the converted value. Day 1's historical record remains unchanged as 100 USDC, preserving the actual state of the treasury on that day. This prevents distortions where today's prices misrepresent historical revenue.
+*Example:* If a treasury receives 100 USDC on Day 1 and swaps it for 0.5 SOL on Day 5, Day 1 revenue is recorded as 100 USDC (unconverted). On Day 5, the swap reveals the rate and the converted value is recorded then. Day 1's record remains unchanged, preserving the actual state of the treasury on that day.
 
-**Native token handling:** Wrapped versions of native tokens (like WSOL) convert 1:1 with their native counterparts.
+**Native token handling.** Wrapped versions of native tokens (like WSOL) convert 1:1 with their native counterparts.
 
 ### Pending Conversions
 
-**Context:** This is particularly relevant for **treasury accounts** in DeFi protocols. Treasuries often accumulate diverse tokens (fee revenue in USDC, BONK, various LP tokens, etc.), but **only a specific token is made available for distribution to stakers** (typically the protocol's native token, USDC or SOL).
+This applies when a protocol collects fees in multiple tokens but distributes rewards in a single denomination. Tokens not yet converted remain tracked in their native denomination but are excluded from normalized totals until conversion occurs on-chain. This ensures reported values reflect **realized amounts** rather than estimates.
 
-For example, a treasury might receive:
-- 100 USDC from swap fees
-- 500,000 BONK from a liquidation
-- 0,01 cbBTC from opening an LP position
-
-But the protocol only distributes SOL to stakers. Until the treasury swaps these tokens for SOL, they remain "pending conversions."
-
-**Accounting Treatment:** Tokens not yet converted remain tracked in their native denomination but excluded from SOL-normalized totals until conversion occurs on-chain. This ensures reported values reflect **realized amounts** (actual conversions that happened) rather than estimates based on external price feeds. When the treasury eventually swaps 100 USDC for 0.5 SOL, that 0.5 SOL is recorded as revenue on the day of the swap, not on the day the USDC was originally received.
+Not every protocol requires this step. Some collect fees directly in a single token, making conversion unnecessary. Others accumulate diverse tokens (USDC, BONK, cbBTC, etc.) that are periodically swapped to a distribution token, making pending-conversion tracking essential.
 
 ---
 
-## Frontend Presentation
+## 5. Present
 
 ```mermaid
+%%{init: {'flowchart': {'useMaxWidth': false}}}%%
 graph LR
-    A[Aggregated Data] -->|Export| B[JSON Files]
-    B -->|e.g. daily_by_token.json| C[Static Hosting]
-    B -->|daily_by_type.json| C
-    B -->|summary.json| C
-    B -->|+15 more files| C
-    C -->|HTTP Fetch| D[React Data Hook]
-    D -->|Parse & Cache| E[Plotly Charts]
-    E -->|User Interaction| F[Interactive Dashboard]
+    A((Normalized Records)) -->|per dimension| B[Aggregate to JSON]
+    B -->|static files| C[Host on CDN]
+    C -->|HTTP fetch| D[Render Charts]
 
     style A fill:#00A3B4,color:#fff
+    style B fill:#00A3B4,color:#fff
     style C fill:#00A3B4,color:#fff
-    style F fill:#00A3B4,color:#fff
+    style D fill:#00A3B4,color:#fff
 ```
 
-Processed data exports as JSON files served as static assets. The frontend loads these files and renders interactive visualizations using Plotly charts.
+Each protocol's normalized data is aggregated into dimension-specific JSON files (e.g. `daily_by_token.json`, `daily_by_pool.json`, `daily_by_type.json`).
 
-### Data Export
+### Static architecture
 
-The backend aggregates attributed and normalized data into dimension-specific JSON files. Examples include:
-- `daily_by_token.json` - Revenue by token mint per day
-- `daily_by_type.json` - Revenue by transaction type per day
-- `daily_by_pool.json` - Revenue by liquidity pool per day
+The frontend is a Docusaurus site. All JSON files live in `/static/data/` and are served as plain files, so there is no server-side processing or database involved. This keeps hosting simple and page loads fast.
 
-In total, the system exports ~20 JSON files covering daily time series (by token, type, pool, pool-type combinations), summary statistics, top transaction rankings, staking metrics (`staking_tuna.json`, `staker_loyalty.json`), usage statistics, APR data, and more.
+### Rendering
 
-### Static Architecture
+React components fetch the JSON files on page load and render them as interactive Plotly charts. Charts support zooming, filtering by clicking segments, and toggling between light/dark mode.
 
-All JSON files are hosted in the `/static/data/` directory and served as immutable assets. This approach:
-- **Ensures fast load times** - No server-side processing or database queries
-- **Enables simple hosting** - Works with any static file server or CDN
-- **Supports offline analysis** - Complete dataset is downloadable
-- **Maintains consistency** - All users see the same pre-computed data
-
-### Frontend Loading
-
-The React frontend uses a custom hook (`useDashboardData`) to:
-1. Fetch all JSON files in parallel on page load
-2. Parse and validate the data structure
-3. Cache results in React state
-4. Provide loading states and error handling
-
-### Interactive Visualization
-
-Plotly charts consume the loaded data and enable:
-- **Multi-dimensional filtering** - Click any bar/segment to filter other views
-- **Cross-chart interaction** - Selection in one chart updates all related charts
-- **Responsive design** - Charts adapt to screen size and theme (light/dark mode)
-- **Export capabilities** - Download charts as PNG or view underlying data
-
-A manifest timestamp (displayed in the site header) indicates when data was last updated, helping users understand data freshness.
+A manifest timestamp in the site header indicates when data was last updated.
 
 ---
 
 ## Data Quality
 
-Data quality is paramount for accurate on-chain analytics. The pipeline maintains rigorous standards including 100% attribution accuracy, automated validation during processing, and manual verification tools for deep auditing.
+The pipeline targets 100% attribution accuracy: every token inflow must be accounted for by a classified transaction. Automated checks run during processing, and manual verification tools exist for spot-checking individual days.
 
 **For detailed information on quality standards, automated checks, and verification tools, see: [Data Quality](./data-quality)**
 

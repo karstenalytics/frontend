@@ -3,6 +3,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 export interface VestingSchedule {
   signature: string;
+  wallet_address: string | null;
   start_time: string;
   locked_tuna: number;
   cliff_hours: number;
@@ -29,6 +30,11 @@ export interface VestingTimeline {
   daily_timeline: Record<string, number>;
   staked_by_vesting_wallets_timeline: Record<string, number>;
   vesting_wallet_staking_operations: VestingWalletStakingOperation[];
+  held_by_vesting_wallets_timeline?: Record<string, number>;
+  wallet_balances?: Record<string, number>;
+  per_wallet_staked?: Record<string, number>;
+  metadata?: { tuna_decimals: number; total_supply: number; generated_at: string };
+  date_range?: { start: string; end: string };
 }
 
 // Module-level cache to prevent re-fetching on component remounts
@@ -38,7 +44,7 @@ let isLoading = false;
 let loadPromise: Promise<void> | null = null;
 
 export function useVestingTimeline() {
-  const dataPath = useBaseUrl('/data/vesting_timeline.json');
+  const dataPath = useBaseUrl('/data/defituna/vesting_timeline.json');
 
   const [data, setData] = useState<VestingTimeline | null>(cachedData);
   const [loading, setLoading] = useState(!cachedData && !cachedError);

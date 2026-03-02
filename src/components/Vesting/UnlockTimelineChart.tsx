@@ -1,25 +1,29 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
-import useBaseUrl from '@docusaurus/useBaseUrl';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import { useManifest } from '@site/src/hooks/useManifest';
 
 interface UnlockTimelineChartProps {
   timeline: Record<string, number>;
-  stakedTimeline: Record<string, number>;
+  stakedTimeline?: Record<string, number>;
   totalSchedules: number;
+  tokenSymbol?: string;
+  secondaryLineLabel?: string;
 }
 
 export default function UnlockTimelineChart({
   timeline,
-  stakedTimeline,
+  stakedTimeline = {},
   totalSchedules,
+  tokenSymbol = 'TUNA',
+  secondaryLineLabel = 'Staked',
 }: UnlockTimelineChartProps): React.ReactElement {
   const { colorMode } = useColorMode();
   const template = getPlotlyTemplate(colorMode === 'dark');
   const isDark = colorMode === 'dark';
-  const manifestPath = useBaseUrl('/data/_manifest.json');
+  const manifest = useManifest();
 
   // Mobile detection
   // Initialize with actual window size to prevent hydration mismatch
@@ -34,24 +38,6 @@ export default function UnlockTimelineChart({
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  // Fetch the last data update date from manifest
-  const [lastDataDate, setLastDataDate] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch(manifestPath)
-      .then(res => res.json())
-      .then(manifest => {
-        // Extract date from generated_at timestamp (e.g., "2025-11-15T23:59:59+00:00")
-        const date = manifest.generated_at.split('T')[0];
-        setLastDataDate(date);
-      })
-      .catch(err => {
-        console.error('Failed to load manifest:', err);
-        // Fallback to using the last date in timeline if manifest fails
-        setLastDataDate(null);
-      });
-  }, [manifestPath]);
 
   // Plotly doesn't support CSS variables, use actual hex values
   const accentColor = isDark ? '#14BCCD' : '#00A3B4';
@@ -92,7 +78,7 @@ export default function UnlockTimelineChart({
   const hasStakedData = Object.keys(stakedTimeline).length > 0;
 
   // Use the last data update date from manifest, or fallback to last date in timeline
-  const dataDate = lastDataDate || (dates.length > 0 ? dates[dates.length - 1] : new Date().toISOString().split('T')[0]);
+  const dataDate = manifest || (dates.length > 0 ? dates[dates.length - 1] : new Date().toISOString().split('T')[0]);
 
   // Filter staked data to only show up to the manifest date
   const stakedDatesFiltered: string[] = [];
@@ -137,25 +123,21 @@ export default function UnlockTimelineChart({
       ref={plotRef}
       style={{
         background: 'var(--ifm-background-surface-color)',
-        border: '1px solid var(--ifm-color-emphasis-200)',
+        border: '1px solid var(--ifm-toc-border-color)',
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
         borderRadius: 'var(--ifm-global-radius)',
         padding: isMobile ? '16px 0px 16px 0px' : '24px',
         marginBottom: '32px',
       }}
     >
       <h3 style={{
-        marginTop: 0,
+        margin: 0,
+        marginBottom: '16px',
         marginLeft: isMobile ? '16px' : 0,
-        fontSize: isMobile ? '1.1rem' : '1.5rem',
+        fontSize: isMobile ? '1.1rem' : '1.25rem',
+        fontWeight: 600,
+        textAlign: 'center',
       }}>Vesting Unlock Timeline</h3>
-      <p style={{
-        color: 'var(--ifm-color-emphasis-700)',
-        marginLeft: isMobile ? '16px' : 0,
-        fontSize: isMobile ? '13px' : '16px',
-      }}>
-        Total vesting schedules: {totalSchedules}
-      </p>
-
       <div
         style={{
           display: isMobile ? 'grid' : 'flex',
@@ -172,7 +154,7 @@ export default function UnlockTimelineChart({
           fontSize: isMobile ? '12px' : '14px',
           textAlign: 'center',
         }}>
-          <strong>{currentLocked.toLocaleString(undefined, { maximumFractionDigits: 0 })}</strong> TUNA currently locked
+          <strong>{currentLocked.toLocaleString(undefined, { maximumFractionDigits: 0 })}</strong> {tokenSymbol} currently locked
         </div>
         {hasStakedData && (
           <div className="badge" style={{
@@ -182,7 +164,7 @@ export default function UnlockTimelineChart({
             backgroundColor: stakedColor,
             color: '#ffffff',
           }}>
-            <strong>{currentStaked.toLocaleString(undefined, { maximumFractionDigits: 0 })}</strong> TUNA staked in wallets with vesting
+            <strong>{currentStaked.toLocaleString(undefined, { maximumFractionDigits: 0 })}</strong> {tokenSymbol} {secondaryLineLabel.toLowerCase()} in wallets with vesting
           </div>
         )}
       </div>
@@ -231,20 +213,20 @@ export default function UnlockTimelineChart({
                   y: locked,
                   type: 'scatter',
                   mode: 'lines',
-                  name: 'Locked TUNA',
+                  name: `Locked ${tokenSymbol}`,
                   line: { color: accentColor, width: 2 },
                   fill: 'tozeroy',
                   fillcolor: accentTransparent,
-                  hovertemplate: '%{x}<br><b>%{y:,.0f}</b> TUNA locked<extra></extra>',
+                  hovertemplate: `<b>%{y:,.0f}</b> ${tokenSymbol} locked<extra></extra>`,
                 },
                 ...(hasStakedData && stakedDatesFiltered.length > 0 ? [{
                   x: stakedDatesFiltered,
                   y: stakedValuesFiltered,
                   type: 'scatter' as const,
                   mode: 'lines' as const,
-                  name: 'Staked TUNA',
+                  name: `${secondaryLineLabel} ${tokenSymbol}`,
                   line: { color: stakedColor, width: 2 },
-                  hovertemplate: '%{x}<br><b>%{y:,.0f}</b> TUNA staked<extra></extra>',
+                  hovertemplate: `<b>%{y:,.0f}</b> ${tokenSymbol} ${secondaryLineLabel.toLowerCase()}<extra></extra>`,
                 }] : []),
                 ...(hasStakedData && lastStakedDate && lastStakedValue !== null ? [
                   // Outer glow ring
@@ -298,7 +280,7 @@ export default function UnlockTimelineChart({
                 yaxis: {
                   ...template.layout.yaxis,
                   title: isMobile ? '' : {
-                    text: 'Locked TUNA',
+                    text: `Locked ${tokenSymbol}`,
                     font: { size: 14 },
                   },
                   tickfont: { size: isMobile ? 8 : 12 },
@@ -361,14 +343,14 @@ export default function UnlockTimelineChart({
                   margin: {
                     l: 25,
                     r: 5,
-                    t: 20,
+                    t: 16,
                     b: bottomMargin,
                   },
                 } : {
                   margin: {
                     l: 80,
                     r: 40,
-                    t: 20,
+                    t: 16,
                     b: 60,
                   },
                 }),
@@ -379,6 +361,7 @@ export default function UnlockTimelineChart({
                 scrollZoom: !isMobile,
               }}
               style={{ width: '100%', height: `${chartHeight}px` }}
+              useResizeHandler={true}
             />
             {isMobile && (
               <div style={{
@@ -388,8 +371,8 @@ export default function UnlockTimelineChart({
                 marginLeft: '25px',
                 lineHeight: '1.6',
               }}>
-                <div>↑ Locked TUNA</div>
-                <div>→ Date (UTC)</div>
+                <div>{'\u2191'} Locked {tokenSymbol}</div>
+                <div>{'\u2192'} Date (UTC)</div>
               </div>
             )}
           </div>

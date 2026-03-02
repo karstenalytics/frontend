@@ -1,52 +1,68 @@
 import { useState, useEffect } from 'react';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import type { DashboardData, SummaryData, DailyDataPoint, TopTransactionsData } from './types';
+import type { DashboardData, SummaryData, DailyDataPoint, DailyTypeDataPoint, TopTransactionsData } from './types';
+
+// Supported protocols
+export type Protocol = 'defituna' | 'flash-trade';
 
 // Module-level cache to prevent re-fetching on component remounts
-let cachedData: DashboardData | null = null;
-let isLoading = false;
-let loadPromise: Promise<void> | null = null;
+// Cache is per-protocol to avoid data mixing
+const cachedDataByProtocol: Record<Protocol, DashboardData | null> = {
+  'defituna': null,
+  'flash-trade': null,
+};
+const loadingByProtocol: Record<Protocol, boolean> = {
+  'defituna': false,
+  'flash-trade': false,
+};
+const loadPromiseByProtocol: Record<Protocol, Promise<void> | null> = {
+  'defituna': null,
+  'flash-trade': null,
+};
+
+const emptyData: DashboardData = {
+  summary: null,
+  dailyStacked: [],
+  dailyByToken: [],
+  dailyByType: [],
+  dailyByPool: [],
+  topTransactionsToken: {},
+  topTransactionsType: {},
+  topTransactionsPool: {},
+  topTransactionsPoolType: {},
+  poolTypeSummary: null,
+  dailyByPoolType: [],
+  loading: true,
+  error: null,
+};
 
 /**
  * Custom hook to load all dashboard data from JSON files
+ * @param protocol - The protocol to load data for (default: 'defituna')
  */
-export function useDashboardData(): DashboardData {
-  const BASE_PATH = useBaseUrl('/data');
+export function useDashboardData(protocol: Protocol = 'defituna'): DashboardData {
+  const BASE_PATH = useBaseUrl(`/data/${protocol}`);
 
   const [data, setData] = useState<DashboardData>(() => {
     // Initialize with cached data if available
-    if (cachedData) {
-      return cachedData;
+    if (cachedDataByProtocol[protocol]) {
+      return cachedDataByProtocol[protocol]!;
     }
-    return {
-      summary: null,
-      dailyStacked: [],
-      dailyByToken: [],
-      dailyByType: [],
-      dailyByPool: [],
-      topTransactionsToken: {},
-      topTransactionsType: {},
-      topTransactionsPool: {},
-      topTransactionsPoolType: {},
-      poolTypeSummary: null,
-      dailyByPoolType: [],
-      loading: true,
-      error: null,
-    };
+    return { ...emptyData };
   });
 
   useEffect(() => {
-    // If we already have cached data, use it immediately
-    if (cachedData) {
-      setData(cachedData);
+    // If we already have cached data for this protocol, use it immediately
+    if (cachedDataByProtocol[protocol]) {
+      setData(cachedDataByProtocol[protocol]!);
       return;
     }
 
     // If data is currently being loaded by another component instance, wait for it
-    if (isLoading && loadPromise) {
-      loadPromise.then(() => {
-        if (cachedData) {
-          setData(cachedData);
+    if (loadingByProtocol[protocol] && loadPromiseByProtocol[protocol]) {
+      loadPromiseByProtocol[protocol]!.then(() => {
+        if (cachedDataByProtocol[protocol]) {
+          setData(cachedDataByProtocol[protocol]!);
         }
       });
       return;
@@ -55,7 +71,7 @@ export function useDashboardData(): DashboardData {
     // Start loading data
     async function loadData() {
       try {
-        isLoading = true;
+        loadingByProtocol[protocol] = true;
         setData(prev => ({ ...prev, loading: true, error: null }));
 
         // Load all data files in parallel
@@ -89,7 +105,7 @@ export function useDashboardData(): DashboardData {
           summary: summary as SummaryData,
           dailyStacked: dailyStacked as DailyDataPoint[],
           dailyByToken: dailyByToken as DailyDataPoint[],
-          dailyByType: dailyByType as DailyDataPoint[],
+          dailyByType: dailyByType as DailyTypeDataPoint[],
           dailyByPool: dailyByPool as DailyDataPoint[],
           topTransactionsToken: topTransactionsToken as TopTransactionsData,
           topTransactionsType: topTransactionsType as TopTransactionsData,
@@ -101,34 +117,24 @@ export function useDashboardData(): DashboardData {
           error: null,
         };
 
-        // Cache the loaded data
-        cachedData = loadedData;
+        // Cache the loaded data for this protocol
+        cachedDataByProtocol[protocol] = loadedData;
         setData(loadedData);
       } catch (err) {
-        console.error('Error loading dashboard data:', err);
-        const errorData = {
-          summary: null,
-          dailyStacked: [],
-          dailyByToken: [],
-          dailyByType: [],
-          dailyByPool: [],
-          topTransactionsToken: {},
-          topTransactionsType: {},
-          topTransactionsPool: {},
-          topTransactionsPoolType: {},
-          poolTypeSummary: null,
-          dailyByPoolType: [],
+        console.error(`Error loading ${protocol} dashboard data:`, err);
+        const errorData: DashboardData = {
+          ...emptyData,
           loading: false,
           error: err instanceof Error ? err.message : 'Failed to load data',
         };
         setData(errorData);
       } finally {
-        isLoading = false;
+        loadingByProtocol[protocol] = false;
       }
     }
 
-    loadPromise = loadData();
-  }, []);
+    loadPromiseByProtocol[protocol] = loadData();
+  }, [protocol, BASE_PATH]);
 
   return data;
 }

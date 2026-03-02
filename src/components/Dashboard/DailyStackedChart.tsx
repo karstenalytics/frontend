@@ -55,12 +55,12 @@ export default function DailyStackedChart({ data }: DailyStackedChartProps): Rea
 
   const dates = data.map(d => d.date);
   
-  // Calculate cumulative values for Orca (including Other) and Fusion
+  // Calculate cumulative values for Orca and Fusion
   let cumulativeOrca = 0;
   let cumulativeFusion = 0;
-  
+
   const orcaCumulative = data.map(d => {
-    cumulativeOrca += (d.orca_sol || 0) + (d.other_sol || 0);
+    cumulativeOrca += (d.orca_sol || 0);
     return cumulativeOrca;
   });
   
@@ -86,7 +86,7 @@ export default function DailyStackedChart({ data }: DailyStackedChartProps): Rea
       stackgroup: 'one',
       fillcolor: 'rgba(255, 193, 7, 0.6)', // Yellow-ish color
       line: { width: 0, color: 'rgba(255, 193, 7, 1)' },
-      hovertemplate: '<b>%{x}</b><br>Orca: %{y:.2f} SOL<extra></extra>',
+      hovertemplate: 'Orca: %{y:.2f} SOL<extra></extra>',
       yaxis: 'y',
     },
     {
@@ -98,7 +98,7 @@ export default function DailyStackedChart({ data }: DailyStackedChartProps): Rea
       stackgroup: 'one',
       fillcolor: 'rgba(0, 163, 180, 0.6)', // Teal color
       line: { width: 0, color: 'rgba(0, 163, 180, 1)' },
-      hovertemplate: '<b>%{x}</b><br>Fusion: %{y:.2f} SOL<extra></extra>',
+      hovertemplate: 'Fusion: %{y:.2f} SOL<extra></extra>',
       yaxis: 'y',
     },
     {
@@ -108,7 +108,7 @@ export default function DailyStackedChart({ data }: DailyStackedChartProps): Rea
       type: 'scatter',
       mode: 'lines',
       line: { width: 2, color: 'rgba(255, 87, 34, 0.8)', dash: 'dash' }, // Orange dashed line
-      hovertemplate: '<b>%{x}</b><br>Fusion Dominance: %{y:.1f}%<extra></extra>',
+      hovertemplate: 'Fusion Dominance: %{y:.1f}%<extra></extra>',
       yaxis: 'y2',
       visible: showFusionDominance ? true : 'legendonly',
     },
@@ -128,6 +128,7 @@ export default function DailyStackedChart({ data }: DailyStackedChartProps): Rea
       background: 'var(--ifm-background-surface-color)',
       border: '1px solid var(--ifm-toc-border-color)',
       borderRadius: 'var(--ifm-global-radius)',
+      boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       padding: isMobile ? '16px 0px 16px 0px' : '16px',
       marginBottom: '24px',
     }}>
@@ -180,7 +181,7 @@ export default function DailyStackedChart({ data }: DailyStackedChartProps): Rea
           showlegend: true,
           legend: {
             orientation: 'h',
-            y: isMobile ? -0.1 : -0.15,
+            y: isMobile ? -0.15 : -0.2,
             yanchor: 'top',
             x: 0.5,
             xanchor: 'center',

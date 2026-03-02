@@ -43,7 +43,7 @@ export default function PoolRampUpChart(): React.ReactElement {
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
   const template = getPlotlyTemplate(isDark);
-  const poolDataPath = useBaseUrl('/data/pool_ramp_up.json');
+  const poolDataPath = useBaseUrl('/data/defituna/pool_ramp_up.json');
 
   const [data, setData] = useState<PoolRampUpData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -99,14 +99,15 @@ export default function PoolRampUpChart(): React.ReactElement {
 
         // Initialize visibility state
         const hiddenByDefault = [
-          'Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE',  // Orca SOL-USDC Whirlpool
-          '7VuKeevbvbQQcxz6N4SNLmuq6PYy4AcGQRDssoqo4t65',  // Fusion SOL-USDC Pool
+          'Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE',  // Orca (SOL\u2013USDC)
+          '7VuKeevbvbQQcxz6N4SNLmuq6PYy4AcGQRDssoqo4t65',  // Fusion SOL-USDC
         ];
 
         const initialVisibility: Record<string, boolean> = {};
         jsonData.pools.forEach(pool => {
-          // Hide if explicitly in hiddenByDefault list OR if cumulative revenue < 5 SOL
-          const shouldHide = hiddenByDefault.includes(pool.pool_id) || pool.total_revenue < 5;
+          // Hide if explicitly in hiddenByDefault list OR if 90-day cumulative revenue < 5 SOL
+          const day90Cumulative = pool.days.length > 0 ? pool.days[pool.days.length - 1].cumulative : 0;
+          const shouldHide = hiddenByDefault.includes(pool.pool_id) || day90Cumulative < 5;
           initialVisibility[pool.pool_id] = !shouldHide;
         });
         setPoolVisibility(initialVisibility);
@@ -122,7 +123,7 @@ export default function PoolRampUpChart(): React.ReactElement {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <LoadingSpinner />
       </div>
     );
@@ -276,8 +277,9 @@ export default function PoolRampUpChart(): React.ReactElement {
         background: 'var(--ifm-background-surface-color)',
         border: '1px solid var(--ifm-toc-border-color)',
         borderRadius: 'var(--ifm-global-radius)',
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
         padding: isMobile ? '16px 0px 16px 0px' : '16px',
-        marginBottom: '16px',
+        marginBottom: '24px',
       }}>
         <Plot
           data={traces}
@@ -314,7 +316,9 @@ export default function PoolRampUpChart(): React.ReactElement {
               y: legendY,
               xanchor: 'center',
               x: 0.5,
-              font: { size: 10 },
+              font: { size: 8 },
+              tracegroupgap: 0,
+              itemwidth: 20,
             } : {
               orientation: 'v',
               y: 1,
@@ -333,7 +337,7 @@ export default function PoolRampUpChart(): React.ReactElement {
               },
             } : {
               margin: {
-                l: 50,
+                l: 70,
                 r: 10,
                 t: 50,
                 b: 50,
@@ -341,7 +345,7 @@ export default function PoolRampUpChart(): React.ReactElement {
             }),
             annotations: isMobile ? [] : [
               {
-                text: 'Default: Main SOL-USDC pools and pools with <5 SOL cumulative revenue are hidden. On mobile: pools <5 SOL excluded completely.',
+                text: 'Default: Orca (SOL\u2013USDC), Fusion SOL-USDC, and pools with <5 SOL 90-day cumulative revenue are hidden. On mobile: pools <5 SOL excluded completely.',
                 xref: 'paper',
                 yref: 'paper',
                 x: 0.6,
@@ -396,8 +400,9 @@ export default function PoolRampUpChart(): React.ReactElement {
         background: 'var(--ifm-background-surface-color)',
         border: '1px solid var(--ifm-toc-border-color)',
         borderRadius: 'var(--ifm-global-radius)',
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
         padding: isMobile ? '12px' : '16px',
-        marginBottom: '16px',
+        marginBottom: '24px',
       }}>
         <div style={{
           display: 'flex',

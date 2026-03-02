@@ -4,10 +4,13 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 export interface StakingDailyRecord {
   date: string;
   staked: number;
+  pending?: number;    // FAF in unstaking queue (Flash.Trade only)
   unstaked: number;
+  vested?: number;     // Reserved FAF: allocated but not yet distributed; includes NFT reserve + accumulated penalties (Flash.Trade only)
   total: number;
-  staked_delta: number;
-  total_delta: number;
+  staked_delta?: number;
+  total_delta?: number;
+  price?: number;      // Token price in USD (Flash.Trade only)
 }
 
 export interface StakingTopEntry {
@@ -21,49 +24,95 @@ export interface ActiveStakersRecord {
 }
 
 export interface StakingMetrics {
-  generated_at: string;
-  date_range: {
+  generated_at?: string;
+  date_range?: {
     start: string;
     end: string;
   };
-  supply: {
+  supply?: {
     max: number;
   };
   daily: StakingDailyRecord[];
-  active_stakers?: {
+  active_stakers?: number | {
     daily_counts: ActiveStakersRecord[];
   };
   top_stakers_7d: StakingTopEntry[];
   top_withdrawers_7d: StakingTopEntry[];
+  // Flash.Trade specific fields
+  total_staked?: number;
+  staking_wallets?: number;
+  percent_staked?: number;
+  rewards_30d_usdc?: number;
+  current_apr?: number;
+  total_rewards_usdc?: number;
+  changes?: Record<string, unknown>;
 }
 
-// Module-level cache to prevent re-fetching on component remounts
-let cachedData: StakingMetrics | null = null;
-let cachedError: string | null = null;
-let isLoading = false;
-let loadPromise: Promise<void> | null = null;
+interface ProtocolConfig {
+  protocol: 'defituna' | 'flash-trade';
+  dataPath: string;
+  stakeToken: string;
+  rewardToken: string;
+}
 
-export function useStakingMetrics() {
-  const dataPath = useBaseUrl('/data/staking_tuna.json');
+const PROTOCOL_CONFIGS: Record<string, ProtocolConfig> = {
+  'defituna': {
+    protocol: 'defituna',
+    dataPath: '/data/defituna/staking_tuna.json',
+    stakeToken: 'TUNA',
+    rewardToken: 'SOL',
+  },
+  'flash-trade': {
+    protocol: 'flash-trade',
+    dataPath: '/data/flash-trade/staking_metrics.json',
+    stakeToken: 'FAF',
+    rewardToken: 'USDC',
+  },
+};
 
-  const [data, setData] = useState<StakingMetrics | null>(cachedData);
-  const [loading, setLoading] = useState(!cachedData && !cachedError);
-  const [error, setError] = useState<string | null>(cachedError);
+// Per-protocol caches to prevent re-fetching on component remounts
+const cacheByProtocol: Record<string, {
+  data: StakingMetrics | null;
+  error: string | null;
+  isLoading: boolean;
+  loadPromise: Promise<void> | null;
+}> = {};
+
+function getCache(protocol: string) {
+  if (!cacheByProtocol[protocol]) {
+    cacheByProtocol[protocol] = {
+      data: null,
+      error: null,
+      isLoading: false,
+      loadPromise: null,
+    };
+  }
+  return cacheByProtocol[protocol];
+}
+
+export function useStakingMetrics(protocol: 'defituna' | 'flash-trade' = 'defituna') {
+  const config = PROTOCOL_CONFIGS[protocol];
+  const dataPath = useBaseUrl(config.dataPath);
+  const cache = getCache(protocol);
+
+  const [data, setData] = useState<StakingMetrics | null>(cache.data);
+  const [loading, setLoading] = useState(!cache.data && !cache.error);
+  const [error, setError] = useState<string | null>(cache.error);
 
   useEffect(() => {
     // If we already have cached data or error, use it immediately
-    if (cachedData || cachedError) {
-      setData(cachedData);
-      setError(cachedError);
+    if (cache.data || cache.error) {
+      setData(cache.data);
+      setError(cache.error);
       setLoading(false);
       return;
     }
 
     // If data is currently being loaded by another component instance, wait for it
-    if (isLoading && loadPromise) {
-      loadPromise.then(() => {
-        setData(cachedData);
-        setError(cachedError);
+    if (cache.isLoading && cache.loadPromise) {
+      cache.loadPromise.then(() => {
+        setData(cache.data);
+        setError(cache.error);
         setLoading(false);
       });
       return;
@@ -73,16 +122,17 @@ export function useStakingMetrics() {
     let cancelled = false;
     const load = async () => {
       try {
-        isLoading = true;
+        cache.isLoading = true;
         setLoading(true);
         const response = await fetch(dataPath);
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
         const payload = await response.json();
+
         if (!cancelled) {
-          cachedData = payload;
-          cachedError = null;
+          cache.data = payload;
+          cache.error = null;
           setData(payload);
           setError(null);
         }
@@ -90,23 +140,22 @@ export function useStakingMetrics() {
         console.error('Failed to load staking metrics:', err);
         if (!cancelled) {
           const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-          cachedError = errorMessage;
+          cache.error = errorMessage;
           setError(errorMessage);
         }
       } finally {
-        isLoading = false;
+        cache.isLoading = false;
         if (!cancelled) {
           setLoading(false);
         }
       }
     };
 
-    loadPromise = load();
+    cache.loadPromise = load();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [protocol, dataPath]);
 
-  return { data, loading, error };
+  return { data, loading, error, config };
 }
-

@@ -54,13 +54,6 @@ export default function DailyTrendsChart({
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       }}
     >
-      <h3 style={{
-        marginTop: 0,
-        marginLeft: isMobile ? '16px' : 0,
-        textAlign: 'center',
-        fontSize: isMobile ? '1.1rem' : '1.5rem',
-      }}>Reward Allocation Over Time (Daily)</h3>
-
       <Plot
         data={[
           {
@@ -92,6 +85,10 @@ export default function DailyTrendsChart({
         ]}
         layout={{
           ...template.layout,
+          title: {
+            text: 'Reward Allocation Over Time (Daily)',
+            font: { size: isMobile ? 15 : 18, weight: 600 },
+          },
           xaxis: {
             title: isMobile ? '' : {
               text: 'Date (UTC)',
@@ -118,10 +115,10 @@ export default function DailyTrendsChart({
           },
           dragmode: isMobile ? false : 'zoom',
           ...(isMobile ? {
-            margin: { l: 25, r: 5, t: 16, b: 80 },
+            margin: { l: 25, r: 5, t: 40, b: 80 },
             height: 350,
           } : {
-            margin: { l: 60, r: 40, t: 40, b: 100 },
+            margin: { l: 60, r: 40, t: 50, b: 100 },
             height: 400,
           }),
           hovermode: 'x unified',
@@ -132,6 +129,7 @@ export default function DailyTrendsChart({
           scrollZoom: !isMobile,
         }}
         style={{ width: '100%' }}
+        useResizeHandler={true}
       />
       {isMobile && (
         <div style={{
