@@ -4,11 +4,21 @@ import type { Data } from 'plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import { buildColorMap } from '@site/src/utils/chartColors';
 import ChartToggle from '@site/src/components/common/ChartToggle';
 import type { DailyTypeDataPoint } from './types';
 
+interface GroupInfo {
+  displayName: string;
+  types: string[];
+  color: string;
+}
+
 interface DailyStackedBarChartProps {
   data: DailyTypeDataPoint[];
+  visibleTypes?: string[] | null;
+  onVisibilityChange?: (types: string[] | null) => void;
+  onGroupInfo?: (groups: GroupInfo[]) => void;
 }
 
 type ViewMode = 'daily' | 'cumulative';
@@ -29,15 +39,15 @@ const TYPE_DISPLAY_NAMES: Record<string, string> = {
   'token_transfer': 'Token Transfer',
   'compound_fees_tuna': 'Collect & Compound (Orca)',
   'tuna_collectandcompoundfeesfusion': 'Collect & Compound (Fusion)',
-  'liquidate_position_orca_sl_tp': 'Liquidate SL/TP (Orca)',
+  'liquidate_position_orca_sl_tp': 'Position SL/TP (Orca)',
   'tuna_increasetunalppositionfusion': 'Increase LP Position (Fusion)',
-  'tuna_openandincreasetunalppositionfusion': 'Open & Increase LP (Fusion)',
+  'tuna_openandincreasetunalppositionfusion': 'Open/Increase LP (Fusion)',
   'tuna_increasetunalppositionorca': 'Increase LP Position (Orca)',
   'tuna_openandincreasetunalppositionorca': 'Open & Increase LP (Orca)',
   'liquidity_add_tuna': 'Add Liquidity (Tuna)',
   'tuna_addliquidityfusion': 'Add Liquidity (Fusion)',
   'tuna_addliquidityorca': 'Add Liquidity (Orca)',
-  'tuna_openpositionwithliquidityfusion': 'Open Position w. Liq. (Fusion)',
+  'tuna_openpositionwithliquidityfusion': 'Open/Increase LP (Fusion)',
   'TunaIncreasetunaspotpositionfusion': 'Increase Spot Position (Fusion)',
   'TunaOpenandincreasetunaspotpositionfusion': 'Open & Increase Spot (Fusion)',
   'TunaDecreasetunaspotpositionfusion': 'Decrease Spot Position (Fusion)',
@@ -72,6 +82,9 @@ function cumulativeSum(values: number[]): number[] {
 
 export default function DailyStackedBarChart({
   data,
+  visibleTypes = null,
+  onVisibilityChange,
+  onGroupInfo,
 }: DailyStackedBarChartProps): React.ReactElement {
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
@@ -162,6 +175,34 @@ export default function DailyStackedBarChart({
   const otherGroups = [...overflowGroups, ...forcedOtherGroups];
   const hasOther = otherGroups.length > 0;
 
+  // Build all display names list (needed for visibility tracking)
+  const allDisplayNames = [...top10Groups.map(g => g.displayName), ...(hasOther ? ['Other'] : [])];
+
+  // Derive hidden set from visibility prop
+  const hiddenSet = new Set(
+    visibleTypes ? allDisplayNames.filter(n => !visibleTypes.includes(n)) : []
+  );
+
+  // Emit group info to parent (display name -> technical types + color mapping)
+  const groupInfoRef = useRef<string>('');
+  useEffect(() => {
+    if (!onGroupInfo) return;
+    const infos: GroupInfo[] = top10Groups.map((g) => ({
+      displayName: g.displayName,
+      types: g.types,
+      color: typeColorMap[g.displayName] || '#888888',
+    }));
+    if (hasOther) {
+      const otherTypes = otherGroups.flatMap(g => g.types);
+      infos.push({ displayName: 'Other', types: otherTypes, color: typeColorMap['Other'] || '#6B7280' });
+    }
+    const key = infos.map(g => g.displayName).join(',');
+    if (key !== groupInfoRef.current) {
+      groupInfoRef.current = key;
+      onGroupInfo(infos);
+    }
+  });
+
   // Build a map for quick lookup: date -> type -> sol_equivalent
   const dataMap = new Map<string, Map<string, number>>();
   filteredData.forEach(item => {
@@ -175,32 +216,13 @@ export default function DailyStackedBarChart({
     dataMap.get(date)!.set(type, sol);
   });
 
-  // Color palette - liquidations in red shades, others in design palette colors
-  const nonRedPalette = [
-    'rgba(0, 163, 180, 0.8)',    // teal (accent)
-    'rgba(40, 95, 126, 0.8)',    // dark blue
-    'rgba(26, 188, 156, 0.8)',   // turquoise
-    'rgba(142, 68, 173, 0.8)',   // purple
-    'rgba(44, 62, 80, 0.8)',     // dark gray
-    'rgba(39, 174, 96, 0.8)',    // green
-    'rgba(22, 160, 133, 0.8)',   // dark turquoise
-    'rgba(41, 128, 185, 0.8)',   // blue
-  ];
-
-  const redPalette = [
-    'rgba(239, 68, 68, 0.8)',   // red-500
-    'rgba(220, 38, 38, 0.8)',   // red-600
-    'rgba(185, 28, 28, 0.8)',   // red-700
-  ];
-
-  const getColor = (displayName: string, index: number): string => {
-    // Only types that START with "Liquidate" get red
-    if (displayName.startsWith('Liquidate')) {
-      return redPalette[index % redPalette.length];
-    }
-    // Non-red colors from design palette (exclude orange/red-ish colors)
-    return nonRedPalette[index % nonRedPalette.length];
-  };
+  // Build color map: liquidation types get red, others from shared palette
+  const isLiquidation = (name: string) => name.startsWith('Liquidate');
+  const typeColorMap = buildColorMap(
+    allDisplayNames,
+    'Other',
+    isLiquidation,
+  );
 
   // Calculate dynamic legend positioning based on number of items and container width
   const numLegendItems = hasOther ? top10Groups.length + 1 : top10Groups.length;
@@ -265,17 +287,20 @@ export default function DailyStackedBarChart({
 
   // Build traces with view-mode branching
   groupDailyValues.forEach(({ group, values }, index) => {
-    const color = getColor(group.displayName, index);
+    const color = typeColorMap[group.displayName] || '#888888';
     const displayValues = view === 'cumulative' ? cumulativeSum(values) : values;
 
+    const isHidden = hiddenSet.has(group.displayName);
     if (view === 'daily') {
       traces.push({
         x: uniqueDates,
         y: displayValues,
         name: group.displayName,
         type: 'bar',
+        visible: isHidden ? ('legendonly' as const) : true,
         marker: { color },
         hovertemplate: `${group.displayName}: %{y:,.4f} SOL<extra></extra>`,
+        customdata: Array(uniqueDates.length).fill(group.displayName),
       });
     } else {
       traces.push({
@@ -285,9 +310,11 @@ export default function DailyStackedBarChart({
         type: 'scatter',
         mode: 'none',
         stackgroup: 'one',
+        visible: isHidden ? ('legendonly' as const) : true,
         fillcolor: color,
         line: { width: 0, color },
         hovertemplate: `${group.displayName}: %{y:,.4f} SOL<extra></extra>`,
+        customdata: Array(uniqueDates.length).fill(group.displayName),
       });
     }
   });
@@ -295,7 +322,8 @@ export default function DailyStackedBarChart({
   // Add "Other" category
   if (hasOther && otherDailyValues) {
     const displayValues = view === 'cumulative' ? cumulativeSum(otherDailyValues) : otherDailyValues;
-    const otherColor = 'rgba(156, 163, 175, 0.8)'; // gray
+    const otherColor = typeColorMap['Other'] || '#6B7280';
+    const otherHidden = hiddenSet.has('Other');
 
     if (view === 'daily') {
       traces.push({
@@ -303,8 +331,10 @@ export default function DailyStackedBarChart({
         y: displayValues,
         name: 'Other',
         type: 'bar',
+        visible: otherHidden ? ('legendonly' as const) : true,
         marker: { color: otherColor },
         hovertemplate: 'Other: %{y:,.4f} SOL<extra></extra>',
+        customdata: Array(uniqueDates.length).fill('Other'),
       });
     } else {
       traces.push({
@@ -314,20 +344,22 @@ export default function DailyStackedBarChart({
         type: 'scatter',
         mode: 'none',
         stackgroup: 'one',
+        visible: otherHidden ? ('legendonly' as const) : true,
         fillcolor: otherColor,
         line: { width: 0, color: otherColor },
         hovertemplate: 'Other: %{y:,.4f} SOL<extra></extra>',
+        customdata: Array(uniqueDates.length).fill('Other'),
       });
     }
   }
 
-  // Compute max y for range scaling
+  // Compute max y for range scaling (only visible traces)
   const dailyTotals = uniqueDates.map((_, i) => {
     let total = 0;
-    for (const { values } of groupDailyValues) {
-      total += values[i];
+    for (const { group, values } of groupDailyValues) {
+      if (!hiddenSet.has(group.displayName)) total += values[i];
     }
-    if (otherDailyValues) total += otherDailyValues[i];
+    if (otherDailyValues && !hiddenSet.has('Other')) total += otherDailyValues[i];
     return total;
   });
 
@@ -348,6 +380,47 @@ export default function DailyStackedBarChart({
   const maxY = view === 'cumulative'
     ? dailyTotals.reduce((a, b) => a + b, 0)  // total cumulative at end
     : Math.max(...dailyTotals);
+
+  // Click handler: isolate type or restore all
+  const handleChartClick = (event: any) => {
+    if (event.points && event.points.length > 0 && onVisibilityChange) {
+      const point = event.points[0];
+      const clickedType = point.customdata;
+      if (clickedType && clickedType !== 'Total') {
+        const currentVisible = visibleTypes || allDisplayNames;
+        if (currentVisible.length === 1 && currentVisible[0] === clickedType) {
+          onVisibilityChange(null);
+        } else {
+          onVisibilityChange([clickedType]);
+        }
+      }
+    }
+  };
+
+  // Sync legend toggle with visibility state
+  const handleRestyle = (restyleData: any) => {
+    if (!onVisibilityChange || !Array.isArray(restyleData) || restyleData.length < 2) return;
+    const updates = restyleData[0];
+    const indices: number[] = restyleData[1];
+    if (!('visible' in updates)) return;
+
+    const currentVisible = new Set(visibleTypes || [...allDisplayNames]);
+    for (let i = 0; i < indices.length; i++) {
+      const idx = indices[i];
+      if (idx >= allDisplayNames.length) continue; // skip Total trace
+      const val = Array.isArray(updates.visible) ? updates.visible[i] : updates.visible;
+      if (val === 'legendonly' || val === false) {
+        currentVisible.delete(allDisplayNames[idx]);
+      } else {
+        currentVisible.add(allDisplayNames[idx]);
+      }
+    }
+
+    const newVisible = currentVisible.size === allDisplayNames.length ? null : [...currentVisible];
+    const oldSet = new Set(visibleTypes || allDisplayNames);
+    if (currentVisible.size === oldSet.size && [...currentVisible].every(n => oldSet.has(n))) return;
+    onVisibilityChange(newVisible);
+  };
 
   const chartTitle = view === 'daily'
     ? 'Daily Revenue by Type'
@@ -384,7 +457,9 @@ export default function DailyStackedBarChart({
         }}>
           {chartTitle}
         </h3>
-        <ChartToggle value={view} onChange={setView} options={VIEW_OPTIONS} variant="primary" />
+        <div style={{ flexShrink: 0 }}>
+          <ChartToggle value={view} onChange={setView} options={VIEW_OPTIONS} variant="primary" />
+        </div>
       </div>
 
       <Plot
@@ -450,6 +525,8 @@ export default function DailyStackedBarChart({
         }}
         style={{ width: '100%', height: `${chartHeight}px` }}
         useResizeHandler={true}
+        onClick={handleChartClick}
+        onRestyle={handleRestyle}
       />
       {isMobile && (
         <div style={{
@@ -463,6 +540,23 @@ export default function DailyStackedBarChart({
           <div>{'\u2192'} Date (UTC)</div>
         </div>
       )}
+      <div style={{
+        fontSize: '12px',
+        color: 'var(--ifm-color-secondary)',
+        marginTop: '8px',
+        paddingLeft: isMobile ? '16px' : '0px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px',
+      }}>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          width: '14px', height: '14px', borderRadius: '50%',
+          border: '1.5px solid var(--ifm-color-secondary)',
+          fontSize: '9px', fontWeight: 700, fontStyle: 'italic', lineHeight: 1, flexShrink: 0,
+        }}>i</span>
+        Legend also filters the table: click to hide, double-click to isolate
+      </div>
     </div>
   );
 }

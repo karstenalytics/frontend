@@ -3,9 +3,9 @@ import Plot from 'react-plotly.js';
 import type { Data } from 'plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
+import { buildColorMap } from '@site/src/utils/chartColors';
 import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 import ChartToggle from '@site/src/components/common/ChartToggle';
-import { POOL_COLORS } from './PoolStackedAreaChart';
 
 interface WeeklyPoolEntry {
   fees_usdc: number;
@@ -157,14 +157,19 @@ export default function EffectiveRevenueRateChart(): React.ReactElement {
   const firstRevenueIdx = nonPartial.findIndex(w => w.totals.revenue_usdc > 0);
   const fullWeeks = firstRevenueIdx >= 0 ? nonPartial.slice(firstRevenueIdx) : nonPartial;
 
-  // Collect all pool names across all weeks
-  const poolNameSet = new Set<string>();
+  // Collect pool totals across all weeks and sort by total fees (descending)
+  const poolFeesTotals: Record<string, number> = {};
   for (const week of fullWeeks) {
-    for (const name of Object.keys(week.pools)) {
-      poolNameSet.add(name);
+    for (const [name, entry] of Object.entries(week.pools)) {
+      poolFeesTotals[name] = (poolFeesTotals[name] || 0) + entry.fees_usdc;
     }
   }
-  const poolNames = Array.from(poolNameSet).sort();
+  const poolNames = Object.entries(poolFeesTotals)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name]) => name);
+
+  // Assign colors by revenue rank
+  const colorMap = buildColorMap(poolNames);
 
   const xDates = fullWeeks.map(w => weekMidpoint(w.week_start));
 
@@ -172,8 +177,8 @@ export default function EffectiveRevenueRateChart(): React.ReactElement {
   const { poolRatios, overallRatios } = computeRollingRatios(fullWeeks, poolNames, windowSize);
 
   // Per-pool traces
-  const traces: Data[] = poolNames.map((poolName, index) => {
-    const color = POOL_COLORS[poolName] || template.layout.colorway[index % template.layout.colorway.length];
+  const traces: Data[] = poolNames.map((poolName) => {
+    const color = colorMap[poolName] || '#888888';
 
     return {
       x: xDates,

@@ -75,7 +75,7 @@ export default function KeyMetricsOverview(): React.ReactElement {
         format="currency"
         change={data.changes?.revenue_30d_pct}
         tooltip={"Total protocol revenue earned over the last 30 days. Each day's SOL revenue is converted to USD at that day's SOL price, then summed (latest SOL price: $" + (data.market_data?.sol_price_usd?.toLocaleString(undefined, { maximumFractionDigits: 2 }) || '-') + ").\nChange compares the current 30-day window to the previous 30 days."}
-        link={{ label: 'Revenue by type', href: `${base}fees-revenue/tx-type-per-day` }}
+        link={{ label: 'Revenue by type', href: `${base}fees-revenue/by-type` }}
       />
       <MetricCard
         title="Annualized Revenue"
@@ -83,7 +83,7 @@ export default function KeyMetricsOverview(): React.ReactElement {
         format="currency"
         change={data.changes?.annualized_revenue_pct}
         tooltip={"Protocol revenue projected to a full year based on the last 30 days. Each day's SOL revenue is converted at that day's SOL price, summed, then multiplied by 12 (latest SOL price: $" + (data.market_data?.sol_price_usd?.toLocaleString(undefined, { maximumFractionDigits: 2 }) || '-') + ").\nChange compares the current 30-day window to the previous 30 days."}
-        link={{ label: 'Revenue by type', href: `${base}fees-revenue/tx-type-per-day` }}
+        link={{ label: 'Revenue by type', href: `${base}fees-revenue/by-type` }}
       />
       <MetricCard
         title="FDV Market Cap"

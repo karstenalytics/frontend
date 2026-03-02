@@ -4,6 +4,7 @@ import type { Data } from 'plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
+import { buildColorMap } from '@site/src/utils/chartColors';
 import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 import ChartToggle from '@site/src/components/common/ChartToggle';
 
@@ -30,20 +31,6 @@ interface PoolStackedChartProps {
 }
 
 type ViewMode = 'daily' | 'cumulative';
-
-// Pool colors - keyed by pool_label for consistency
-const POOL_COLORS: Record<string, string> = {
-  'Fusion SOL-USDC':       '#00A3B4',  // teal
-  'Orca (SOL\u2013USDC)':  '#FF6B6B',  // coral
-  'Other / Not Applicable':'#A0AEC0',  // slate
-  'Orca (SOL\u2013CBBTC)': '#4ECDC4',  // cyan
-  'Orca (SOL\u2013FARTCOIN)':'#F39C12', // orange
-  'Orca (SOL\u2013USDT)':  '#8B5CF6',  // violet
-  'Orca (SOL\u2013JLP)':   '#DDA0DD',  // plum
-  'Orca (SOL\u2013USELESS)':'#98D8C8', // mint
-  'Orca (SOL\u2013ORE)':   '#3498DB',  // blue
-  'Others':                '#6B7280',  // gray
-};
 
 const VIEW_OPTIONS = [
   { value: 'daily' as ViewMode, label: 'Daily' },
@@ -221,10 +208,13 @@ export default function PoolStackedAreaChart({
     return total;
   });
 
+  // Assign colors by revenue rank
+  const colorMap = buildColorMap(poolNames);
+
   // Create Plotly traces
-  const traces: Data[] = poolNames.map((poolName, index) => {
+  const traces: Data[] = poolNames.map((poolName) => {
     const yValues = displayData[poolName];
-    const color = POOL_COLORS[poolName] || template.layout.colorway[index % template.layout.colorway.length];
+    const color = colorMap[poolName] || '#888888';
 
     if (view === 'daily') {
       return {
@@ -352,7 +342,9 @@ export default function PoolStackedAreaChart({
         }}>
           {chartTitle}
         </h3>
-        <ChartToggle value={view} onChange={setView} options={VIEW_OPTIONS} variant="primary" />
+        <div style={{ flexShrink: 0 }}>
+          <ChartToggle value={view} onChange={setView} options={VIEW_OPTIONS} variant="primary" />
+        </div>
       </div>
 
       <Plot
@@ -424,6 +416,23 @@ export default function PoolStackedAreaChart({
           <div>{'\u2192'} Date (UTC)</div>
         </div>
       )}
+      <div style={{
+        fontSize: '12px',
+        color: 'var(--ifm-color-secondary)',
+        marginTop: '8px',
+        paddingLeft: isMobile ? '16px' : '0px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px',
+      }}>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          width: '14px', height: '14px', borderRadius: '50%',
+          border: '1.5px solid var(--ifm-color-secondary)',
+          fontSize: '9px', fontWeight: 700, fontStyle: 'italic', lineHeight: 1, flexShrink: 0,
+        }}>i</span>
+        Legend also filters the table: click to hide, double-click to isolate
+      </div>
     </div>
   );
 }

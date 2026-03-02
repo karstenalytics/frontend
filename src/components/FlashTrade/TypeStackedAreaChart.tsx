@@ -3,6 +3,7 @@ import Plot from 'react-plotly.js';
 import type { Data } from 'plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig} from '@site/src/utils/plotlyTheme';
+import { buildColorMap } from '@site/src/utils/chartColors';
 import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 import ChartToggle from '@site/src/components/common/ChartToggle';
 
@@ -18,26 +19,10 @@ interface TypeDataResponse {
 interface TypeStackedAreaChartProps {
   visibleTypes?: string[] | null;
   onVisibilityChange?: (visibleTypes: string[] | null) => void;
+  onColorsComputed?: (colorMap: Record<string, string>) => void;
 }
 
 type ViewMode = 'daily' | 'cumulative';
-
-// Instruction type colors - consistent across charts and tables
-export const TYPE_COLORS: Record<string, string> = {
-  'SwapAndOpen': '#00A3B4',       // Teal (accent)
-  'CloseAndSwap': '#FF6B6B',      // Red
-  'OpenPosition': '#4ECDC4',      // Cyan
-  'ClosePosition': '#FFEAA7',     // Yellow
-  'IncreaseSize': '#DDA0DD',      // Plum
-  'DecreaseSize': '#98D8C8',      // Mint
-  'Liquidate': '#F39C12',         // Orange
-  'ExecuteTriggerWithSwap': '#9B59B6', // Purple
-  'ExecuteTriggerOrder': '#3498DB',    // Blue
-  'ExecuteLimitWithSwap': '#E74C3C',   // Dark Red
-  'ExecuteLimitOrder': '#2ECC71',      // Green
-  'AddCollateral': '#1ABC9C',          // Turquoise
-  'RemoveCollateral': '#E67E22',       // Dark Orange
-};
 
 // Toggle options
 const VIEW_OPTIONS = [
@@ -48,6 +33,7 @@ const VIEW_OPTIONS = [
 export default function TypeStackedAreaChart({
   visibleTypes = null,
   onVisibilityChange,
+  onColorsComputed,
 }: TypeStackedAreaChartProps): React.ReactElement {
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
@@ -151,6 +137,16 @@ export default function TypeStackedAreaChart({
     .sort((a, b) => b[1] - a[1])
     .map(([name]) => name);
 
+  // Assign colors by revenue rank (liquidation types get red)
+  const colorMap = buildColorMap(typeNames, 'Others', n => n.startsWith('Liquidate'));
+
+  // Publish color map to parent (e.g., for table chip colors)
+  const colorMapRef = useRef<Record<string, string>>({});
+  if (JSON.stringify(colorMapRef.current) !== JSON.stringify(colorMap)) {
+    colorMapRef.current = colorMap;
+    if (onColorsComputed) onColorsComputed(colorMap);
+  }
+
   // Derive which types are hidden from visibility prop
   const hiddenSet = new Set(
     visibleTypes ? typeNames.filter(t => !visibleTypes.includes(t)) : []
@@ -182,9 +178,9 @@ export default function TypeStackedAreaChart({
   // Create traces for each type
   // Daily view: stacked bar chart
   // Cumulative view: stacked area chart
-  const traces: Data[] = typeNames.map((typeName, index) => {
+  const traces: Data[] = typeNames.map((typeName) => {
     const yValues = displayData.map(day => day.instructions[typeName] || 0);
-    const color = TYPE_COLORS[typeName] || template.layout.colorway[index % template.layout.colorway.length];
+    const color = colorMap[typeName] || '#888888';
 
     if (view === 'daily') {
       // Stacked bar chart for daily
@@ -393,6 +389,23 @@ export default function TypeStackedAreaChart({
           <div>&#8594; Date (UTC)</div>
         </div>
       )}
+      <div style={{
+        fontSize: '12px',
+        color: 'var(--ifm-color-secondary)',
+        marginTop: '8px',
+        paddingLeft: isMobile ? '16px' : '0px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px',
+      }}>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          width: '14px', height: '14px', borderRadius: '50%',
+          border: '1.5px solid var(--ifm-color-secondary)',
+          fontSize: '9px', fontWeight: 700, fontStyle: 'italic', lineHeight: 1, flexShrink: 0,
+        }}>i</span>
+        Legend also filters the table: click to hide, double-click to isolate
+      </div>
     </div>
   );
 }

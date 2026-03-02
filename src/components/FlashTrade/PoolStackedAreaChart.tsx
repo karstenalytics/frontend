@@ -3,6 +3,7 @@ import Plot from 'react-plotly.js';
 import type { Data } from 'plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig} from '@site/src/utils/plotlyTheme';
+import { buildColorMap } from '@site/src/utils/chartColors';
 import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 import ChartToggle from '@site/src/components/common/ChartToggle';
 
@@ -40,23 +41,11 @@ interface NormalizedDayData {
 interface PoolStackedAreaChartProps {
   visiblePools?: string[] | null;
   onVisibilityChange?: (visiblePools: string[] | null) => void;
+  onColorsComputed?: (colorMap: Record<string, string>) => void;
 }
 
 type ViewMode = 'daily' | 'cumulative';
 type MetricType = 'fees' | 'lp' | 'revenue';
-
-// Pool colors - consistent across charts and tables
-export const POOL_COLORS: Record<string, string> = {
-  'Crypto.1': '#00A3B4',      // Teal (accent)
-  'Community.1': '#FF6B6B',   // Red
-  'Governance.1': '#4ECDC4',  // Cyan
-  'Trump.1': '#FFEAA7',       // Yellow
-  'Community.2': '#DDA0DD',   // Plum
-  'Community.3': '#98D8C8',   // Mint
-  'Ore.1': '#F39C12',         // Orange
-  'Virtual.1': '#3498DB',     // Blue
-  'Remora.1': '#8B5CF6',      // Violet
-};
 
 // Helper to consolidate pools by removing version suffix
 // Matches backend normalize_pool_name(): strips (V1/V2), (V3), (V1), (V2)
@@ -135,6 +124,7 @@ function getPoolMetricValue(bucket: PoolBuckets, metric: MetricType): number {
 export default function PoolStackedAreaChart({
   visiblePools = null,
   onVisibilityChange,
+  onColorsComputed,
 }: PoolStackedAreaChartProps): React.ReactElement {
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
@@ -267,12 +257,26 @@ export default function PoolStackedAreaChart({
     return { date: day.date, pools: consolidated };
   });
 
-  // Get unique pool names
-  const poolNames = Array.from(
-    new Set(
-      consolidatedData.flatMap(day => Object.keys(day.pools))
-    )
-  ).sort();
+  // Get unique pool names sorted by total value (descending)
+  const poolTotals: Record<string, number> = {};
+  consolidatedData.forEach(day => {
+    Object.entries(day.pools).forEach(([pool, value]) => {
+      poolTotals[pool] = (poolTotals[pool] || 0) + value;
+    });
+  });
+  const poolNames = Object.entries(poolTotals)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name]) => name);
+
+  // Assign colors by revenue rank
+  const colorMap = buildColorMap(poolNames);
+
+  // Publish color map to parent (e.g., for table chip colors)
+  const colorMapRef = useRef<Record<string, string>>({});
+  if (JSON.stringify(colorMapRef.current) !== JSON.stringify(colorMap)) {
+    colorMapRef.current = colorMap;
+    if (onColorsComputed) onColorsComputed(colorMap);
+  }
 
   // Derive which pools are hidden from visibility prop
   const hiddenSet = new Set(
@@ -307,9 +311,9 @@ export default function PoolStackedAreaChart({
   // Create traces for each pool
   // Daily view: stacked bar chart
   // Cumulative view: stacked area chart
-  const traces: Data[] = poolNames.map((poolName, index) => {
+  const traces: Data[] = poolNames.map((poolName) => {
     const yValues = displayData.map(day => day.pools[poolName] || 0);
-    const color = POOL_COLORS[poolName] || template.layout.colorway[index % template.layout.colorway.length];
+    const color = colorMap[poolName] || '#888888';
 
     if (view === 'daily') {
       // Stacked bar chart for daily
@@ -446,7 +450,7 @@ export default function PoolStackedAreaChart({
         }}>
           {chartTitle}
         </h3>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', flexShrink: 0 }}>
           <ChartToggle value={view} onChange={setView} options={VIEW_OPTIONS} variant="primary" />
           <ChartToggle value={metric} onChange={setMetric} options={metricOptions} variant="secondary" />
         </div>
@@ -522,6 +526,23 @@ export default function PoolStackedAreaChart({
           <div>{'\u2192'} Date (UTC)</div>
         </div>
       )}
+      <div style={{
+        fontSize: '12px',
+        color: 'var(--ifm-color-secondary)',
+        marginTop: '8px',
+        paddingLeft: isMobile ? '16px' : '0px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px',
+      }}>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          width: '14px', height: '14px', borderRadius: '50%',
+          border: '1.5px solid var(--ifm-color-secondary)',
+          fontSize: '9px', fontWeight: 700, fontStyle: 'italic', lineHeight: 1, flexShrink: 0,
+        }}>i</span>
+        Legend also filters the table: click to hide, double-click to isolate
+      </div>
     </div>
   );
 }

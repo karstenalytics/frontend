@@ -5,13 +5,14 @@ import { useColorMode } from '@docusaurus/theme-common';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import { buildColorMap } from '@site/src/utils/chartColors';
 import ChartToggle from '../common/ChartToggle';
 
 type WidthMode = 'proportional' | 'equal';
 
 const WIDTH_OPTIONS = [
-  { value: 'proportional' as WidthMode, label: 'Proportional' },
   { value: 'equal' as WidthMode, label: 'Equal' },
+  { value: 'proportional' as WidthMode, label: 'Proportional' },
 ];
 
 interface PoolTypeData {
@@ -28,7 +29,7 @@ interface PoolTypeData {
 }
 
 interface PoolTypeMatrixChartProps {
-  onSegmentClick?: (poolId: string, poolLabel: string, displayName: string, technicalTypes?: string[]) => void;
+  onSegmentClick?: (poolId: string, poolLabel: string, displayName: string, technicalTypes?: string[], color?: string) => void;
 }
 
 // Type name mapping - technical to display names (same as DailyStackedBarChart)
@@ -161,33 +162,6 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
 
   const traces: Data[] = [];
   
-  // Color palette - same as DailyStackedBarChart
-  const nonRedPalette = [
-    'rgba(0, 163, 180, 0.8)',    // teal (accent)
-    'rgba(40, 95, 126, 0.8)',    // dark blue
-    'rgba(26, 188, 156, 0.8)',   // turquoise
-    'rgba(142, 68, 173, 0.8)',   // purple
-    'rgba(44, 62, 80, 0.8)',     // dark gray
-    'rgba(39, 174, 96, 0.8)',    // green
-    'rgba(22, 160, 133, 0.8)',   // dark turquoise
-    'rgba(41, 128, 185, 0.8)',   // blue
-  ];
-
-  const redPalette = [
-    'rgba(239, 68, 68, 0.8)',   // red-500
-    'rgba(220, 38, 38, 0.8)',   // red-600
-    'rgba(185, 28, 28, 0.8)',   // red-700
-  ];
-  
-  const getColor = (displayName: string, index: number): string => {
-    // Only types that START with "Liquidate" get red
-    if (displayName.startsWith('Liquidate')) {
-      return redPalette[index % redPalette.length];
-    }
-    // Non-red colors from design palette
-    return nonRedPalette[index % nonRedPalette.length];
-  };
-
   // Group technical types by display name
   const displayNameGroups = new Map<string, string[]>();
   data.forEach(pool => {
@@ -225,13 +199,15 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
 
   const top10Set = new Set(top10DisplayNames);
 
-  // Assign colors to each display name
-  const displayNameToColor: Record<string, string> = {};
-  let colorIndex = 0;
-  Array.from(displayNameGroups.keys()).forEach((displayName) => {
-    displayNameToColor[displayName] = getColor(displayName, colorIndex);
-    colorIndex++;
-  });
+  // Assign colors to each display name (liquidation types get red)
+  const rankedDisplayNames = Array.from(displayNameRevenue.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([name]) => name);
+  const displayNameToColor = buildColorMap(
+    rankedDisplayNames,
+    'Others',
+    n => n.startsWith('Liquidate'),
+  );
 
   // Calculate cumulative x positions for pools
   const equalWidth = 1 / data.length;
@@ -488,7 +464,7 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
           if (event.points && event.points.length > 0 && onSegmentClick) {
             const point = event.points[0];
             const [poolId, poolLabel, displayName, technicalTypes] = point.customdata;
-            onSegmentClick(poolId, poolLabel, displayName, technicalTypes);
+            onSegmentClick(poolId, poolLabel, displayName, technicalTypes, displayNameToColor[displayName]);
           }
         }}
       />
@@ -504,6 +480,23 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
           <div>→ {widthMode === 'proportional' ? 'Liquidity pools (width = share of revenue)' : 'Liquidity pools (equal width)'}</div>
         </div>
       )}
+      <div style={{
+        fontSize: '12px',
+        color: 'var(--ifm-color-secondary)',
+        marginTop: '8px',
+        paddingLeft: isMobile ? '16px' : '0px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px',
+      }}>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          width: '14px', height: '14px', borderRadius: '50%',
+          border: '1.5px solid var(--ifm-color-secondary)',
+          fontSize: '9px', fontWeight: 700, fontStyle: 'italic', lineHeight: 1, flexShrink: 0,
+        }}>i</span>
+        Click a segment to filter the table by pool-type combination. Legend: click to hide/show
+      </div>
     </div>
   );
 }
