@@ -7,7 +7,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Pools vs. Types
 
-This page shows a revenue breakdown of how transaction types interact with liquidity pools. Click any chart segment to filter the transactions table.
+Marimekko chart showing revenue across liquidity pools (columns) and transaction types (segments) simultaneously. Use the Equal/Proportional toggle to switch between uniform column widths and revenue-weighted widths. Click any segment to filter the transactions table.
 
 ## Data
 
@@ -16,9 +16,9 @@ This page shows a revenue breakdown of how transaction types interact with liqui
     const PoolTypeMatrixChart = require('@site/src/components/Dashboard/PoolTypeMatrixChart').default;
 
     function ChartSection() {
-      const handleSegmentClick = (poolId, poolLabel, displayName, technicalTypes) => {
+      const handleSegmentClick = (poolId, poolLabel, displayName, technicalTypes, typeColor) => {
         window.dispatchEvent(new CustomEvent('poolTypeSegmentClick', {
-          detail: { poolId, poolLabel, displayName, technicalTypes }
+          detail: { poolId, poolLabel, displayName, technicalTypes, typeColor }
         }));
       };
       return <PoolTypeMatrixChart onSegmentClick={handleSegmentClick} />;
@@ -32,12 +32,12 @@ This page shows a revenue breakdown of how transaction types interact with liqui
 
 The table displays the top 10 individual transactions contributing to treasury revenue. By default, it shows all transactions across all pool-type combinations, sorted by SOL amount.
 
-**Filtering**: Click any segment in the Marimekko chart above to filter the table to that specific pool-type combination's transactions.
-
 <BrowserOnly fallback={<div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
   {() => {
     const { useState, useEffect } = require('react');
     const TopTransactionsTable = require('@site/src/components/Dashboard/TopTransactionsTable').default;
+    const FilterIndicator = require('@site/src/components/common/FilterIndicator').default;
+    const { buildColorMap } = require('@site/src/utils/chartColors');
     const useBaseUrl = require('@docusaurus/useBaseUrl').default;
 
     function TransactionsSection() {
@@ -77,40 +77,27 @@ The table displays the top 10 individual transactions contributing to treasury r
 
       const handleClearFilter = () => setSelectedSegment(null);
 
+      const poolLabels = (summary?.top_pools_by_value || [])
+        .filter(p => p.pool_label !== 'Others')
+        .map(p => p.pool_label);
+      const poolColorMap = buildColorMap([...poolLabels, 'Others']);
+
+      const filterChips = selectedSegment
+        ? [
+            { label: selectedSegment.poolLabel, color: poolColorMap[selectedSegment.poolLabel] || '#888888' },
+            ...(selectedSegment.displayName
+              ? [{ label: selectedSegment.displayName, color: selectedSegment.typeColor }]
+              : []),
+          ]
+        : [];
+
       return (
         <>
-          {selectedSegment && (
-            <div style={{
-              marginBottom: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px'
-            }}>
-              <span style={{ fontSize: '14px', color: 'var(--ifm-color-secondary)' }}>
-                Filtered by: <strong>{selectedSegment.poolLabel}</strong>
-                {selectedSegment.displayName && (
-                  <>
-                    <span style={{ margin: '0 8px' }}>{'\u2192'}</span>
-                    <strong>{selectedSegment.displayName}</strong>
-                  </>
-                )}
-              </span>
-              <button
-                onClick={handleClearFilter}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '13px',
-                  background: 'var(--ifm-color-emphasis-200)',
-                  border: '1px solid var(--ifm-toc-border-color)',
-                  borderRadius: 'var(--ifm-global-radius)',
-                  cursor: 'pointer',
-                  color: 'var(--ifm-font-color-base)',
-                }}
-              >
-                Clear Filter
-              </button>
-            </div>
-          )}
+          <FilterIndicator
+            filters={filterChips}
+            onClear={handleClearFilter}
+            separator={" \u2192 "}
+          />
 
           {!loading && (
             <TopTransactionsTable
@@ -141,8 +128,8 @@ This page helps you:
 - **Assess pool specialization**: Determine if pools focus on specific transaction types or maintain diverse compositions
 - **Evaluate revenue concentration**: Check if revenue is driven by specific pool-type combinations
 - **Spot unusual patterns**: Identify gaps in expected pool-type pairs or unexpected concentrations
-- **Cross-reference with single-dimension views**: Combine insights from [By Type](/analysis/defituna/fees-revenue/tx-type-per-day) and [By Pool](/analysis/defituna/fees-revenue/by-pool) to understand pool-type interactions
-- **Track temporal changes**: Use [Tx Type per Day](/analysis/defituna/fees-revenue/tx-type-per-day) to see how pool-type patterns evolve daily, or [Orca vs. Fusion](/analysis/defituna/fees-revenue/orca-vs-fusion) to compare the two major protocol ecosystems
+- **Cross-reference with single-dimension views**: Combine insights from [By Type](/analysis/defituna/fees-revenue/by-type) and [By Pool](/analysis/defituna/fees-revenue/by-pool) to understand pool-type interactions
+- **Track temporal changes**: Use [By Type](/analysis/defituna/fees-revenue/by-type) to see how pool-type patterns evolve daily, or [Orca vs. Fusion](/analysis/defituna/fees-revenue/orca-vs-fusion) to compare the two major protocol ecosystems
 
 ## How to Read This Chart
 
@@ -181,9 +168,6 @@ This chart answers:
 - **Click segments**: Filter the transaction table by specific pool-type combinations
 - **Legend**: Click legend items to show/hide specific transaction types
 
-**Special Labels:**
-- **Other / Not Applicable**: Transactions that could not be attributed to a specific named liquidity pool, including protocol-level fee collections, liquidations, staking operations (e.g., Initialize Staking Position), and direct token transfers
-
 **Pattern Recognition:**
 
 Watch for:
@@ -205,7 +189,7 @@ Watch for:
 
 This visualization combines two classification systems to create a matrix view:
 
-- **Pool attribution**: Each transaction is linked to the liquidity pool where it occurred, identified by protocol (Orca or Fusion) and token pair, or classified as "Other / Not Applicable"
+- **Pool attribution**: Each transaction is linked to the liquidity pool where it occurred, identified by protocol (Orca or Fusion) and token pair
 - **Type classification**: Each transaction is categorized by its operation type using log-based pattern matching
 - **Cross-tabulation**: Revenue is aggregated by each unique pool-type combination
 - **Sizing modes**: In Equal mode (default), all columns have uniform width for easier composition comparison. In Proportional mode, column width represents each pool's share of total revenue and segment area is proportional to that combination's share of total revenue. Height always represents each type's percentage share within that pool.

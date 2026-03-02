@@ -26,7 +26,7 @@ const sidebars: SidebarsConfig = {
       },
       items: [
         'analysis/defituna/fees-revenue/by-pool',
-        'analysis/defituna/fees-revenue/tx-type-per-day',
+        'analysis/defituna/fees-revenue/by-type',
         'analysis/defituna/fees-revenue/pools-vs-types',
         'analysis/defituna/fees-revenue/orca-vs-fusion',
         'analysis/defituna/fees-revenue/pool-ramp-up',

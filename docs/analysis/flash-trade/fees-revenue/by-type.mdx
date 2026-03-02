@@ -5,6 +5,17 @@ title: By Type
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
+export const typeFilter = {
+  _types: null,
+  _cbs: new Set(),
+  _colors: {},
+  get() { return this._types; },
+  set(v) { this._types = v; this._cbs.forEach(fn => fn(v)); },
+  sub(fn) { this._cbs.add(fn); return () => this._cbs.delete(fn); },
+  getColors() { return this._colors; },
+  setColors(m) { this._colors = m; },
+};
+
 # Fees by Type
 
 Daily trading fees broken down by instruction type, with a stacked chart showing each operation's contribution and a table of the largest individual transactions.
@@ -18,12 +29,22 @@ Daily trading fees broken down by instruction type, with a stacked chart showing
     const TypeStackedAreaChart = TypeModule.default;
 
     function ChartSection() {
-      const [visibleTypes, setVisibleTypes] = useState(null);
+      const [visibleTypes, setLocalTypes] = useState(typeFilter.get());
+
+      useEffect(() => {
+        typeFilter._cbs.add(setLocalTypes);
+        return () => typeFilter._cbs.delete(setLocalTypes);
+      }, []);
+
+      const setVisibleTypes = (types) => {
+        typeFilter.set(types);
+      };
 
       return (
         <TypeStackedAreaChart
           visibleTypes={visibleTypes}
           onVisibilityChange={setVisibleTypes}
+          onColorsComputed={(colors) => typeFilter.setColors(colors)}
         />
       );
     }
@@ -37,14 +58,18 @@ Daily trading fees broken down by instruction type, with a stacked chart showing
 <BrowserOnly fallback={<div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
   {() => {
     const { useState, useEffect } = require('react');
-    const TypeModule = require('@site/src/components/FlashTrade/TypeStackedAreaChart');
-    const TYPE_COLORS = TypeModule.TYPE_COLORS;
+    const FilterIndicator = require('@site/src/components/common/FilterIndicator').default;
     const { tableStyles, tableRowHoverHandlers, linkHoverHandlers } = require('@site/src/styles/tableStyles');
 
     function TopTransactionsTable() {
-      const [visibleTypes, setVisibleTypes] = useState(null);
+      const [visibleTypes, setLocalTypes] = useState(typeFilter.get());
       const [topTxData, setTopTxData] = useState(null);
       const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        typeFilter._cbs.add(setLocalTypes);
+        return () => typeFilter._cbs.delete(setLocalTypes);
+      }, []);
 
       useEffect(() => {
         fetch('/data/flash-trade/top_transactions_type.json')
@@ -66,7 +91,7 @@ Daily trading fees broken down by instruction type, with a stacked chart showing
       }, []);
 
       const clearFilter = () => {
-        setVisibleTypes(null);
+        typeFilter.set(null);
       };
 
       if (loading) {
@@ -83,8 +108,10 @@ Daily trading fees broken down by instruction type, with a stacked chart showing
         : allTransactions;
       const displayTransactions = filteredTransactions.slice(0, 10);
 
-      // Build type filter chips from available data
-      const availableTypes = [...new Set(allTransactions.map(tx => tx.type))].sort();
+      const colors = typeFilter.getColors();
+      const filterChips = visibleTypes
+        ? visibleTypes.map(type => ({ label: type, color: colors[type] || '#888888' }))
+        : [];
 
       return (
         <div>
@@ -93,61 +120,7 @@ Daily trading fees broken down by instruction type, with a stacked chart showing
             {!topTxData && ' Transaction data will be available after the next data pipeline run.'}
           </p>
 
-          {availableTypes.length > 1 && (
-            <div style={{
-              marginBottom: '16px',
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
-              <span style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)', marginRight: '4px' }}>Filter:</span>
-              {visibleTypes && (
-                <button
-                  onClick={clearFilter}
-                  style={{
-                    padding: '4px 10px',
-                    fontSize: '12px',
-                    background: 'var(--ifm-color-emphasis-200)',
-                    border: '1px solid var(--ifm-toc-border-color)',
-                    borderRadius: 'var(--ifm-global-radius)',
-                    cursor: 'pointer',
-                    color: 'var(--ifm-font-color-base)',
-                  }}
-                >
-                  Clear
-                </button>
-              )}
-              {availableTypes.map(type => {
-                const isActive = !visibleTypes || visibleTypes.includes(type);
-                const color = TYPE_COLORS[type] || '#888888';
-                return (
-                  <button
-                    key={type}
-                    onClick={() => {
-                      if (visibleTypes && visibleTypes.length === 1 && visibleTypes[0] === type) {
-                        setVisibleTypes(null);
-                      } else {
-                        setVisibleTypes([type]);
-                      }
-                    }}
-                    style={{
-                      padding: '4px 10px',
-                      fontSize: '12px',
-                      background: isActive ? color + '22' : 'transparent',
-                      border: `1px solid ${isActive ? color : 'var(--ifm-toc-border-color)'}`,
-                      borderRadius: 'var(--ifm-global-radius)',
-                      cursor: 'pointer',
-                      color: isActive ? color : 'var(--ifm-color-secondary)',
-                      opacity: isActive ? 1 : 0.6,
-                    }}
-                  >
-                    {type}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <FilterIndicator filters={filterChips} onClear={clearFilter} />
 
           {topTxData ? (
             <div style={{ overflowX: 'auto' }}>
@@ -164,7 +137,7 @@ Daily trading fees broken down by instruction type, with a stacked chart showing
                 </thead>
                 <tbody>
                   {displayTransactions.length > 0 ? displayTransactions.map((tx, idx) => {
-                    const color = TYPE_COLORS[tx.type] || '#888888';
+                    const color = colors[tx.type] || '#888888';
                     return (
                       <tr key={tx.signature} style={tableStyles.bodyRow} {...tableRowHoverHandlers}>
                         <td style={{ ...tableStyles.cell, fontWeight: 600 }}>{idx + 1}</td>
@@ -235,19 +208,17 @@ Daily trading fees broken down by instruction type, with a stacked chart showing
 | OpenPosition | Opening | Yes | Open position directly |
 | IncreaseSize | Opening | Yes | Increase existing position size |
 | AddCollateral | Collateral | No | Add margin to position |
-| SwapAndAddCollateral | Collateral | No | Add collateral with swap |
 | CloseAndSwap | Closing | Yes | Close position with output swap |
 | ClosePosition | Closing | Yes | Close position directly |
 | DecreaseSize | Closing | Yes | Partial position close |
 | RemoveCollateral | Collateral | No | Remove excess margin |
-| RemoveCollateralAndSwap | Collateral | No | Remove collateral with swap |
 | ExecuteTriggerWithSwap | Trigger | Yes | Execute stop-loss/take-profit with swap |
 | ExecuteTriggerOrder | Trigger | Yes | Execute trigger order |
 | ExecuteLimitWithSwap | Trigger | Yes | Execute limit order with swap |
 | ExecuteLimitOrder | Trigger | Yes | Execute limit order |
 | Liquidate | System | Yes | Liquidate underwater positions |
 
-Collateral management operations (AddCollateral, RemoveCollateral, SwapAndAddCollateral, RemoveCollateralAndSwap) adjust a trader's margin without changing position size and do not generate protocol fees. They do not appear in the fee charts above.
+Collateral management operations (AddCollateral, RemoveCollateral) adjust a trader's margin without changing position size and do not generate protocol fees. They do not appear in the fee charts above.
 
 ## Use Cases
 
@@ -256,7 +227,7 @@ This chart helps you:
 - **Track fee trends**: Monitor how each operation type's fee contribution changes over time
 - **Identify top operations**: See which trading operations generate the most fees
 - **Assess operation mix**: Determine if fees are concentrated in specific operations or distributed
-- **Investigate specific types**: Click on a type in the chart legend to isolate it, or use the table filters to examine individual trades
+- **Investigate specific types**: Click a bar in the chart or a legend item to isolate a type and filter the transactions table
 
 ## How to Read This Chart
 
@@ -302,7 +273,7 @@ Flash.Trade operations can be grouped into categories:
 |----------|------------|-------------|
 | Opening | SwapAndOpen, OpenPosition, IncreaseSize | Operations that open or increase positions |
 | Closing | CloseAndSwap, ClosePosition, DecreaseSize | Operations that close or reduce positions |
-| Collateral | AddCollateral, SwapAndAddCollateral, RemoveCollateral, RemoveCollateralAndSwap | Margin adjustments (no fees) |
+| Collateral | AddCollateral, RemoveCollateral | Margin adjustments (no fees) |
 | Trigger | ExecuteTriggerWithSwap, ExecuteTriggerOrder, ExecuteLimitWithSwap, ExecuteLimitOrder | Automated order executions |
 | System | Liquidate | Protocol-initiated operations |
 
@@ -316,7 +287,7 @@ Each fee-generating trading operation is attributed to its instruction type base
 
 **Update Frequency**
 
-Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
 
 **Known Limitations**
 

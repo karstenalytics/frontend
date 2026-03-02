@@ -8,14 +8,17 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 export const poolFilter = {
   _pools: null,
   _cbs: new Set(),
+  _colors: {},
   get() { return this._pools; },
   set(v) { this._pools = v; this._cbs.forEach(fn => fn(v)); },
   sub(fn) { this._cbs.add(fn); return () => this._cbs.delete(fn); },
+  getColors() { return this._colors; },
+  setColors(m) { this._colors = m; },
 };
 
 # Fees & Revenue by Pool
 
-Displays protocol fees and revenue categorized by liquidity pool over time. Toggle between daily and cumulative views, and switch between fee and revenue metrics to compare pool contributions.
+Fees and revenue categorized by liquidity pool over time. Toggle between daily and cumulative views, and switch between fee and revenue metrics.
 
 ## Data
 
@@ -41,6 +44,7 @@ Displays protocol fees and revenue categorized by liquidity pool over time. Togg
         <PoolStackedAreaChart
           visiblePools={visiblePools}
           onVisibilityChange={setVisiblePools}
+          onColorsComputed={(colors) => poolFilter.setColors(colors)}
         />
       );
     }
@@ -51,12 +55,12 @@ Displays protocol fees and revenue categorized by liquidity pool over time. Togg
 
 ## Top Transactions
 
-The table displays the largest individual transactions contributing to protocol fees and revenue.
+The table displays the largest individual transactions contributing to protocol fees and revenue. Clicking a pool in the chart or legend filters this table to that pool's transactions.
 
 <BrowserOnly fallback={<div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
   {() => {
     const { useState, useEffect } = require('react');
-    const { POOL_COLORS } = require('@site/src/components/FlashTrade/PoolStackedAreaChart');
+    const FilterIndicator = require('@site/src/components/common/FilterIndicator').default;
     const { tableStyles, tableRowHoverHandlers, linkHoverHandlers } = require('@site/src/styles/tableStyles');
 
     function TransactionsTable() {
@@ -118,37 +122,14 @@ The table displays the largest individual transactions contributing to protocol 
         : allTransactions;
       const displayTransactions = filteredTransactions.slice(0, 10);
 
+      const colors = poolFilter.getColors();
+      const filterChips = visiblePools
+        ? visiblePools.map(pool => ({ label: pool, color: colors[pool] || '#888888' }))
+        : [];
+
       return (
         <div>
-          {visiblePools && (
-            <div style={{
-              marginBottom: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px'
-            }}>
-              <span style={{ fontSize: '14px', color: 'var(--ifm-color-secondary)' }}>
-                {visiblePools.length === 1
-                  ? <>Filtered by: <strong style={{ color: POOL_COLORS[visiblePools[0]] || 'var(--ifm-font-color-base)' }}>{visiblePools[0]}</strong></>
-                  : <>Showing {visiblePools.length} pools</>
-                }
-              </span>
-              <button
-                onClick={clearFilter}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '13px',
-                  background: 'var(--ifm-color-emphasis-200)',
-                  border: '1px solid var(--ifm-toc-border-color)',
-                  borderRadius: 'var(--ifm-global-radius)',
-                  cursor: 'pointer',
-                  color: 'var(--ifm-font-color-base)',
-                }}
-              >
-                Clear Filter
-              </button>
-            </div>
-          )}
+          <FilterIndicator filters={filterChips} onClear={clearFilter} />
 
           {topTxData ? (
             <div style={{ overflowX: 'auto' }}>
@@ -166,7 +147,7 @@ The table displays the largest individual transactions contributing to protocol 
                 <tbody>
                   {displayTransactions.length > 0 ? displayTransactions.map((tx, idx) => {
                     const poolName = consolidatePoolName(tx.pool);
-                    const color = POOL_COLORS[poolName] || '#888888';
+                    const color = colors[poolName] || '#888888';
                     return (
                       <tr key={tx.signature} style={tableStyles.bodyRow} {...tableRowHoverHandlers}>
                         <td style={{ ...tableStyles.cell, fontWeight: 600 }}>{idx + 1}</td>
@@ -238,7 +219,7 @@ This chart helps you:
 - **Identify top performers**: See which perpetual markets generate the most protocol fees
 - **Compare fee magnitudes**: Switch metrics to see how gross fees compare to protocol revenue distributions
 - **Assess pool concentration**: Determine if revenue is concentrated in specific markets or distributed
-- **Investigate specific pools**: Click on a pool to filter the transactions table and examine individual trades
+- **Investigate specific pools**: Click a pool's legend item or chart bar/area to filter the transactions table and examine individual trades
 
 ## How to Read This Chart
 
@@ -255,8 +236,8 @@ This chart helps you:
 - **Interactions**:
   - Use the Daily/Cumulative toggle at the top right to switch views
   - Use the metric toggle to switch between Fees and Revenue
-  - Click legend items to filter the transactions table
-  - Double-click legend to isolate a single pool
+  - Click a bar/area segment or legend item to filter the transactions table
+  - Double-click a legend item to isolate a single pool
   - Hover to see values per pool
 
 **Top Transactions Table:**

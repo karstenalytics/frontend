@@ -62,8 +62,8 @@ const config: Config = {
             to: '/analysis/defituna/fees-revenue/orca-vs-fusion',
           },
           {
-            from: '/analysis/defituna/tx-type-per-day',
-            to: '/analysis/defituna/fees-revenue/tx-type-per-day',
+            from: ['/analysis/defituna/tx-type-per-day', '/analysis/defituna/fees-revenue/tx-type-per-day'],
+            to: '/analysis/defituna/fees-revenue/by-type',
           },
           {
             from: '/analysis/defituna/staking-apy',
@@ -75,8 +75,8 @@ const config: Config = {
             to: '/analysis/defituna/fees-revenue/by-pool',
           },
           {
-            from: ['/analysis/defituna/revenue-breakdown/by-type', '/analysis/defituna/fees-revenue/by-type'],
-            to: '/analysis/defituna/fees-revenue/tx-type-per-day',
+            from: '/analysis/defituna/revenue-breakdown/by-type',
+            to: '/analysis/defituna/fees-revenue/by-type',
           },
           {
             from: '/analysis/defituna/revenue-breakdown/by-pool',
@@ -92,7 +92,7 @@ const config: Config = {
           },
           {
             from: '/analysis/defituna/revenue-breakdown/tx-type-per-day',
-            to: '/analysis/defituna/fees-revenue/tx-type-per-day',
+            to: '/analysis/defituna/fees-revenue/by-type',
           },
           {
             from: '/analysis/defituna/usage-statistics/wallet-usage',

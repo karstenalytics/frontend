@@ -5,19 +5,41 @@ title: By Type
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
+export const typeFilter = {
+  _types: null,
+  _groupInfo: null,
+  _cbs: new Set(),
+  get() { return this._types; },
+  set(v) { this._types = v; this._cbs.forEach(fn => fn(v)); },
+  sub(fn) { this._cbs.add(fn); return () => this._cbs.delete(fn); },
+  getGroupInfo() { return this._groupInfo; },
+  setGroupInfo(v) { this._groupInfo = v; },
+};
+
 # By Type
 
-Daily time-series of DefiTuna treasury revenue broken down by transaction type. Toggle between **Daily** (stacked bars) and **Cumulative** (stacked area) views to see day-to-day composition or long-term growth trends.
+Daily treasury revenue broken down by transaction type, with **Daily** and **Cumulative** views. Includes a top transactions table sorted by SOL amount.
 
 ## Data
 
 <BrowserOnly fallback={<div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
   {() => {
+    const { useState, useEffect } = require('react');
     const { useDashboardData } = require('@site/src/components/Dashboard/useDashboardData');
     const DailyStackedBarChart = require('@site/src/components/Dashboard/DailyStackedBarChart').default;
 
-    function RevenueDashboard() {
+    function ChartSection() {
       const data = useDashboardData();
+      const [visibleTypes, setLocalTypes] = useState(typeFilter.get());
+
+      useEffect(() => {
+        typeFilter._cbs.add(setLocalTypes);
+        return () => typeFilter._cbs.delete(setLocalTypes);
+      }, []);
+
+      const setVisibleTypes = (types) => {
+        typeFilter.set(types);
+      };
 
       if (data.loading) {
         return (
@@ -36,7 +58,7 @@ Daily time-series of DefiTuna treasury revenue broken down by transaction type. 
             borderRadius: 'var(--ifm-global-radius)',
             color: 'var(--ifm-color-danger)',
           }}>
-            <h3>Error Loading Dashboard</h3>
+            <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '8px' }}>Error Loading Dashboard</div>
             <p>{data.error}</p>
           </div>
         );
@@ -46,10 +68,80 @@ Daily time-series of DefiTuna treasury revenue broken down by transaction type. 
         return <div>No daily transaction type data available</div>;
       }
 
-      return <DailyStackedBarChart data={data.dailyByType} />;
+      return (
+        <DailyStackedBarChart
+          data={data.dailyByType}
+          visibleTypes={visibleTypes}
+          onVisibilityChange={setVisibleTypes}
+          onGroupInfo={(info) => typeFilter.setGroupInfo(info)}
+        />
+      );
     }
 
-    return <RevenueDashboard />;
+    return <ChartSection />;
+  }}
+</BrowserOnly>
+
+## Top Transactions Table
+
+The table displays the largest individual transactions contributing to treasury revenue,
+sorted by SOL amount.
+
+<BrowserOnly fallback={<div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useState, useEffect } = require('react');
+    const { useDashboardData } = require('@site/src/components/Dashboard/useDashboardData');
+    const TopTransactionsTable = require('@site/src/components/Dashboard/TopTransactionsTable').default;
+    const FilterIndicator = require('@site/src/components/common/FilterIndicator').default;
+
+    function TableSection() {
+      const data = useDashboardData();
+      const [visibleTypes, setLocalTypes] = useState(typeFilter.get());
+
+      useEffect(() => {
+        typeFilter._cbs.add(setLocalTypes);
+        return () => typeFilter._cbs.delete(setLocalTypes);
+      }, []);
+
+      if (data.loading || data.error || !data.topTransactionsType) {
+        return null;
+      }
+
+      const groupInfo = typeFilter.getGroupInfo();
+
+      // Build filter chips from visibleTypes + groupInfo
+      const filterChips = visibleTypes && groupInfo
+        ? visibleTypes.map(name => {
+            const info = groupInfo.find(g => g.displayName === name);
+            return { label: name, color: info?.color };
+          })
+        : [];
+
+      // Map visible display names to technical type names for table filtering
+      const typeFilterNames = visibleTypes && groupInfo
+        ? visibleTypes.flatMap(name => {
+            const info = groupInfo.find(g => g.displayName === name);
+            return info ? info.types : [];
+          })
+        : null;
+
+      return (
+        <div>
+          <FilterIndicator filters={filterChips} onClear={() => typeFilter.set(null)} />
+          <TopTransactionsTable
+            topTransactionsToken={data.topTransactionsToken}
+            topTransactionsType={data.topTransactionsType}
+            topTransactionsPool={data.topTransactionsPool}
+            topTransactionsPoolType={data.topTransactionsPoolType}
+            groupMode="type"
+            typeFilter={typeFilterNames}
+            summary={data.summary}
+          />
+        </div>
+      );
+    }
+
+    return <TableSection />;
   }}
 </BrowserOnly>
 
@@ -61,10 +153,7 @@ This page helps you:
 - **Analyze composition shifts**: See which revenue sources are gaining or losing importance over time
 - **Investigate revenue spikes**: Hover over bars to see which transaction types contributed to unusual patterns
 - **Detect protocol impact**: Validate expected outcomes from protocol changes, new features, or pool launches
-- **Spot seasonal patterns**: Identify cyclical or seasonal trends in protocol activity
-- **Assess revenue stability**: Evaluate whether revenue is consistent or volatile across different periods
 - **Track cumulative growth**: Use the cumulative view to see how total revenue and its composition evolve over the full data window
-- **Correlate with events**: Link revenue patterns to external market events or protocol milestones
 
 ## How to Read This Chart
 
@@ -97,8 +186,17 @@ This page helps you:
 
 **Interactive Features:**
 - **Toggle**: Switch between Daily and Cumulative views using the button in the chart header
-- **Hover**: See the SOL value for a specific transaction type on that day
+- **Hover**: See the SOL values for all visible transaction types on that day
 - **Legend**: Click legend items to show/hide specific transaction types
+
+**Top Transactions Table:**
+- **Rank**: Position by SOL amount (largest first)
+- **Amount**: Revenue in SOL for that transaction
+- **Date**: UTC date the transaction occurred
+- **Type**: Transaction type classification (primary grouping column)
+- **Pool**: Liquidity pool involved
+- **Token**: Token pair for the pool
+- **Signature**: On-chain transaction signature (links to Solscan)
 
 </details>
 
@@ -135,7 +233,7 @@ The cumulative view computes a running total for each transaction type independe
 
 **Type Grouping**
 
-The chart shows the top 9 transaction types by total SOL value, with all remaining types combined into an "Other" category. Types with the same display name (e.g. legacy and current naming) are merged. Liquidation types are highlighted in red. Token Transfer is always grouped into Other regardless of its total, as it represents a one-time manual transfer rather than protocol-generated revenue.
+The chart shows up to 10 transaction types individually, ranked by total SOL value. If more than 10 types exist, the top 9 are shown with the remainder combined into an "Other" category. Token Transfer is always grouped into "Other" regardless of its rank, as it represents a one-time manual transfer rather than protocol-generated revenue, so an "Other" bucket appears whenever Token Transfer data is present. Types with the same display name (e.g. legacy and current naming) are merged. Liquidation types are highlighted in red.
 
 **Relationship to Other Views**
 
@@ -154,5 +252,6 @@ Data is automatically updated once per day. Check the "Last updated" timestamp i
 - Chart shows realized revenue only (excludes unrealized gains from held positions)
 - Very small transaction types may not be visible in the stacked bars
 - Token conversion rates based on treasury swap prices (may differ from market mid-price by a few basis points)
+- Top transactions table shows the 10 largest transactions (or the 10 largest within selected types when a legend filter is active)
 
 </details>

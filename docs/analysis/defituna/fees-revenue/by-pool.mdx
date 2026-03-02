@@ -7,7 +7,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # By Pool
 
-Displays protocol revenue over time, broken down by liquidity pool. The top 8 pools by total revenue are shown individually; remaining pools are grouped into "Others". Click a pool in the legend or chart to filter the transactions table below.
+Protocol revenue over time, broken down by liquidity pool. Click a pool in the legend or chart to filter the transactions table.
 
 ## Data
 
@@ -16,7 +16,9 @@ Displays protocol revenue over time, broken down by liquidity pool. The top 8 po
     const { useState, useEffect } = require('react');
     const { useDashboardData } = require('@site/src/components/Dashboard/useDashboardData');
     const PoolStackedAreaChart = require('@site/src/components/Dashboard/PoolStackedAreaChart').default;
+    const { buildColorMap } = require('@site/src/utils/chartColors');
     const TopTransactionsTable = require('@site/src/components/Dashboard/TopTransactionsTable').default;
+    const FilterIndicator = require('@site/src/components/common/FilterIndicator').default;
 
     function RevenueDashboard() {
       const data = useDashboardData();
@@ -73,13 +75,15 @@ Displays protocol revenue over time, broken down by liquidity pool. The top 8 po
         return visiblePools.map(label => labelToId[label]).filter(Boolean);
       })();
 
-      // If exactly one pool is selected, pass as filter
-      const singleFilter = selectedPoolIds && selectedPoolIds.length === 1
-        ? selectedPoolIds[0]
-        : null;
-      const singleLabel = visiblePools && visiblePools.length === 1
-        ? visiblePools[0]
-        : null;
+      const poolLabels = (summary.top_pools_by_value || [])
+        .filter(p => p.pool_label !== 'Others')
+        .slice(0, 8)
+        .map(p => p.pool_label);
+      const colorMap = buildColorMap([...poolLabels, 'Others']);
+
+      const filterChips = visiblePools
+        ? visiblePools.map(label => ({ label, color: colorMap[label] || '#888888' }))
+        : [];
 
       return (
         <div>
@@ -98,36 +102,7 @@ Displays protocol revenue over time, broken down by liquidity pool. The top 8 po
               By default, it shows all transactions across all pools, sorted by SOL amount.
             </p>
 
-            <p style={{ marginBottom: '16px' }}>
-              <strong>Filtering</strong>: Click a pool in the chart legend to isolate it and filter the table to that pool's transactions.
-            </p>
-
-            {singleLabel && (
-              <div style={{
-                marginBottom: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px'
-              }}>
-                <span style={{ fontSize: '14px', color: 'var(--ifm-color-secondary)' }}>
-                  Filtered by: <strong>{singleLabel}</strong>
-                </span>
-                <button
-                  onClick={() => setVisiblePools(null)}
-                  style={{
-                    padding: '6px 12px',
-                    fontSize: '13px',
-                    background: 'var(--ifm-color-emphasis-200)',
-                    border: '1px solid var(--ifm-toc-border-color)',
-                    borderRadius: 'var(--ifm-global-radius)',
-                    cursor: 'pointer',
-                    color: 'var(--ifm-font-color-base)',
-                  }}
-                >
-                  Clear Filter
-                </button>
-              </div>
-            )}
+            <FilterIndicator filters={filterChips} onClear={() => setVisiblePools(null)} />
 
             <TopTransactionsTable
               topTransactionsToken={data.topTransactionsToken}
@@ -135,8 +110,8 @@ Displays protocol revenue over time, broken down by liquidity pool. The top 8 po
               topTransactionsPool={data.topTransactionsPool}
               topTransactionsPoolType={data.topTransactionsPoolType}
               groupMode="pool"
-              selectedFilter={singleFilter}
-              selectedFilterLabel={singleLabel}
+              selectedFilter={selectedPoolIds}
+              selectedFilterLabel={visiblePools && visiblePools.length === 1 ? visiblePools[0] : null}
               summary={summary}
             />
           </div>
@@ -155,7 +130,7 @@ This chart helps you:
 - **Assess pool concentration**: Determine if revenue is driven by specific pools or broadly distributed
 - **Track trends over time**: See how individual pool contributions change day-to-day
 - **Compare pool performance**: Toggle between daily and cumulative views to spot growing or declining pools
-- **Cross-reference pool activity**: Link pool data with [By Type](./tx-type-per-day) and [Pools vs. Types](./pools-vs-types) breakdowns
+- **Cross-reference pool activity**: Link pool data with [By Type](./by-type) and [Pools vs. Types](./pools-vs-types) breakdowns
 - **Investigate specific pools**: Click a pool in the legend to isolate it and examine its top transactions
 
 ## How to Read This Chart
@@ -170,8 +145,8 @@ This chart helps you:
 - **Interactions**:
   - Click a bar/area segment to isolate that pool (click again to restore all)
   - Click legend items to show/hide individual pools
-  - Hover over the chart to see per-pool and total SOL values for that date
-  - When a single pool is selected, the transactions table below filters to that pool
+  - Hover over the chart to see per-pool and total SOL values (daily values in daily view, running totals in cumulative view)
+  - Selected pools also filter the transactions table below
 
 </details>
 
@@ -192,16 +167,16 @@ For complete pipeline details, see [Data Pipeline](/analysis/data-pipeline).
 
 Pools are identified through a multi-source matching system:
 
-1. **Direct address matching**: Compares transaction account addresses against a registry of known pool addresses
-2. **Alias resolution**: Maps alternative addresses (position accounts, vault accounts) to canonical pool IDs
-3. **Token pair hints**: Uses mint addresses involved in transfers to identify pools when direct matches aren't found
-4. **Protocol detection**: Identifies the protocol (Orca, Fusion, etc.) from program IDs to generate fallback labels
+- **Direct address matching**: Compares transaction account addresses against a registry of known pool addresses
+- **Alias resolution**: Maps alternative addresses (position accounts, vault accounts) to canonical pool IDs
+- **Token pair hints**: Uses mint addresses involved in transfers to identify pools when direct matches aren't found
+- **Protocol detection**: Uses each pool's known protocol (Orca, Fusion, etc.) to generate fallback labels when no manual name exists
 
 This hybrid approach ensures comprehensive coverage while maintaining accurate, user-friendly pool names.
 
 **Top-N Grouping**
 
-The chart displays the top 8 pools ranked by total SOL revenue. All remaining pools are aggregated into an "Others" bucket. This grouping is computed client-side using the `summary.json` ranking and applied to the `daily_by_pool.json` time-series data.
+The chart displays the top 8 pools ranked by total SOL revenue. All remaining pools are aggregated into an "Others" bucket. This grouping is computed client-side from the summary ranking and applied to the daily time-series data.
 
 **Common Pool Types**
 
@@ -210,12 +185,12 @@ The chart displays the top 8 pools ranked by total SOL revenue. All remaining po
 
 **Update Frequency**
 
-Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
 
 **Known Limitations**
 
 - Pool labels may show addresses for newly discovered pools until manual names are added
 - The "Others" bucket aggregates all pools outside the top 8, which may include meaningful individual pools
-- The "Other / Not Applicable" named pool represents system-level or unattributed revenue, distinct from the "Others" aggregation bucket
+- The "Other / Not Applicable" named pool represents system-level or unattributed revenue (e.g., direct transfers, protocol operations). It appears inside the top-8 series if it ranks high enough, otherwise it is included in the "Others" aggregation bucket
 
 </details>

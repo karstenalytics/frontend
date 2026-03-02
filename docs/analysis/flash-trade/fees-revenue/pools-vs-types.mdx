@@ -5,9 +5,9 @@ title: Pools vs. Types
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
-# Fees by Pool & Type
+# Fees by Pool & Transaction Type
 
-Two-dimensional fee distribution showing how transaction types and liquidity pools interact. The Marimekko chart reveals which pool-type combinations drive fees, where transaction types concentrate, and how fee composition varies across pools. Click any segment to display up to 10 contributing transactions for that pool-type combination.
+Two-dimensional fee distribution showing how transaction types and liquidity pools interact. Click any segment to filter the transaction table by that pool-type combination.
 
 ## Data
 
@@ -32,8 +32,8 @@ Two-dimensional fee distribution showing how transaction types and liquidity poo
 <BrowserOnly fallback={<div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
   {() => {
     const { useState, useEffect } = require('react');
-    const { POOL_COLORS } = require('@site/src/components/FlashTrade/PoolStackedAreaChart');
-    const { TYPE_COLORS } = require('@site/src/components/FlashTrade/TypeStackedAreaChart');
+    const { buildColorMap } = require('@site/src/utils/chartColors');
+    const FilterIndicator = require('@site/src/components/common/FilterIndicator').default;
     const { tableStyles, tableRowHoverHandlers, linkHoverHandlers } = require('@site/src/styles/tableStyles');
 
     function TopTransactionsTable() {
@@ -103,53 +103,36 @@ Two-dimensional fee distribution showing how transaction types and liquidity poo
         );
       }
 
+      // Compute color maps from transaction data
+      const allTx = topTransactionsPool?.transactions || [];
+      const poolTotals = {};
+      const typeTotals = {};
+      for (const tx of allTx) {
+        const pn = consolidatePoolName(tx.pool);
+        poolTotals[pn] = (poolTotals[pn] || 0) + tx.fee_usdc;
+        typeTotals[tx.type] = (typeTotals[tx.type] || 0) + tx.fee_usdc;
+      }
+      const rankedPools = Object.entries(poolTotals).sort((a, b) => b[1] - a[1]).map(([n]) => n);
+      const rankedTypes = Object.entries(typeTotals).sort((a, b) => b[1] - a[1]).map(([n]) => n);
+      const poolColorMap = buildColorMap(rankedPools);
+      const typeColorMap = buildColorMap(rankedTypes);
+
+      const filterChips = [];
+      if (selectedPool) filterChips.push({ label: selectedPool, color: poolColorMap[selectedPool] || '#888888' });
+      if (selectedType) filterChips.push({ label: selectedType, color: typeColorMap[selectedType] || '#888888' });
+
       return (
         <div>
           <p style={{ marginBottom: '16px' }}>
             The table displays individual transactions contributing to trading fees.
-            By default, it shows all transactions across all pool-type combinations, sorted by USDC amount.
-            Click any segment in the Marimekko chart above to filter by a specific pool-type combination.
+            By default, it shows the top 10 transactions globally across all pools, sorted by USDC amount.
           </p>
 
-          {(selectedPool || selectedType) && (
-            <div style={{
-              marginBottom: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px'
-            }}>
-              <span style={{ fontSize: '14px', color: 'var(--ifm-color-secondary)' }}>
-                Filtered by:
-                {selectedPool && (
-                  <strong style={{ color: POOL_COLORS[selectedPool] || 'var(--ifm-font-color-base)', marginLeft: '4px' }}>
-                    {selectedPool}
-                  </strong>
-                )}
-                {selectedPool && selectedType && (
-                  <span style={{ margin: '0 8px' }}>&#8594;</span>
-                )}
-                {selectedType && (
-                  <strong style={{ color: TYPE_COLORS[selectedType] || 'var(--ifm-font-color-base)' }}>
-                    {selectedType}
-                  </strong>
-                )}
-              </span>
-              <button
-                onClick={handleClearFilter}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '13px',
-                  background: 'var(--ifm-color-emphasis-200)',
-                  border: '1px solid var(--ifm-toc-border-color)',
-                  borderRadius: 'var(--ifm-global-radius)',
-                  cursor: 'pointer',
-                  color: 'var(--ifm-font-color-base)',
-                }}
-              >
-                Clear Filter
-              </button>
-            </div>
-          )}
+          <FilterIndicator
+            filters={filterChips}
+            onClear={handleClearFilter}
+            separator={" \u2192 "}
+          />
 
           {topTransactionsPool || topTransactionsPoolType ? (
             <div style={{ overflowX: 'auto' }}>
@@ -167,8 +150,8 @@ Two-dimensional fee distribution showing how transaction types and liquidity poo
                 <tbody>
                   {displayTransactions.length > 0 ? displayTransactions.map((tx, idx) => {
                     const poolName = consolidatePoolName(tx.pool);
-                    const poolColor = POOL_COLORS[poolName] || '#888888';
-                    const typeColor = TYPE_COLORS[tx.type] || '#888888';
+                    const poolColor = poolColorMap[poolName] || '#888888';
+                    const typeColor = typeColorMap[tx.type] || '#888888';
                     return (
                       <tr key={tx.signature} style={tableStyles.bodyRow} {...tableRowHoverHandlers}>
                         <td style={{ ...tableStyles.cell, fontWeight: 600 }}>{idx + 1}</td>
@@ -339,7 +322,7 @@ All values maintain 100% attribution accuracy. Each transaction is counted exact
 
 **Update Frequency**
 
-Data is automatically updated once a day. Check the "Last updated" timestamp in the site header for data freshness.
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
 
 **Known Limitations**
 
