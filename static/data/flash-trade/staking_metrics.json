@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-03-01T03:32:30.322743+00:00",
+  "generated_at": "2026-03-02T03:02:34.342808+00:00",
   "date_range": {
     "start": "2025-04-12",
-    "end": "2026-02-28"
+    "end": "2026-03-01"
   },
   "supply": {
     "max": 1000000000
@@ -3560,6 +3560,17 @@
       "staked_delta": 52034.95408499241,
       "total_delta": -614093.1928380728,
       "price": 0.0031512625696272964
+    },
+    {
+      "date": "2026-03-01",
+      "staked": 695199386.51896,
+      "pending": 23910342.130876,
+      "unstaked": 10505010.898655,
+      "vested": 0.0,
+      "total": 729614739.548491,
+      "staked_delta": 735031.8546279669,
+      "total_delta": 587930.822816968,
+      "price": 0.0031735145200600043
     }
   ],
   "top_stakers_7d": [
@@ -3584,6 +3595,10 @@
       "amount": 897690.444827
     },
     {
+      "address": "8JhfspbLt93jeHA1xMnse7kwntiT27wyMYhZmwDym9Go",
+      "amount": 882319.897913
+    },
+    {
       "address": "5Dfp7JyX3HA96u2twbEytC4k2cCD3QePFkCWYH4AbupQ",
       "amount": 721999.973489
     },
@@ -3594,10 +3609,6 @@
     {
       "address": "65BVbQEaH16H9d5KrwScThFJmPrDy9EJ6fqqG3VJd8S3",
       "amount": 339954.280817
-    },
-    {
-      "address": "8JhfspbLt93jeHA1xMnse7kwntiT27wyMYhZmwDym9Go",
-      "amount": 288352.746578
     },
     {
       "address": "FK9VWacDKwGD5G5RkejtsU1C7MgZzQiFZcpM3QpkzkRR",
@@ -3646,9 +3657,9 @@
       "amount": 201606.587606
     }
   ],
-  "total_staked": 694464354.6643307,
-  "staking_wallets": 3900,
-  "rewards_30d_usdc": 56393.86948200001,
-  "current_apr": 31.35,
-  "total_rewards_usdc": 427335.730407
+  "total_staked": 695199386.5189588,
+  "staking_wallets": 3904,
+  "rewards_30d_usdc": 53246.436917,
+  "current_apr": 29.36,
+  "total_rewards_usdc": 427734.060269
 }
