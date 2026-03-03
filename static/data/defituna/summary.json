@@ -7,13 +7,13 @@
   "totals": {
     "wsol_direct": 4800.205790951,
     "total_token_records": 2747,
-    "total_pool_records": 4773,
-    "total_pool_type_records": 12016,
-    "total_type_records": 2256,
+    "total_pool_records": 4776,
+    "total_pool_type_records": 12020,
+    "total_type_records": 2257,
     "unique_mints": 36,
-    "unique_pools": 51,
+    "unique_pools": 52,
     "unique_types": 23,
-    "unique_pool_type_pairs": 270
+    "unique_pool_type_pairs": 273
   },
   "top_tokens_by_value": [
     {
@@ -44,7 +44,7 @@
     {
       "name": "TUNA",
       "mint": "TUNAfXDZEdQizTMTh3uEvNvYqJmqFHZbEJt8joP4cyx",
-      "total_sol": 139.83848317300013
+      "total_sol": 139.75414338393887
     },
     {
       "name": "ORE",
@@ -81,7 +81,7 @@
     {
       "pool_id": "CE4wHeDdSNsXp5hD1o3S1ujLQtn6fqJYFy91Hknp4HPR",
       "pool_label": "Fusion USDC-WhiteWhale",
-      "total_sol": 452.2092901827725
+      "total_sol": 452.92509585602744
     },
     {
       "pool_id": "CeaZcxBNLpJWtxzt58qQmfMBtJY8pQLvursXTJYGQpbN",
@@ -110,13 +110,13 @@
     },
     {
       "pool_id": "27ExzqiGapKFd6NhffapRfdSkuykTVUqY5qeuNnrzBNm",
-      "pool_label": "Orca (SOL\u2013ORE)",
+      "pool_label": "Orca SOL-ORE",
       "total_sol": 194.97066579917868
     },
     {
       "pool_id": "OTHERS",
       "pool_label": "Others",
-      "total_sol": 1074.1547239113133
+      "total_sol": 1073.354578448997
     }
   ],
   "top_types_by_value": [
@@ -135,7 +135,7 @@
         "fusion_collectprotocolfees"
       ],
       "label": "Collect Protocol Fees (Fusion)",
-      "total_sol": 2524.4983320268534
+      "total_sol": 2524.4983331216763
     },
     {
       "type": "Liquidate LP Position (Fusion)",
@@ -144,7 +144,7 @@
         "tuna_liquidatetunalppositionfusion"
       ],
       "label": "Liquidate LP Position (Fusion)",
-      "total_sol": 1194.6610293629678
+      "total_sol": 1194.6610299773472
     },
     {
       "type": "Open Position w. Liq. (Orca)",
@@ -169,7 +169,7 @@
         "tuna_openandincreasetunalppositionfusion"
       ],
       "label": "Open/Increase LP (Fusion)",
-      "total_sol": 111.12530248386753
+      "total_sol": 111.12530249887388
     },
     {
       "type": "Liquidate Spot Position (Fusion)",
@@ -177,7 +177,7 @@
         "TunaLiquidatetunaspotpositionfusion"
       ],
       "label": "Liquidate Spot Position (Fusion)",
-      "total_sol": 76.81794499977187
+      "total_sol": 76.81794532259592
     },
     {
       "type": "Position SL/TP (Orca)",
@@ -199,7 +199,7 @@
       "type": "Others",
       "types": [],
       "label": "Others",
-      "total_sol": 54.86104763664042
+      "total_sol": 54.94538742835084
     }
   ]
 }
