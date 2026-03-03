@@ -181,6 +181,14 @@
       "fee_usdc": 2574.314676
     },
     {
+      "signature": "exTq4XxbGDQf65r4XggUCbceBM3WNx95BZSeJHuv6uXaDkufwZqEW32RYdJJyvaMJfN3G932m1j8cTP8ui9PWDi",
+      "timestamp": 1772462873,
+      "date": "2026-03-02",
+      "pool": "Crypto.1",
+      "type": "ClosePosition",
+      "fee_usdc": 1731.924972
+    },
+    {
       "signature": "4EuDNiHFRDiz4wPdRTfr4qpZa4PoZzWqTQvDygWgxqNQh1LPYfKuKVf4gTYL5NP9p3vorcCwxyAv6YpUwbzT4cDj",
       "timestamp": 1770937592,
       "date": "2026-02-12",
@@ -235,14 +243,6 @@
       "pool": "Crypto.1",
       "type": "ClosePosition",
       "fee_usdc": 664.972689
-    },
-    {
-      "signature": "4tvqafDQdEgzDURQsVHbAQ9TWP6PVVNRLBAnxQ6VujG6GCYYddE8Z457r5wDr9dSYTLyPmBcYbc2RPVkq6s9zFU8",
-      "timestamp": 1771068103,
-      "date": "2026-02-14",
-      "pool": "Crypto.1",
-      "type": "ClosePosition",
-      "fee_usdc": 662.926561
     }
   ],
   "Crypto.1_IncreaseSize": [
@@ -3247,6 +3247,14 @@
       "fee_usdc": 295.447033
     },
     {
+      "signature": "5NX97eNML6ERGijJMDNsrBCwK1HLWuaiUfF987NKBrcNNsTok8NjWnbTaJRrG9eRRogmJLK5hbhnM3GVivqiJc5x",
+      "timestamp": 1772406051,
+      "date": "2026-03-01",
+      "pool": "Remora.1",
+      "type": "ClosePosition",
+      "fee_usdc": 290.961615
+    },
+    {
       "signature": "5o3YykAWLFiBLvD7TzQezCsZPXrUFttavcU4fGTwe7hfQbNKjzzCrANio4EwBo4LgPD9PxzNJRFfgzEy7NGSoFjf",
       "timestamp": 1750018504,
       "date": "2025-06-15",
@@ -3263,20 +3271,12 @@
       "fee_usdc": 188.970306
     },
     {
-      "signature": "41nGy6oCkYpyjJdgv2eNe3XLEP6tYNr2nhmaS3mYmZFa293br9aSaYn9vEegUqn7123WdLTH8PGoEVAajt8To4fA",
-      "timestamp": 1746642457,
-      "date": "2025-05-07",
+      "signature": "5YYKmE6dcWKdDvQfi6edWouYE6gdnorswfNG2nKaU6KRAp24QWFgYWw9pBbYYPMAh79eEeNRVMnfoT4RJSX1wvjX",
+      "timestamp": 1772478746,
+      "date": "2026-03-02",
       "pool": "Remora.1",
       "type": "ClosePosition",
-      "fee_usdc": 150.11654
-    },
-    {
-      "signature": "4wQEZPvnMFpaHKxkgBPku2gFLfCJ41LLyDzXVVuZ6AZeW4UVvEQYpa23YkWSue8isoYJVT7bLJohgFQ2p1oBRYY3",
-      "timestamp": 1758183379,
-      "date": "2025-09-18",
-      "pool": "Remora.1",
-      "type": "ClosePosition",
-      "fee_usdc": 148.782031
+      "fee_usdc": 182.875372
     }
   ],
   "Virtual.1_ClosePosition": [
@@ -3985,6 +3985,22 @@
       "fee_usdc": 73.715206
     },
     {
+      "signature": "4NpYKsBDwy9bwADiseKzW9YbqVGnXNamv75zQtou3SBdf8PJ2JTUtdBxovTJs7Q1bpJB5x22FjXLEYDuZDwhSTKg",
+      "timestamp": 1772266184,
+      "date": "2026-02-28",
+      "pool": "Remora.1",
+      "type": "DecreaseSize",
+      "fee_usdc": 72.895777
+    },
+    {
+      "signature": "2AYAgx6GoqiQjj8dw1QGfLJGbrirN3mZ13eemMn46FXdwnpia5gBDQotJYatph1SHzRytqbxH55ioTQA4dhyH9iS",
+      "timestamp": 1772224737,
+      "date": "2026-02-27",
+      "pool": "Remora.1",
+      "type": "DecreaseSize",
+      "fee_usdc": 70.277137
+    },
+    {
       "signature": "3VyWwnSCfMWGYtBQ6MSadLN6W9mZJnr1e6gg73ddQXg3PENYdE78NZHdqTMTFS7GrVAVCRdsLBuxnwqZwBVAMb3P",
       "timestamp": 1769101978,
       "date": "2026-01-22",
@@ -3999,22 +4015,6 @@
       "pool": "Remora.1",
       "type": "DecreaseSize",
       "fee_usdc": 69.074077
-    },
-    {
-      "signature": "24DET54WS4n1oSb6xCR8fa5Y67Wm8kce7BrWxA5yMdBRJK8MUUvSE9AG5p1B6bDYc4MSgXs6qQsbEx8125v4Ek1a",
-      "timestamp": 1769382212,
-      "date": "2026-01-25",
-      "pool": "Remora.1",
-      "type": "DecreaseSize",
-      "fee_usdc": 63.366569
-    },
-    {
-      "signature": "3355uwAm8A9n2ii4BGMskoYvQwCsVbsxrVJ2GpEJ4w5LRGEfFcABMgdK764Ve3RMCtMpuhbqZskvSchTh9fYxN4Y",
-      "timestamp": 1771946812,
-      "date": "2026-02-24",
-      "pool": "Remora.1",
-      "type": "DecreaseSize",
-      "fee_usdc": 54.621137
     }
   ],
   "Community.3_ExecuteTriggerOrder": [
@@ -4649,28 +4649,28 @@
       "fee_usdc": 66.655932
     },
     {
+      "signature": "4fP2ca2TtQ9Ks6XgAxjhXpLc63omTrZFwFT5QEWCvGsXQP8QBZ4tP6ZpA2z9gpaei421rTGURAiu5T2oju7oFuuf",
+      "timestamp": 1772467551,
+      "date": "2026-03-02",
+      "pool": "Remora.1",
+      "type": "IncreaseSize",
+      "fee_usdc": 58.107304
+    },
+    {
+      "signature": "2vu26AiAvbs39KTZnKZHGCjKJ2Qzqgxj4SE5AZfRdWK6pjSgfR7F8ztGFhXyBB3B5rTsnSBGYswibSDMtEtAhF3h",
+      "timestamp": 1772465249,
+      "date": "2026-03-02",
+      "pool": "Remora.1",
+      "type": "IncreaseSize",
+      "fee_usdc": 49.333602
+    },
+    {
       "signature": "59sxFaEKfhoNyZyavyDj2dsCL6phMF23hUqFbZKeEoFX3YA2Lnr9RSHqCouTx8UJj3PvmH4WEcTGNNXD6Jx2JBfm",
       "timestamp": 1772136224,
       "date": "2026-02-26",
       "pool": "Remora.1",
       "type": "IncreaseSize",
       "fee_usdc": 49.070324
-    },
-    {
-      "signature": "3uRxharDkYnXcg99v3U9LTDXEax3425nHYmaedMVGrTuJgKAn9pWwtHhZt9YwPsQiobDr91xk3zZdnyb3jx2LFPs",
-      "timestamp": 1770086210,
-      "date": "2026-02-03",
-      "pool": "Remora.1",
-      "type": "IncreaseSize",
-      "fee_usdc": 45.411982
-    },
-    {
-      "signature": "5U7EWGTGLW2DrLWi4LkFysRgxCu22ZkswiDa86Mpskqd71CTVBULJchsUb58r9GLhQoirZeAzYCbpbQSz9JFvAVk",
-      "timestamp": 1767181323,
-      "date": "2025-12-31",
-      "pool": "Remora.1",
-      "type": "IncreaseSize",
-      "fee_usdc": 41.736038
     }
   ],
   "Virtual.1_Liquidate": [
@@ -5027,12 +5027,28 @@
       "fee_usdc": 444.850273
     },
     {
+      "signature": "3fRDDSyhNi9EsHioqTuttU3p5DG5URbn1t5hnZUDfiMeqiF5RvJA6uSx2bBcBWeBdhaRqc52AS9HBvdddXYuWCpt",
+      "timestamp": 1772415833,
+      "date": "2026-03-02",
+      "pool": "Remora.1",
+      "type": "CloseAndSwap",
+      "fee_usdc": 411.945955
+    },
+    {
       "signature": "e89TRvEFSq6TKKf2gDExhSuA4utYcfJ1ngCZZjfYZEPQAww63xEXZVKnfe35bz8AncpcxJiwdByuR4nSDanFgZg",
       "timestamp": 1767388977,
       "date": "2026-01-02",
       "pool": "Remora.1",
       "type": "CloseAndSwap",
       "fee_usdc": 398.215641
+    },
+    {
+      "signature": "P4mMvimFPA8ieUs4Bq17rNDy4Atir8xRXaoB5bsjddGchoN3x41BUgky5dJeDb4dTsoXD1W2vYo9592AduxWiUu",
+      "timestamp": 1772462031,
+      "date": "2026-03-02",
+      "pool": "Remora.1",
+      "type": "CloseAndSwap",
+      "fee_usdc": 300.236772
     },
     {
       "signature": "48LZMuDQAhX7vpw9HHRAhNKVzSB6aJqE1mgXbCKz4N4az3zSbQahZ32gsBE4eTN24jom8TdaWdaqyffF4HLmrkhj",
@@ -5065,22 +5081,6 @@
       "pool": "Remora.1",
       "type": "CloseAndSwap",
       "fee_usdc": 198.29024
-    },
-    {
-      "signature": "JqHKuXQmpZfAS8AvAC4QJUtpaLNJwTW9auGpUEY9cEyvQ389wgzKh11DvfRkQ5EiD4v3m4achH5KDWt6UQtPNuA",
-      "timestamp": 1769523792,
-      "date": "2026-01-27",
-      "pool": "Remora.1",
-      "type": "CloseAndSwap",
-      "fee_usdc": 197.063056
-    },
-    {
-      "signature": "NiZ9K22HDZyDK8bWfCGrUMPV1zEyvadQ1wKKc29peqjdyuAf5gXg2ZhWg6LHJ8De8LrP8LS1qjEQW7QjVuH6w5y",
-      "timestamp": 1768469095,
-      "date": "2026-01-15",
-      "pool": "Remora.1",
-      "type": "CloseAndSwap",
-      "fee_usdc": 193.444163
     }
   ],
   "Trump.1_ExecuteLimitWithSwap": [
