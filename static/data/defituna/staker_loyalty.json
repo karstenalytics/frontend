@@ -141,13 +141,6 @@
   },
   "weekly_trends": [
     {
-      "week": "2025-W01",
-      "claim_amount": 52.484663119,
-      "compound_amount": 1.0156255970000003,
-      "total_amount": 53.500288716,
-      "compound_rate": 1.8983553572791534
-    },
-    {
       "week": "2025-W31",
       "claim_amount": 46.94660463000004,
       "compound_amount": 0.0,
@@ -303,10 +296,10 @@
     },
     {
       "week": "2026-W01",
-      "claim_amount": 39.06571619099999,
-      "compound_amount": 3.3711020380000005,
-      "total_amount": 42.436818229,
-      "compound_rate": 7.943814307209994
+      "claim_amount": 91.55037931000004,
+      "compound_amount": 4.3867276350000015,
+      "total_amount": 95.93710694500004,
+      "compound_rate": 4.572503564772781
     },
     {
       "week": "2026-W02",
@@ -5165,5 +5158,10 @@
         "address_short": "H7q8zE2g...gW6c"
       }
     ]
+  },
+  "changes": {
+    "loyalty_score_pct": -0.44,
+    "compound_rate_pct": 0.04,
+    "compound_only_users_pct": 2.3
   }
 }
