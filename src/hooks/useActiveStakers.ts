@@ -34,7 +34,7 @@ export interface TopStakerByBalance {
   current_balance: number;
   share_pct: number;         // current_balance / totalStaked * 100
   vs_peak_pct: number;       // current_balance / max_ever_balance * 100
-  change_30d_pp: number | null; // share now - share 30d ago (pp), null if wallet didn't exist 30d ago
+  change_30d_pct: number | null; // % change in wallet's own balance over 30d, null if wallet didn't exist 30d ago
 }
 
 export interface ActiveStakersData {
@@ -330,12 +330,14 @@ export function useActiveStakers(protocol: 'defituna' | 'flash-trade' = 'defitun
         const sharePct = currentTotalStaked > 0 ? (balance / currentTotalStaked) * 100 : 0;
         const vsPeakPct = stats.max_balance > 0 ? (balance / stats.max_balance) * 100 : 0;
 
-        let change30dPp: number | null = null;
+        let change30dPct: number | null = null;
         if (walletBalances30dAgo) {
           const balance30d = walletBalances30dAgo.get(address) || 0;
-          if (balance30d > 0 || stats.first_seen <= (snapshotDate || '')) {
-            const share30d = totalStaked30dAgo > 0 ? (balance30d / totalStaked30dAgo) * 100 : 0;
-            change30dPp = sharePct - share30d;
+          if (balance30d > 0) {
+            change30dPct = ((balance - balance30d) / balance30d) * 100;
+          } else if (stats.first_seen <= (snapshotDate || '')) {
+            // Wallet existed 30d ago with zero balance, now has a balance
+            change30dPct = balance > DUST_THRESHOLD ? 100 : 0;
           }
         }
 
@@ -344,7 +346,7 @@ export function useActiveStakers(protocol: 'defituna' | 'flash-trade' = 'defitun
           current_balance: balance,
           share_pct: sharePct,
           vs_peak_pct: vsPeakPct,
-          change_30d_pp: change30dPp,
+          change_30d_pct: change30dPct,
         };
       });
 

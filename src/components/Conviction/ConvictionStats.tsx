@@ -1,16 +1,13 @@
 import React from 'react';
-import type { LoyaltySummary } from '@site/src/hooks/useStakerLoyalty';
+import type { ConvictionSummary, ConvictionChanges } from '@site/src/hooks/useStakerConviction';
 import MetricCard from '../common/MetricCard';
 
-interface LoyaltyStatsProps {
-  summary: LoyaltySummary;
-  changes?: {
-    loyalty_score_pct: number | null;
-    compound_rate_pct: number | null;
-  };
+interface ConvictionStatsProps {
+  summary: ConvictionSummary;
+  changes?: ConvictionChanges;
 }
 
-export default function LoyaltyStats({ summary, changes }: LoyaltyStatsProps): React.ReactElement {
+export default function ConvictionStats({ summary, changes }: ConvictionStatsProps): React.ReactElement {
   return (
     <div className="usage-summary-grid">
       <MetricCard

@@ -65,7 +65,6 @@ export default function StakerConvictionMetrics(): React.ReactElement {
         title="FAF Claimed by Stakers"
         value={data.total_claimed_faf}
         format="number"
-        suffix=" FAF"
         change={data.changes?.claimed_faf_30d}
         changeUnit="number"
         tooltip={"Cumulative FAF claimed by stakers through monthly epoch token rewards (CollectTokenReward events) since protocol launch. Does not include USDC revenue share.\nChange shows the absolute FAF claimed in the last 30 days."}

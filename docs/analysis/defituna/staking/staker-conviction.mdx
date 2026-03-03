@@ -13,11 +13,11 @@ Tracks how stakers manage their rewards: compounding (reinvesting as TUNA), clai
 
 <BrowserOnly fallback={<div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
   {() => {
-    const { useStakerLoyalty } = require('@site/src/hooks/useStakerLoyalty');
-    const LoyaltyStats = require('@site/src/components/Loyalty').LoyaltyStats;
+    const { useStakerConviction } = require('@site/src/hooks/useStakerConviction');
+    const ConvictionStats = require('@site/src/components/Conviction').ConvictionStats;
 
     function MetricsSection() {
-      const { data, loading, error } = useStakerLoyalty();
+      const { data, loading, error } = useStakerConviction();
 
       if (loading) {
         return (
@@ -35,7 +35,7 @@ Tracks how stakers manage their rewards: compounding (reinvesting as TUNA), clai
         );
       }
 
-      return <LoyaltyStats summary={data.summary} changes={data.changes} />;
+      return <ConvictionStats summary={data.summary} changes={data.changes} />;
     }
 
     return <MetricsSection />;
@@ -44,18 +44,17 @@ Tracks how stakers manage their rewards: compounding (reinvesting as TUNA), clai
 
 ## Data
 
-<BrowserOnly fallback={<LoadingSpinner />}>
+<BrowserOnly fallback={<div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
   {() => {
-    const { useStakerLoyalty } = require('@site/src/hooks/useStakerLoyalty');
+    const { useStakerConviction } = require('@site/src/hooks/useStakerConviction');
     const { useActiveStakers } = require('@site/src/hooks/useActiveStakers');
     const {
       BehaviorPieChart,
-      InverseWhaleChart,
-      DailyTrendsChart,
-    } = require('@site/src/components/Loyalty');
+      StakeSizeBreakdownChart,
+    } = require('@site/src/components/Conviction');
 
     function StakerConvictionPage() {
-      const { data, loading, error } = useStakerLoyalty();
+      const { data, loading, error } = useStakerConviction();
       const { data: activeData, loading: activeLoading, error: activeError } = useActiveStakers('defituna');
 
       if (loading || activeLoading) {
@@ -82,7 +81,7 @@ Tracks how stakers manage their rewards: compounding (reinvesting as TUNA), clai
         );
       }
 
-      const { summary, user_segments, daily_trends } = data;
+      const { summary, user_segments } = data;
       const currentActiveStakers = activeData.current_active_stakers;
 
       return (
@@ -93,9 +92,7 @@ Tracks how stakers manage their rewards: compounding (reinvesting as TUNA), clai
             currentActiveStakers={currentActiveStakers}
           />
 
-          <InverseWhaleChart userSegments={user_segments} />
-
-          {daily_trends && <DailyTrendsChart dailyTrends={daily_trends} />}
+          <StakeSizeBreakdownChart userSegments={user_segments} />
         </>
       );
     }
@@ -145,7 +142,7 @@ Helps identify whether whales (large stakers) or shrimp (small stakers) are more
 
 **Interactive Features:**
 - **Hover on charts**: See exact values and percentages
-- **Legend toggles**: Click legend items to show/hide specific segments
+- **Legend toggles** (stacked bar chart only): Click legend items to show/hide specific behavior segments
 
 </details>
 

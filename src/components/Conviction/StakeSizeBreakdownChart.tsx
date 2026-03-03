@@ -3,15 +3,15 @@ import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
-import type { UserSegments } from '@site/src/hooks/useStakerLoyalty';
+import type { UserSegments } from '@site/src/hooks/useStakerConviction';
 
-interface InverseWhaleChartProps {
+interface StakeSizeBreakdownChartProps {
   userSegments: UserSegments;
 }
 
-export default function InverseWhaleChart({
+export default function StakeSizeBreakdownChart({
   userSegments,
-}: InverseWhaleChartProps): React.ReactElement {
+}: StakeSizeBreakdownChartProps): React.ReactElement | null {
   const { colorMode } = useColorMode();
   const template = getPlotlyTemplate(colorMode === 'dark');
 
@@ -31,7 +31,7 @@ export default function InverseWhaleChart({
 
   const plotRef = useRef<HTMLDivElement>(null);
   useChartTracking(plotRef, {
-    chartName: 'Staker Loyalty Distribution',
+    chartName: 'Conviction by Stake Size',
     trackClick: true,
     trackZoom: true,
   });
@@ -65,7 +65,7 @@ export default function InverseWhaleChart({
 
     // Create combined tier with summed values
     combinedByStakeSize.tier8 = {
-      label: '≥10M TUNA ',
+      label: '≥10M',
       user_count: tier8.user_count + tier7.user_count,
       avg_compound_rate:
         tier8.user_count + tier7.user_count > 0
@@ -90,7 +90,7 @@ export default function InverseWhaleChart({
 
     // Create combined tier with summed values
     combinedByStakeSize.tier6 = {
-      label: '1-10M TUNA ',
+      label: '1-10M',
       user_count: tier6.user_count + tier5.user_count,
       avg_compound_rate:
         tier6.user_count + tier5.user_count > 0
@@ -108,26 +108,16 @@ export default function InverseWhaleChart({
     delete combinedByStakeSize.tier5;
   }
 
-  // Add trailing space to remaining tier labels for y-axis spacing
-  if (combinedByStakeSize.tier4) {
-    combinedByStakeSize.tier4.label = combinedByStakeSize.tier4.label + ' ';
-  }
-  if (combinedByStakeSize.tier3) {
-    combinedByStakeSize.tier3.label = combinedByStakeSize.tier3.label + ' ';
-  }
-  if (combinedByStakeSize.tier2) {
-    combinedByStakeSize.tier2.label = combinedByStakeSize.tier2.label + ' ';
-  }
-  if (combinedByStakeSize.tier1) {
-    combinedByStakeSize.tier1.label = combinedByStakeSize.tier1.label + ' ';
+  // Strip " TUNA" from remaining labels (chart title already shows the unit)
+  for (const tier of Object.values(combinedByStakeSize)) {
+    tier.label = tier.label.replace(/ ?TUNA$/, '').trim();
   }
 
-  // Sort tiers from tier8 (top) to tier1 (bottom)
+  // Sort tiers ascending so Plotly renders tier1 (smallest) at bottom, tier8 (largest) at top
   const sortedEntries = Object.entries(combinedByStakeSize).sort((a, b) => {
-    // Extract tier numbers (tier8 -> 8, tier1 -> 1)
     const tierA = parseInt(a[0].replace('tier', '')) || 0;
     const tierB = parseInt(b[0].replace('tier', '')) || 0;
-    return tierB - tierA; // Descending order
+    return tierA - tierB; // Ascending order
   });
 
   const labels = sortedEntries.map(([_, data]) => data.label);
@@ -301,6 +291,7 @@ export default function InverseWhaleChart({
             title: isMobile ? '' : {
               text: 'Wallet Distribution (%)',
               font: { size: 14 },
+              standoff: 1,
             },
             range: [0, 100],
             ticksuffix: '%',

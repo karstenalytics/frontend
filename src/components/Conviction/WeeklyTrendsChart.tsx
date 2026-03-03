@@ -3,7 +3,7 @@ import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
-import type { WeeklyTrend } from '@site/src/hooks/useStakerLoyalty';
+import type { WeeklyTrend } from '@site/src/hooks/useStakerConviction';
 
 interface WeeklyTrendsChartProps {
   weeklyTrends: WeeklyTrend[];
@@ -17,7 +17,7 @@ export default function WeeklyTrendsChart({
 
   const plotRef = useRef<HTMLDivElement>(null);
   useChartTracking(plotRef, {
-    chartName: 'Weekly Loyalty Trends',
+    chartName: 'Weekly Conviction Trends',
     trackClick: true,
     trackZoom: true,
   });

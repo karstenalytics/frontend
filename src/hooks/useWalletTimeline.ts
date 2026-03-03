@@ -516,7 +516,11 @@ function parseWalletTimeline(
   }
 
   const current = addrData.current || [];
-  const currentStaked = current[0] !== undefined ? current[0] : timeline[timeline.length - 1].staked;
+  // Use the replayed timeline value for currentStaked rather than current[0] from the
+  // Python builder's address metadata.  The cache's current[0] can be inflated when
+  // set_vesting events' display-only d_stake is accidentally included in the total,
+  // while the JS replay correctly skips set_vesting (type 6) balance accumulation.
+  const currentStaked = timeline[timeline.length - 1].staked;
   let currentUnstaked = timeline[timeline.length - 1].unstaked;
   if (protocol === 'flash-trade') {
     // Flash current = [staked, pending, withdrawn_lifetime, compound_rate, total_rewards, behavior]

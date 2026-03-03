@@ -225,10 +225,10 @@ export interface UsageMetricsData {
 }
 
 // ============================================================================
-// Staker Loyalty Data (staker_loyalty.json)
+// Staker Conviction Data (staker_loyalty.json)
 // ============================================================================
 
-export interface LoyaltySummary {
+export interface ConvictionSummary {
   total_users: number;
   compound_only_users: number;
   claim_only_users: number;
@@ -257,10 +257,10 @@ export interface WeeklyTrend {
   unique_users: number;
 }
 
-export interface StakerLoyaltyData {
+export interface StakerConvictionData {
   generated_at: string;
   date_range: DateRange;
-  summary: LoyaltySummary;
+  summary: ConvictionSummary;
   user_segments: UserSegments;
   weekly_trends: WeeklyTrend[];
 }

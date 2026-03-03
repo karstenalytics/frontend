@@ -3,7 +3,7 @@ import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
-import type { Visualizations } from '@site/src/hooks/useStakerLoyalty';
+import type { Visualizations } from '@site/src/hooks/useStakerConviction';
 
 interface StakeDistributionHistogramProps {
   visualizations: Visualizations;

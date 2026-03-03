@@ -49,16 +49,20 @@ Tracks TUNA tokens locked in vesting schedules and their unlock timeline, showin
         ? remainingPctNow - remainingPct7dAgo
         : null;
 
-      // Vesting wallet conviction: (staked + held) / unlocked
+      // Vesting wallet conviction: (staked - locked + held) / unlocked
+      // Only the freely-available portion of staked counts (locked stake can't be withdrawn).
+      // This way unlocks don't mechanically change the ratio - only actual buying/selling does.
       const stakedNow = stakedTimeline[latestDate] || 0;
       const heldNow = heldTimeline[latestDate] || 0;
       const unlockedNow = totalTuna - (lockedNow || 0);
-      const convictionNow = unlockedNow > 0 ? ((stakedNow + heldNow) / unlockedNow) * 100 : null;
+      const freeNow = (stakedNow - (lockedNow || 0)) + heldNow;
+      const convictionNow = unlockedNow > 0 ? (freeNow / unlockedNow) * 100 : null;
 
       const staked7dAgo = stakedTimeline[date7dAgo] || 0;
       const held7dAgo = heldTimeline[date7dAgo] || 0;
       const unlocked7dAgo = totalTuna - (locked7dAgo || 0);
-      const conviction7dAgo = unlocked7dAgo > 0 ? ((staked7dAgo + held7dAgo) / unlocked7dAgo) * 100 : null;
+      const free7dAgo = (staked7dAgo - (locked7dAgo || 0)) + held7dAgo;
+      const conviction7dAgo = unlocked7dAgo > 0 ? (free7dAgo / unlocked7dAgo) * 100 : null;
       const convictionChange = convictionNow != null && conviction7dAgo != null
         ? convictionNow - conviction7dAgo
         : null;
@@ -89,7 +93,7 @@ Tracks TUNA tokens locked in vesting schedules and their unlock timeline, showin
             format="percent"
             decimals={1}
             change={convictionChange}
-            tooltip={`(Staked + held) / unlocked-from-vesting across all vesting wallets.\nMeasures how much of the vested (no longer locked) TUNA recipients still retain.\n>100% means wallets acquired extra TUNA beyond their vested amount.\nChange vs. 7 days ago in percentage points.`}
+            tooltip={`(Freely available) / unlocked across all vesting wallets.\nFreely available = staked (minus locked portion) + held in wallet.\nMeasures how much of the unlocked TUNA recipients retain at their free disposal.\n>100% means wallets acquired extra TUNA beyond their unlocked amount.\nWhen above 100%, new unlocks mathematically pull the ratio toward 100% even with perfect retention.\nChange vs. 7 days ago in percentage points.`}
           />
         </div>
       );
@@ -347,7 +351,7 @@ This page helps you:
 **Summary Cards:**
 - **Total Vesting**: Sum of TUNA locked across all vesting schedules (tooltip shows percentage of total TUNA supply)
 - **Remaining Locked**: Percentage of total vesting allocation still locked
-- **Vesting Wallet Conviction**: Ratio of (staked + held) to unlocked TUNA across all vesting wallets. Values above 100% indicate wallets acquired additional TUNA beyond their unlocked vesting amount
+- **Vesting Wallet Conviction**: Ratio of freely available TUNA (staked minus locked + held) to unlocked TUNA across all vesting wallets. Values above 100% indicate wallets acquired additional TUNA beyond their unlocked vesting amount
 
 **Unlock Timeline Chart:**
 - **X-axis**: Date (chronological, extending into future)

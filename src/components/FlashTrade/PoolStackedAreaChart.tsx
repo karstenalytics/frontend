@@ -151,6 +151,7 @@ export default function PoolStackedAreaChart({
   }, []);
 
   const plotRef = useRef<HTMLDivElement>(null);
+  const colorMapRef = useRef<Record<string, string>>({});
 
   // Container width measurement for dynamic legend sizing
   const [containerWidth, setContainerWidth] = useState(0);
@@ -272,7 +273,6 @@ export default function PoolStackedAreaChart({
   const colorMap = buildColorMap(poolNames);
 
   // Publish color map to parent (e.g., for table chip colors)
-  const colorMapRef = useRef<Record<string, string>>({});
   if (JSON.stringify(colorMapRef.current) !== JSON.stringify(colorMap)) {
     colorMapRef.current = colorMap;
     if (onColorsComputed) onColorsComputed(colorMap);

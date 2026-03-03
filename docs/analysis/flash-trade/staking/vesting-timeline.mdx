@@ -50,15 +50,21 @@ Tracks FAF tokens locked in Streamflow vesting contracts and their unlock timeli
         : null;
 
       // Vesting wallet conviction: (staked + held) / unlocked
+      // Flash.Trade uses Streamflow vesting where locked FAF sits in separate contracts,
+      // not inside the staking program.  Wallets can only stake *unlocked* FAF, so
+      // staked already represents freely-committed capital (no locked-subtraction needed,
+      // unlike DefiTuna where locked TUNA is a subset of staked TUNA).
       const stakedNow = stakedTimeline[latestDate] || 0;
       const heldNow = heldTimeline[latestDate] || 0;
       const unlockedNow = totalFaf - (lockedNow || 0);
-      const convictionNow = unlockedNow > 0 ? ((stakedNow + heldNow) / unlockedNow) * 100 : null;
+      const retainedNow = stakedNow + heldNow;
+      const convictionNow = unlockedNow > 0 ? (retainedNow / unlockedNow) * 100 : null;
 
       const staked7dAgo = stakedTimeline[date7dAgo] || 0;
       const held7dAgo = heldTimeline[date7dAgo] || 0;
       const unlocked7dAgo = totalFaf - (locked7dAgo || 0);
-      const conviction7dAgo = unlocked7dAgo > 0 ? ((staked7dAgo + held7dAgo) / unlocked7dAgo) * 100 : null;
+      const retained7dAgo = staked7dAgo + held7dAgo;
+      const conviction7dAgo = unlocked7dAgo > 0 ? (retained7dAgo / unlocked7dAgo) * 100 : null;
       const convictionChange = convictionNow != null && conviction7dAgo != null
         ? convictionNow - conviction7dAgo
         : null;
@@ -87,7 +93,7 @@ Tracks FAF tokens locked in Streamflow vesting contracts and their unlock timeli
             format="percent"
             decimals={1}
             change={convictionChange}
-            tooltip={`(Staked + held) / unlocked across all vesting wallets.\nMeasures how much unlocked FAF recipients retain.\n>100% means wallets acquired extra FAF beyond their unlocked amount.\nChange vs. 7 days ago in percentage points.`}
+            tooltip={`(Staked + held) / unlocked across all vesting wallets.\nMeasures how much of the unlocked FAF recipients retain (staked or in wallet).\n>100% means wallets acquired extra FAF beyond their unlocked amount.\nWhen above 100%, new unlocks mathematically pull the ratio toward 100% even with perfect retention.\nChange vs. 7 days ago in percentage points.`}
           />
         </div>
       );
@@ -377,7 +383,7 @@ This page helps you:
 **Summary Cards:**
 - **Total Vesting**: Sum of FAF allocated across all Streamflow vesting contracts (tooltip shows percentage of total FAF supply)
 - **Remaining Locked**: Percentage of total vesting allocation still locked in contracts
-- **Vesting Wallet Conviction**: Ratio of (staked + held) to unlocked FAF across all vesting wallets. Values above 100% indicate wallets acquired additional FAF beyond their unlocked vesting amount
+- **Vesting Wallet Conviction**: Ratio of retained FAF (staked + held) to unlocked FAF across all vesting wallets. Values above 100% indicate wallets acquired additional FAF beyond their unlocked vesting amount
 
 **Unlock Timeline Chart:**
 - **X-axis**: Date (chronological, extending into future)

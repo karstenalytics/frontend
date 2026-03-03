@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
-export interface LoyaltySummary {
+export interface ConvictionSummary {
   total_users: number;
   compound_only_users: number;
   claim_only_users: number;
@@ -104,43 +104,44 @@ export interface DataContext {
   snapshot_date?: string;
 }
 
-export interface LoyaltyChanges {
+export interface ConvictionChanges {
   loyalty_score_pct: number | null;
   compound_rate_pct: number | null;
   compound_only_users_pct: number | null;
 }
 
-export interface StakerLoyaltyData {
+export interface StakerConvictionData {
   generated_at: string;
   date_range: {
     start: string;
     end: string;
   };
-  summary: LoyaltySummary;
+  summary: ConvictionSummary;
   user_segments: UserSegments;
   weekly_trends: WeeklyTrend[];
   daily_trends?: DailyTrend[];
   visualizations?: Visualizations;
   context?: DataContext;
-  changes?: LoyaltyChanges;
+  changes?: ConvictionChanges;
 }
 
-export interface UseStakerLoyaltyResult {
-  data: StakerLoyaltyData | null;
+export interface UseStakerConvictionResult {
+  data: StakerConvictionData | null;
   loading: boolean;
   error: string | null;
 }
 
 // Module-level cache to prevent re-fetching on component remounts
-let cachedData: StakerLoyaltyData | null = null;
+let cachedData: StakerConvictionData | null = null;
 let cachedError: string | null = null;
 let isLoading = false;
 let loadPromise: Promise<void> | null = null;
 
-export function useStakerLoyalty(): UseStakerLoyaltyResult {
+export function useStakerConviction(): UseStakerConvictionResult {
+  // JSON filename is legacy; backend generates staker_loyalty.json
   const dataPath = useBaseUrl('/data/defituna/staker_loyalty.json');
 
-  const [data, setData] = useState<StakerLoyaltyData | null>(cachedData);
+  const [data, setData] = useState<StakerConvictionData | null>(cachedData);
   const [loading, setLoading] = useState(!cachedData && !cachedError);
   const [error, setError] = useState<string | null>(cachedError);
 
@@ -178,8 +179,8 @@ export function useStakerLoyalty(): UseStakerLoyaltyResult {
         setData(jsonData);
         setError(null);
       } catch (err) {
-        console.error('Error loading staker loyalty data:', err);
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load staker loyalty data';
+        console.error('Error loading staker conviction data:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load staker conviction data';
         cachedError = errorMessage;
         setError(errorMessage);
       } finally {

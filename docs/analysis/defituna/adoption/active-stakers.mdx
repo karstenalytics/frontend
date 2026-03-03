@@ -141,19 +141,19 @@ Tracks the number of unique wallets holding active TUNA stakes over time. The co
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>Current Stake</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>% of Total</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>vs. Peak</th>
-                  <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>30d Change (pp)</th>
+                  <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>30d Change</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'center' }}>Timeline</th>
                 </tr>
               </thead>
               <tbody>
                 {data.top_stakers.map((staker, idx) => {
-                  const change = staker.change_30d_pp;
+                  const change = staker.change_30d_pct;
                   const changeColor = change === null ? 'var(--ifm-color-emphasis-600)'
                     : change > 0 ? 'var(--ifm-color-success)'
                     : change < 0 ? 'var(--ifm-color-danger)'
-                    : 'inherit';
+                    : 'var(--ifm-color-emphasis-600)';
                   const changeText = change === null ? '--'
-                    : `${change >= 0 ? '+' : ''}${change.toFixed(2)} pp`;
+                    : `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
                   return (
                     <tr key={staker.address} style={tableStyles.bodyRow} {...tableRowHoverHandlers}>
                       <td style={{ ...tableStyles.cell, fontWeight: 600 }}>{idx + 1}</td>

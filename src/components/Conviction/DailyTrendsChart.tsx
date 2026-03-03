@@ -3,7 +3,7 @@ import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
-import type { DailyTrend } from '@site/src/hooks/useStakerLoyalty';
+import type { DailyTrend } from '@site/src/hooks/useStakerConviction';
 
 interface DailyTrendsChartProps {
   dailyTrends: DailyTrend[];
@@ -30,7 +30,7 @@ export default function DailyTrendsChart({
 
   const plotRef = useRef<HTMLDivElement>(null);
   useChartTracking(plotRef, {
-    chartName: 'Daily Loyalty Trends',
+    chartName: 'Daily Conviction Trends',
     trackClick: true,
     trackZoom: true,
   });

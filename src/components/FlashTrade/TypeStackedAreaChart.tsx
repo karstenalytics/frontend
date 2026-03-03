@@ -58,6 +58,7 @@ export default function TypeStackedAreaChart({
   }, []);
 
   const plotRef = useRef<HTMLDivElement>(null);
+  const colorMapRef = useRef<Record<string, string>>({});
 
   // Measure container width for dynamic legend sizing
   const [containerWidth, setContainerWidth] = useState(0);
@@ -141,7 +142,6 @@ export default function TypeStackedAreaChart({
   const colorMap = buildColorMap(typeNames, 'Others', n => n.startsWith('Liquidate'));
 
   // Publish color map to parent (e.g., for table chip colors)
-  const colorMapRef = useRef<Record<string, string>>({});
   if (JSON.stringify(colorMapRef.current) !== JSON.stringify(colorMap)) {
     colorMapRef.current = colorMap;
     if (onColorsComputed) onColorsComputed(colorMap);
