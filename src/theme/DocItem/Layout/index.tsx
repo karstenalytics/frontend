@@ -12,8 +12,6 @@ import DocItemContent from '@theme/DocItem/Content';
 import ContentVisibility from '@theme/ContentVisibility';
 import type {Props} from '@theme/DocItem/Layout';
 import DocSectionLabel from '@theme/DocSectionLabel';
-import DefitunaBanner from '@site/src/components/DefitunaBanner';
-
 import styles from './styles.module.css';
 
 function useDocTOC() {
@@ -51,7 +49,6 @@ export default function DocItemLayout({children}: Props): ReactNode {
         <DocVersionBanner />
         <div className={styles.docItemContainer}>
           <article>
-            <DefitunaBanner />
             <DocSectionLabel />
             <DocVersionBadge />
             {docTOC.mobile}
