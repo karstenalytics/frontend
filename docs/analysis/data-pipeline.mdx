@@ -36,13 +36,13 @@ graph LR
 
 1. **Collect** - Enumerate transaction signatures for monitored accounts, fetch full transaction data with logs via Helius RPC, store in compressed daily cache files
 2. **Classify** - Identify the instructions and events executed in each transaction by parsing program logs and decoding CPI event data
-3. **Attribute** - Resolve the context for each classified transaction: when it happened (time), which pool, which token, which wallet
-4. **Normalize** - Convert multi-token values to a common base denomination using on-chain swap rates, so figures are comparable across days and tokens
-5. **Present** - Aggregate into JSON files per dimension (by token, by pool, by type, etc.), host as static assets, render as interactive Plotly charts
+3. **Attribute** - Resolve the context for each classified transaction: E.g. when it happened (time), which pool, which token, which wallet
+4. **Normalize** - Convert multi-token values (e.g. SOL, BTC, ETH, USDC) to a common base denomination using on-chain swap rates, so figures are comparable across days and tokens. Common base depends on protocol
+5. **Present** - Aggregate into JSON files per dimension (by token, by pool, by type, etc.), host as static assets, render as interactive Plotly charts in the frontend
 
 **Processing Model:**
 
-All processing happens offline in a separate backend repository. The frontend displays pre-computed JSON files, so page loads are fast regardless of data volume.
+All processing happens "offline", means once a day after midnight UTC in a separate backend repository which is not public. The frontend displays pre-computed JSON files, so page loads are fast regardless of data volume.
 
 ---
 
@@ -64,9 +64,9 @@ graph LR
 ### What Gets Monitored
 
 Which accounts get monitored depends on the analysis objective:
-- **Treasury accounts** - Where protocol revenue accumulates
+- **Treasury and (Stake) Pool accounts** - Where protocol revenue accumulates or protocol tokens are staked
 - **Token accounts (ATAs)** - Holding protocol-relevant tokens
-- **Wallet addresses** - Key addresses involved in protocol operations
+- **Wallet addresses** - Key addresses involved in protocol operations or vesting
 
 The specific accounts monitored depend on the analysis objective. Revenue analysis tracks treasury addresses. Staking analysis monitors staking program interactions. Position analysis follows liquidity pool accounts.
 
@@ -74,9 +74,9 @@ The specific accounts monitored depend on the analysis objective. Revenue analys
 
 **Primary:** Helius API provides enhanced transaction data with parsed logs and token transfers, guaranteeing logMessages and consistent classification.
 
-**Supplemental:** Protocol websites and documentation provide context like token names and pool information.
+**Supplemental:** Protocol websites and documentation provide context like token names and pool information that I use as QA/ for benchmarking.
 
-On-chain transactions contain a lot of information. I try to get as much information as I can out of as little transactions as possible.
+On-chain transactions contain a lot of information. I try to get as much information as I can out of as little transactions as possible. There are a lot of ways to slice and dice on-chain data.
 
 ### Update Cadence
 
@@ -99,7 +99,7 @@ graph LR
     style D fill:#00A3B4,color:#fff
 ```
 
-The core objective is **identifying which instruction is being executed** in each transaction touching the accounts I monitor.
+The core objective is **identifying which instructions are being executed** in each transaction touching the accounts I monitor.
 
 ### Log-Based Classification
 
@@ -114,11 +114,11 @@ The classification system:
 
 A configuration file maintains the mapping between instruction names and their meanings. This includes:
 - Display names for user-facing labels (instead of technical strings)
-- Categorization for grouping related transactions (there might be different instruction types I want to sum up and display as one type)
-- Revenue flags indicating which transactions generate value versus those that merely convert or move it (e.g. a token swap distributes existing revenue but does not create new revenue)
+- Categorization for grouping related transactions (there might be different instruction types I want to sum up and display as one type, or when there is instruction versioning like closePositionV1, closePositionV2)
+- Revenue flags indicating which transactions generate value versus those that merely convert or move it (e.g. a certain token swap instruction might help distribute existing revenue but not create new revenue)
 - Color schemes for consistent visualization (e.g. liquidations should always have a red-ish color)
 
-When protocols introduce new transaction types, the configuration is updated and historical data is reprocessed for consistency.
+When protocols introduce new transaction types, the configuration is updated with an automated first guess and historical data is reprocessed for consistency.
 
 ---
 
@@ -141,10 +141,10 @@ Each classified transaction is tagged across several dimensions so the same data
 - **Token** - Which asset was involved (SOL, USDC, protocol tokens)
 - **Transaction Type** - What operation occurred (fees, swaps, stakes)
 - **Pool** - Which liquidity pool or program was involved
-- **Wallet** - Which addresses participated
+- **Wallet** - Which addresses participated/ triggered the transaction
 - **Time** - When the transaction occurred
 
-This means a single fee transaction can show up in a "revenue by token" chart, a "revenue by pool" chart, and a "top wallets" table without any duplication or re-processing.
+This means a single fee transaction can contribute to a "revenue by token" chart, a "revenue by pool" chart, and a "top wallets" table without any duplication or re-processing.
 
 ### Pool Identification
 
@@ -173,15 +173,15 @@ graph LR
     style D fill:#00A3B4,color:#fff
 ```
 
-To compare and aggregate transactions involving different tokens, values are normalized to a common base denomination. Which denomination depends on the protocol. For example, a protocol that distributes SOL to stakers normalizes to SOL, while one that collects fees directly in USDC may need no conversion at all.
+To compare and aggregate transactions involving different tokens, values are normalized to a common base denomination if required. Which denomination depends on the protocol. For example, a protocol that distributes SOL to stakers normalizes to SOL, while one that collects fees directly in USDC may need no conversion at all.
 
 ### Conversion Approach
 
-**On-chain rates only.** I never use external price feeds. When tokens are swapped on-chain, the actual exchange rate provides precise valuation for that moment. If there are multiple swaps per day, the conversion rates are combined into an average daily price.
+**On-chain rates only.** I never use external price feeds. When tokens are swapped on-chain, the actual exchange rate provides precise valuation for that moment. If there are multiple swaps per day, we always take the valuation of the moment and build an average if required for reporting purposes.
 
 **Same-day pricing.** Conversion rates are applied only to transactions occurring on the same day, ensuring historical values are never retroactively adjusted based on future price changes.
 
-*Example:* If a treasury receives 100 USDC on Day 1 and swaps it for 0.5 SOL on Day 5, Day 1 revenue is recorded as 100 USDC (unconverted). On Day 5, the swap reveals the rate and the converted value is recorded then. Day 1's record remains unchanged, preserving the actual state of the treasury on that day.
+*Example:* If a treasury receives 100 USDC as fees on Day 1 and swaps it for 0.5 SOL to distribute to stakers on Day 5, Day 1 revenue is recorded as 100 USDC (unconverted). On Day 5, the swap reveals the rate and the converted value is recorded then. Day 1's record remains unchanged, preserving the actual state of the treasury on that day.
 
 **Native token handling.** Wrapped versions of native tokens (like WSOL) convert 1:1 with their native counterparts.
 
@@ -189,7 +189,7 @@ To compare and aggregate transactions involving different tokens, values are nor
 
 This applies when a protocol collects fees in multiple tokens but distributes rewards in a single denomination. Tokens not yet converted remain tracked in their native denomination but are excluded from normalized totals until conversion occurs on-chain. This ensures reported values reflect **realized amounts** rather than estimates.
 
-Not every protocol requires this step. Some collect fees directly in a single token, making conversion unnecessary. Others accumulate diverse tokens (USDC, BONK, cbBTC, etc.) that are periodically swapped to a distribution token, making pending-conversion tracking essential.
+Not every protocol requires this step. Some collect fees directly in a single token, making conversion unnecessary. Others accumulate diverse tokens (USDC, ETH, cbBTC, etc.) that are periodically swapped to a distribution token, making pending-conversion tracking essential.
 
 ---
 
@@ -223,8 +223,6 @@ A manifest timestamp in the site header indicates when data was last updated.
 ---
 
 ## Data Quality
-
-The pipeline targets 100% attribution accuracy: every token inflow must be accounted for by a classified transaction. Automated checks run during processing, and manual verification tools exist for spot-checking individual days.
 
 **For detailed information on quality standards, automated checks, and verification tools, see: [Data Quality](./data-quality)**
 

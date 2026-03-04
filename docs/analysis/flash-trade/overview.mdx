@@ -11,7 +11,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 ## Key metrics
 
-Summary of key metrics for Flash.Trade protocol revenue:
+Summary of key metrics for Flash.Trade - the second protocol I cover:
 
 <BrowserOnly fallback={<LoadingSpinner />}>
   {() => {
@@ -22,7 +22,9 @@ Summary of key metrics for Flash.Trade protocol revenue:
 
 ## What is Flash.Trade?
 
-**Flash.Trade** is a decentralized perpetuals exchange on Solana where traders can open leveraged positions (up to 100x) on crypto assets and memecoins with low fees and minimal price impact. All settlements are denominated in USDC.
+**Quoted from the Official Documentation** ([https://docs.flash.trade](https://docs.flash.trade)), March 4th 2026:
+
+> Flash.Trade is a decentralized asset-backed perpetuals and spot exchange on Solana that lets you trade with up to 100x leverage, low fees, and minimal price impact.
 
 **What sets Flash.Trade apart** is its pool-to-peer architecture: instead of matching buyers with sellers via an order book, traders open positions against multi-asset liquidity pools. This means LPs collectively act as the counterparty to every trade, earning real yield from trading fees rather than relying on token emissions.
 
@@ -33,11 +35,11 @@ The protocol's mission is to create genuine economic ownership for its participa
 **Liquidity pools**: Each perpetual market (Crypto.1, Trump.1, Community.1, etc.) has its own pool backed by crypto assets. LPs deposit into these pools and receive one of two token types:
 
 - **FLP** (Flash Liquidity Provider): Fees auto-compound into the token price. FLP is freely tradable, making it a passive, set-and-forget option.
-- **sFLP** (Staked FLP): Fees are paid out in USDC every hour. Non-tradable but gives LPs direct stablecoin income.
+- **sFLP** (Staked FLP): Fees are paid out in USDC every hour. Non-tradable but gives LPs direct USDC income.
 
 Both token types earn from the same fee sources: position open/close fees, margin fees from leveraged positions, swap fees, and liquidation bonuses.
 
-**Fee distribution**: Trading fees are split between LPs and the protocol. The LP share varies by pool (70-90%), with the remainder going to the protocol treasury. Half of protocol revenue is distributed to FAF stakers in USDC; the other half funds protocol development.
+**Fee distribution**: Trading fees are split between LPs and the protocol. The LP share varies by pool (70-90%), with the remainder going to the protocol treasury. Currently, half of protocol revenue is distributed to FAF stakers in USDC; the other half funds protocol development.
 
 **FAF staking**: Staking the FAF token unlocks a share of protocol revenue (paid in USDC), trading fee discounts, higher referral rebates, and boosted LP yields. Governance follows a futarchy model (FAFtarchy) where prediction markets guide protocol decisions rather than traditional token-weighted voting.
 

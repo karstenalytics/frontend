@@ -6,129 +6,90 @@ sidebar_custom_props:
 
 # Data Quality
 
-Data Quality isn't just about accuracy—it's about user confidence. When every number traces to its on-chain source and survives multiple validation layers, users can trust the analytics for informed decisions. The pipeline maintains different standards through automated validation during processing and manual verification tools for deep auditing.
+Every number on this site traces to on-chain transactions. The pipeline maintains accuracy through four validation layers: checks that run during processing, checks that run after processing, regression fixtures that catch regressions, and manual tools for deep-dive auditing.
 
 From my professional experience, data quality is rarely 100% perfect. So I expect to find issues going forward. This is also why I sense-check every number I see. But something might slip. Feel free to drop me a comment if you see a number that doesn't make sense to you!
 
-Data Quality measures are constantly improving, below you can find some examples of what is in place for the different protocols.
-
 ---
 
-## Automated Quality Checks
+## 1. In-Pipeline Validation
 
-These checks run automatically during data processing to ensure data quality:
+Checks that run automatically during data processing. Failures block the pipeline.
 
-### Accuracy Checks
+**Revenue Reconciliation**
 
-**DefiTuna Attribution Reconciliation**
+Both protocols reconcile computed fees against independent reference totals during processing. Examples:
 
-The revenue attribution system automatically reconciles two independent methods:
-- **Raw WSOL tracking** - Direct summation of all WSOL inflows to treasury
-- **Type attribution** - SOL attributed back to originating transaction types
-
-During processing, the system detects and logs any discrepancies. Over-attribution (negative variance) triggers an error message.
-
-**DefiTuna Ledger Persistence**
-
-Cross-day attribution accuracy is maintained through automatic ledger carryforward:
-- End-of-day ledger state saved automatically
-- Next-day processing loads previous ledger
-- Enables correct attribution when tokens accumulate over multiple days before swapping
-
-**Result**: Prevents revenue loss from ATA token accumulations that span multiple days.
-
-### Completeness Checks
-
-**Workflow Validation**
-
-Before data deployment, automated validation verifies:
-- All exported JSON files exist and are valid
-- Structure consistency across all data files
-- Target date presence in all time-series data
-- **Workflow aborts if validation fails** - bad data never reaches production
-
-**Transaction Coverage**
-
-Pipeline smoke tests verify:
-- Summary files exist and are valid
-- Transaction totals match across aggregation methods
-- Daily transaction files exist for target dates
-
----
-
-## Quality Standards
-
-### Accuracy Standards
-
-**DefiTuna Attribution Accuracy**
-- Total attributed SOL must equal raw WSOL inflows exactly
-- System has consistently achieved 100% accuracy against verified benchmarks
-- Critical safeguards prevent accidental modifications to attribution logic
-
-
-### Completeness Standards
+- **DefiTuna**: Two independent methods must match exactly -- raw WSOL inflows to treasury vs. per-type attribution. Over-attribution triggers an error.
+- **Flash.Trade**: Four-layer reconciliation engine compares fee components (RSU, compounding, vault-touch, migration) against on-chain protocol fee sweeps. Gaps above 1,000 atoms flag warnings.
 
 **Transaction Classification**
 
-Every transaction must be:
-- **Classified** - Assigned a transaction type via log-based classification
-- **Attributed** - Labeled across all relevant dimensions (e.g. token, type, pool, wallet, time)
-- **Accounted** - Either counted in realized fees/ revenue or tracked in pending ledger
+Every transaction must be classified, attributed, and accounted for. Examples:
 
-Two-pass classification system (fast pass + enrichment for unknowns) ensures all transactions receive type assignments.
+- Log-based classification assigns a transaction type to each transaction
+- Two-pass system (fast pass + enrichment) ensures no transaction remains unclassified
+- Unknown types are auto-discovered and flagged for review
 
-**Data Coverage**
+**Ledger Persistence**
 
-All time periods must have:
-- Complete transaction enumeration from monitored accounts
-- All expected data files generated and validated
-- No gaps in time-series data
+Cross-day accuracy is maintained through automatic ledger carryforward. End-of-day ledger state is saved and loaded by the next day's processing, so tokens that accumulate over multiple days before swapping are attributed correctly.
 
 ---
 
-## Manual Verification Tools
+## 2. Post-Pipeline Validation
 
-These tools exist for deep auditing but require manual execution:
+Checks that run after processing completes, before data reaches the frontend.
 
-### Verification Scripts
+**Workflow Output Validation**
 
-**DefiTuna Comprehensive SOL Check**
-- Compares daily realized Treasury token against test fixtures
-- Validates total realized SOL against official numbers
-- Identifies coverage gaps and missing date ranges
-- Expected output: Confirmation of 100% accuracy with zero unattributed amounts
+Before deployment, automated validation verifies:
 
-**DefiTuna Daily Attribution Comparison**
-- Deep-dive verification for specific dates
-- Compares Simple Method vs Realized Types Method
-- Shows detailed breakdown when discrepancies found
-- Run manually for date-specific debugging
+- All required JSON files exist and are structurally valid
+- Field counts and required keys are consistent across files
+- Target dates are present in all time-series data (no gaps)
+- Pipeline aborts if validation fails -- bad data never reaches production
 
-### Test Fixtures
+**Cross-Validation Against External Sources**
 
-Test fixtures contain manually verified benchmark data:
+Computed results are compared against external data sources. Examples:
 
-**Daily Realized SOL** - Contains manually verified daily totals serving as ground truth for accuracy testing.
+- **DefiTuna**: Computed daily inflows are compared against the DefiTuna API, with tolerance of 0.1 SOL per day
+- **Flash.Trade**: API snapshots (pool APY, TVL, fee rates) are collected daily for comparison; wallet usage metrics are benchmarked against official protocol reports (e.g., monthly active wallet counts match within 1 wallet)
 
-**Daily Transaction Counts** - Expected transaction counts with acceptable tolerance for minor variations.
+---
 
-**Official Reports** - Protocols like Flash.Trade publish official reports which are used for sanity checks/ benchmarking
+## 3. Regression Fixtures
 
-### Cache Integrity Tests
+Manually verified benchmark data that catches regressions when code changes. Examples:
 
-Cache validation tools verify:
-- Transaction counts against fixtures
-- Acceptable tolerance for minor variations
+| Fixture | Protocol | What it verifies |
+|---------|----------|------------------|
+| Daily realized SOL totals | DefiTuna | Per-day SOL amounts match ground truth |
+| Daily transaction counts | DefiTuna | Transaction volumes within tolerance |
+| Reconciliation golden file (320+ intervals) | Flash.Trade | Per-interval fee gaps remain stable |
+| Official staked FAF totals | Flash.Trade | Staker cache matches protocol-published figures |
+
+Fixtures are sacred -- if a test fails, the code is fixed, never the fixture.
+
+---
+
+## 4. Manual Verification Tools
+
+On-demand scripts for auditing and debugging specific dates or anomalies.
+
+**DefiTuna**
+- Comprehensive SOL check: validates total realized SOL against fixtures and official numbers across all dates
+- Daily attribution comparison: deep-dive into a specific date, comparing Simple Method vs. Realized Types Method
+- API inflow comparison: spot-checks computed inflows against the DefiTuna API
+
+**Flash.Trade**
+- Interval verification: replays fee calculation for a specific reconciliation interval against on-chain data
+- Vault balance continuity: verifies stake pool token balances are continuous across days (no unexplained jumps)
+- Staker cache validation: checks staker positions, unstake queue totals, and penalty reserves for internal consistency
 
 ---
 
 ## Continuous Improvement
 
-As protocols evolve, the system improves through:
-
-1. **New transaction discovery** - Unknown transaction types prompt classification rule expansion
-2. **Configuration updates** - Add mappings to transaction type and pool label configurations
-3. **Historical reprocessing** - Apply updated rules uniformly across all dates
-4. **Verification** - Run manual scripts to confirm accuracy maintained after changes
-
-**Why reprocessing works**: The system uses actual on-chain swap rates (facts that don't change) for conversions, so classification improvements can be applied retroactively without affecting conversion accuracy.
+As protocols evolve, new transaction types are discovered, classification rules expand, and historical data is reprocessed with updated logic. This works because the system uses actual on-chain swap rates for conversions -- facts that don't change -- so classification improvements apply retroactively without affecting conversion accuracy.

@@ -73,20 +73,7 @@ The decision to build this as a static site rather than a traditional web applic
 
 ## The Data Journey
 
-The project follows a linear pipeline from blockchain to browser (for a detailed technical breakdown, see [Data Pipeline](/analysis/data-pipeline)):
-
-1. **Blockchain Monitoring**: I monitor specific Solana accounts (treasury addresses, program IDs, token accounts) and fetch all their transaction history via Helius API.
-
-2. **Transaction Classification**: Raw transactions are parsed and classified using a configurable rule engine. Each transaction is labeled by type (e.g., swap fee, staking reward, LP position adjustment) based on instruction logs and account patterns.
-
-3. **Multi-Dimensional Attribution**: Transactions are attributed across multiple dimensions simultaneously—by token, by transaction type, and by pool. This enables flexible aggregation for different analytical views, e.g. for breaking down protocol revenues in a treasury account.
-
-4. **Aggregation & Export**: Classified transactions are aggregated into daily time series, top-N rankings, and summary statistics, then exported as JSON files.
-
-5. **Static Deployment**: JSON files are copied into the frontend's `/static/data/` directory, committed to git, and deployed via GitHub Pages.
-
-6. **Frontend Loading**: When you visit a chart page, your browser fetches the relevant JSON files, and React components render interactive Plotly charts.
-
+The project follows a linear pipeline from blockchain to browser. For a detailed technical breakdown, see [Data Pipeline](/analysis/data-pipeline):
 As mentioned - this entire pipeline runs offline—there's no real-time querying, no live API, no server-side computation. Data updates happen daily via scheduled GitHub Action Workflows, and the frontend simply displays pre-computed results.
 
 ## Data Quality & Verification
@@ -94,10 +81,6 @@ As mentioned - this entire pipeline runs offline—there's no real-time querying
 I try to maintain high standards for data accuracy by implementing different verification systems. Every data update is tested against publicly available benchmarks if available (such as information from the Websites of the DeFi Protocols, explorers like Solscan, or manually verified totals). If computed results deviate from known values by even 0.1 SOL, it indicates the classification logic is incomplete—not just a rounding error, but a conceptual gap in e.g. how transactions are categorized. In case I do not get 100% match but am still confident the data is good enough, I will indicate this accordingly.
 
 The verification principle is MECE (Mutually Exclusive, Collectively Exhaustive): every transaction, every revenue contribution must be classified exactly once, and no transactions can be left unclassified. This ensures that aggregated metrics are complete and accurate.
-
-## Current Coverage
-
-The project currently focuses exclusively on **DefiTuna**, a Solana-based DeFi protocol. This depth-first approach ensures complete historical data (starting with $TUNA token and treasury launch by the end of July 2025), daily updates, and high-quality verified analytics. Future expansion will add other emerging Solana protocols while maintaining the same standards for accuracy and depth.
 
 ## Open Source & Data Access
 
