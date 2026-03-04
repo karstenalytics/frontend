@@ -44,7 +44,7 @@ This chart helps you:
 
 - **Compound Rate card**: Percentage of wallets that re-staked within 7 days of claiming, aggregated across all epochs
 - **FAF Compound Rate card**: Percentage of total distributed FAF that was re-staked (weighted by amount, not wallet count)
-- **FAF Distributed to Stakers card**: Total FAF rewards distributed across all epochs
+- **FAF Claimed by Stakers card**: Total FAF token rewards claimed across all epochs
 - **X-axis**: Epoch number (monthly reward distribution periods, 15th to 14th of the following month)
 - **Y-axis**: Compound rate as a percentage
 - **Toggle**: Switch between wallet count view and FAF-weighted view
@@ -65,7 +65,7 @@ This chart helps you:
 - **FAF Token Claims** (`CollectTokenReward`): FAF rewards are distributed monthly after each epoch ends (on the 15th)
 - **Time Window**: 7 days after claiming
 - **Compound Criteria**: A wallet is considered a "compounder" for a given epoch if it stakes FAF within 7 days of any claim in that epoch
-- **Formula**: `Compound Rate = (Wallets that re-staked within 7 days) / (Total wallets with claims) x 100`, counted per epoch then aggregated across all epochs
+- **Formula**: `Compound Rate = (Staker-epoch pairs that re-staked within 7 days) / (Total staker-epoch pairs with claims) x 100`, counted per epoch then aggregated across all epochs
 - **FAF-weighted variant**: Uses claimed FAF amounts instead of wallet counts
 
 **Stake Size Tiers**

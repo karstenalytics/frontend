@@ -7,7 +7,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Staking Wallet Timeline
 
-Detailed staking history for individual wallet addresses showing balance evolution, realized rewards, and all staking operations over time. Enter any wallet address to view their staked/unstaked FAF balances, cumulative USDC rewards claimed, and complete transaction history.
+Detailed staking history for individual wallet addresses showing balance evolution, realized rewards, and all staking operations over time. Enter any wallet address to view their staked and pending-unstake FAF balances, cumulative USDC rewards claimed, and complete FAF staking operation history.
 
 ## Data
 
@@ -636,6 +636,10 @@ This page helps you:
 <summary>Click to expand technical details</summary>
 
 Wallet timeline data is derived from the Flash.Trade staker cache, which contains all FAF staking events. Events are filtered by wallet address and displayed chronologically with running balance calculations.
+
+**Scope**
+- Includes all wallets present in the Flash.Trade staker cache (no manual bot/exchange filtering on this page).
+- Excludes non-FAF-staking and protocol-admin flows from the displayed operation list (for example LP staking reward claims, reserve sweeps, and instant-unstake fee sweeps).
 
 **Event Types:**
 - **Stake**: FAF deposited into staking pool (DepositTokenStake)

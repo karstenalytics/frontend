@@ -7,7 +7,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Effective Take Rate
 
-Shows the share of gross fees swept as protocol revenue each week, broken down by pool and displayed as a rolling average.
+Shows the share of gross fees swept as protocol revenue each week, broken down by pool and displayed as a trailing rolling-window ratio.
 
 ## Data
 
@@ -62,7 +62,7 @@ Weekly pool metrics are pre-computed from daily fee and revenue data. Each ISO w
 
 **Take Rate Calculation (Rolling Window)**
 
-Fees are generated when trades happen (SwapFeeInternal), but revenue is swept later by MoveProtocolFees (every ~6 hours). This timing lag means a single week's ratio can spike above the theoretical maximum when a sweep catches up on accumulated fees from prior weeks. To eliminate this artifact, the chart uses a **trailing rolling window**:
+Fees are generated when trades happen (SwapFeeInternal), but revenue is swept later by MoveProtocolFees (every ~6 hours). This timing lag means a single week's ratio can spike above the theoretical maximum when a sweep catches up on accumulated fees from prior weeks. To reduce this artifact, the chart uses a **trailing rolling window**:
 
 ```
 take_rate = sum(revenue_usdc over window) / sum(fees_usdc over window)

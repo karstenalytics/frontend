@@ -7,7 +7,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Active Stakers
 
-Tracks the number of unique wallets holding active FAF stakes over time. The count increases when new wallets stake and decreases when wallets request a full unstake.
+Tracks the number of unique wallets holding active FAF stakes over time. The count increases when wallets add stake and decreases when a wallet's staked balance falls to the dust threshold (<= 0.001), including full unstake requests and instant unstakes.
 
 ## Current Metrics
 
@@ -141,7 +141,7 @@ Tracks the number of unique wallets holding active FAF stakes over time. The cou
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>Current Stake</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>% of Total</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>vs. Peak</th>
-                  <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>30d Change</th>
+                  <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>30d Balance %</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'center' }}>Timeline</th>
                 </tr>
               </thead>
@@ -220,13 +220,13 @@ This chart helps you:
 <summary>Click to expand reading guide</summary>
 
 **Summary Cards:**
-- **Active Stakers**: Current count of wallets with staked FAF > 0. Change badge shows the percentage change vs. 30 days ago.
+- **Active Stakers**: Current count of wallets with staked FAF > 0.001 (dust threshold). Change badge shows the percentage change vs. 30 days ago.
 - **Top 50 Concentration**: Combined share of all staked FAF held by the 50 largest stakers. Change badge shows the percentage point shift vs. 30 days ago.
 - **Top 50 at Peak**: Percentage of the top 50 stakers currently at their all-time-high staked balance. Includes first-time stakers who are trivially at their peak. Change badge shows the percentage point shift vs. 30 days ago.
 
 **Active Stakers Time Series:**
 - **X-axis**: Date (UTC days)
-- **Y-axis**: Number of unique wallets with staked FAF balance > 0
+- **Y-axis**: Number of unique wallets with staked FAF balance > 0.001 (dust threshold)
 - **Line trend**: Shows the snapshot count of wallets with a positive staked balance at the end of each day
 - **Increases**: New stakers, wallets that restaked, or wallets that cancelled a pending unstake request
 - **Decreases**: Wallets that requested a full unstake (entering the unstake queue)
@@ -237,7 +237,7 @@ This chart helps you:
 - **Current Stake**: Current staked FAF balance
 - **% of Total**: Wallet's share of all currently staked FAF
 - **vs. Peak**: Current balance as a percentage of the wallet's all-time-high staked balance (100% = at peak, lower = has partially unstaked)
-- **30d Change (pp)**: Change in % of Total over the last 30 days, in percentage points. "--" if wallet was first seen after the 30-day snapshot date
+- **30d Balance %**: Percent change in the wallet's own staked FAF balance vs. the 30-day snapshot. "--" if wallet was first seen after the 30-day snapshot date
 - **Timeline**: "See details" button linking to the wallet's full staking timeline page
 
 </details>
@@ -252,16 +252,20 @@ This chart helps you:
 - **Staking transactions**: On-chain staking instructions from Flash.Trade staking program
 - **Staker cache**: Compressed event log containing all staking activity
 
+**Scope**
+
+- Includes all wallets present in the Flash.Trade staker cache; no manual bot/exchange filtering is applied on this page.
+
 **Active Staker Calculation**
 
 A wallet is counted as an **active staker** on a given day if:
-- Its staked FAF balance > 0 at 23:59:59 UTC
+- Its staked FAF balance > 0.001 at 23:59:59 UTC (dust threshold)
 - The balance is calculated by processing all stake/unstake events chronologically
 - Wallets with FAF only in the unstake queue (pending balance > 0, staked balance = 0) are **not** counted as active. The count drops when a wallet submits an unstake request, not when the FAF is physically withdrawn.
 
 **Summary Cards**
 
-- **Active Stakers**: Number of wallets with staked FAF > 0 at the latest data point. Change badge shows the percentage change vs. 30 days ago.
+- **Active Stakers**: Number of wallets with staked FAF > 0.001 at the latest data point (dust threshold). Change badge shows the percentage change vs. 30 days ago.
 - **Top 50 Concentration**: Sum of the "% of Total" column for the 50 largest stakers. Change badge shows the percentage point difference vs. the top-50 concentration 30 days ago (recomputed from the snapshot's top 50).
 - **Top 50 at Peak**: Percentage of the current top 50 stakers whose staked balance equals their all-time high. First-time stakers are trivially at their peak and are included. Change badge shows the percentage point difference vs. the snapshot 30 days ago.
 
@@ -275,7 +279,7 @@ The Top 50 Stakers table ranks by:
 - **Current staked balance**: Wallets sorted by their FAF balance at the latest data point (descending)
 - **% of Total**: Each wallet's share of the total staked FAF across all wallets
 - **vs. Peak**: Compares current balance to the wallet's all-time-high staked balance, showing retention
-- **30d Change**: Difference in share percentage between now and 30 days ago, showing trend
+- **30d Balance %**: Percent change in each wallet's own staked FAF balance between now and the 30-day snapshot
 
 **Active Staker Threshold**
 

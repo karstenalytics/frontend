@@ -7,7 +7,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Vesting Timeline
 
-Tracks FAF tokens locked in Streamflow vesting contracts and their unlock timeline. Shows advisory and Solana Labs vesting schedules with periodic unlock frequencies. Hover over the chart to see locked amounts at any date, and expand the per-recipient table to see how each wallet uses their unlocked FAF.
+Tracks FAF tokens locked in Streamflow vesting contracts and their unlock timeline. Shows advisory and Solana Labs vesting schedules with periodic unlock frequencies. Hover over the chart to see locked amounts at any date, and use the per-recipient table below to see how each wallet uses their unlocked FAF.
 
 ## Current Metrics
 
@@ -418,6 +418,11 @@ This page helps you:
 - **Contract Parameters**: Start time, end time, cliff, period, and amounts decoded from on-chain account data via RPC
 - **Live Status**: Withdrawn amounts reflect current on-chain state
 - **Allocation Proof**: Traced via intermediary token account `2dT2ihztFs5hVdL21AMDVQGHdCGScnT5MiwERh6zUeJC`
+
+**Scope**
+
+- Includes contracts in the maintained known vesting-contract list (Advisory + Solana Labs allocations tracked by this page).
+- New vesting contracts appear on this page after they are added to that maintained list.
 
 **Calculation Process**
 
