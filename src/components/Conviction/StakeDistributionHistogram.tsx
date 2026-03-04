@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
@@ -14,6 +14,16 @@ export default function StakeDistributionHistogram({
 }: StakeDistributionHistogramProps): React.ReactElement {
   const { colorMode } = useColorMode();
   const template = getPlotlyTemplate(colorMode === 'dark');
+
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 996 : false
+  );
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 996);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const plotRef = useRef<HTMLDivElement>(null);
   useChartTracking(plotRef, {
@@ -124,10 +134,15 @@ export default function StakeDistributionHistogram({
             title: 'Number of Wallets',
             type: 'log',
           },
+          dragmode: isMobile ? false : 'zoom',
           margin: { l: 80, r: 40, t: 50, b: 120 },
           height: 500,
         }}
-        config={getResponsivePlotlyConfig()}
+        config={{
+          ...getResponsivePlotlyConfig(),
+          staticPlot: false,
+          scrollZoom: !isMobile,
+        }}
         style={{ width: '100%' }}
       />
 

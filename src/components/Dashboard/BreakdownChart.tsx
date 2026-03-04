@@ -202,6 +202,7 @@ export default function BreakdownChart({ summary, groupMode, onBarClick }: Break
           },
           showlegend: false,
           hovermode: 'closest',
+          dragmode: isMobile ? false : 'zoom',
           ...(isMobile ? {
             margin: {
               l: 25,
@@ -218,7 +219,11 @@ export default function BreakdownChart({ summary, groupMode, onBarClick }: Break
             },
           }),
         }}
-        config={getResponsivePlotlyConfig()}
+        config={{
+          ...getResponsivePlotlyConfig(),
+          staticPlot: false,
+          scrollZoom: !isMobile,
+        }}
         style={{ width: '100%', height: isMobile ? '400px' : '450px' }}
         useResizeHandler={true}
         onClick={(event: React.MouseEvent) => {
