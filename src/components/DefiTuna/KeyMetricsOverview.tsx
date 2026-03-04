@@ -102,13 +102,13 @@ export default function KeyMetricsOverview(): React.ReactElement {
         tooltip={"Ratio of fully diluted market cap to annualized protocol revenue. A lower ratio suggests the protocol generates more revenue relative to its valuation.\nChange compares the current ratio to the ratio 30 days ago."}
       />
       <MetricCard
-        title="Staking APR"
+        title="TUNA Staking APR"
         value={metrics?.staking_apr_percent}
         format="percent"
         decimals={2}
         change={data.changes?.staking_apr_pct}
         tooltip={"Estimated yearly return for staking TUNA. Calculated by annualizing the last 30 days of SOL rewards per staked TUNA divided by the current TUNA price.\nChange shows the percentage point difference vs. 30 days ago."}
-        link={{ label: 'Staking APR', href: `${base}staking/staking-apr` }}
+        link={{ label: 'TUNA Staking APR', href: `${base}staking/staking-apr` }}
       />
       <MetricCard
         title="Active Stakers"

@@ -147,8 +147,11 @@ export default function ConvictionEpochChart(): React.ReactElement {
     const clean = ep.epoch.replace('-active', '');
     const [y, m] = clean.split('-');
     const epochNum = (parseInt(y) - 2025) * 12 + (parseInt(m) - 5) + 1;
-    const endDate = `${y}/${m}/14`;
     const suffix = ep.epoch.endsWith('-active') ? '*' : '';
+    if (isMobile) {
+      return `Epoch ${epochNum}${suffix}`;
+    }
+    const endDate = `${y}/${m}/14`;
     return `Epoch ${epochNum}${suffix}<br><span style="font-size:8px">through ${endDate}</span>`;
   });
 
@@ -278,8 +281,8 @@ export default function ConvictionEpochChart(): React.ReactElement {
           xaxis: {
             ...template.layout.xaxis,
             title: isMobile ? '' : undefined,
-            tickfont: { size: isMobile ? 8 : 10 },
-            tickangle: 0,
+            tickfont: { size: isMobile ? 9 : 10 },
+            tickangle: isMobile ? -90 : 0,
             type: 'category',
           },
           yaxis: {

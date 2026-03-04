@@ -376,7 +376,7 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
         marginBottom: '4px',
       }}>
         <span style={{ fontWeight: 600, fontSize: isMobile ? 15 : 18 }}>
-          Revenue Distribution: Pools x Transaction Types
+          Revenue by Pool & Transaction Type
         </span>
         <ChartToggle
           value={widthMode}

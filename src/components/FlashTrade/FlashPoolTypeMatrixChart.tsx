@@ -30,8 +30,8 @@ interface FlashPoolTypeMatrixChartProps {
 type WidthMode = 'proportional' | 'equal';
 
 const WIDTH_OPTIONS = [
-  { value: 'proportional' as WidthMode, label: 'Proportional' },
   { value: 'equal' as WidthMode, label: 'Equal' },
+  { value: 'proportional' as WidthMode, label: 'Proportional' },
 ];
 
 export default function FlashPoolTypeMatrixChart({
@@ -222,8 +222,8 @@ export default function FlashPoolTypeMatrixChart({
   const estimatedRows = Math.ceil(numLegendItems / estimatedColumns);
   const rowHeight = isMobile ? 25 : 22;
   const legendHeight = estimatedRows * rowHeight;
-  const legendY = isMobile ? -0.32 : -0.4;
-  const bottomMargin = isMobile ? 110 + legendHeight + 10 : 140;
+  const legendY = isMobile ? -0.42 : -0.4;
+  const bottomMargin = isMobile ? 150 + legendHeight + 15 : 140;
   const plotAreaBase = isMobile ? 350 : 500;
   const chartHeight = isMobile ? 30 + plotAreaBase + bottomMargin : 600;
 
@@ -302,7 +302,7 @@ export default function FlashPoolTypeMatrixChart({
         padding: isMobile ? '0 12px 8px' : '0 0 8px',
       }}>
         <span style={{ fontWeight: 600, fontSize: isMobile ? 15 : 18 }}>
-          Fee Distribution: Pools & Transaction Types
+          Fees by Pool & Transaction Type
         </span>
         <div style={{ flexShrink: 0 }}>
           <ChartToggle
@@ -395,7 +395,7 @@ export default function FlashPoolTypeMatrixChart({
         <div style={{
           fontSize: '13px',
           color: 'var(--ifm-color-secondary)',
-          marginTop: `-${Math.round(legendHeight * 0.6)}px`,
+          marginTop: '0px',
           marginLeft: '25px',
           lineHeight: '1.6',
         }}>
