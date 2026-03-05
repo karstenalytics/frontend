@@ -475,7 +475,7 @@ This page helps you:
 **Chart (Daily / Weekly toggle):**
 - **Daily view**: Each point is the number of unique trader wallets active on that UTC day. The grey line is a 30-day moving average that smooths daily noise. Spikes may indicate marketing campaigns, token launches, or protocol events.
 - **Weekly view**: Each point is the rolling 7-day union of active wallets (counted once even if active on multiple days). Smooths daily volatility to highlight sustained engagement. Changes appear gradually due to the rolling window.
-- **New %** (orange, right axis): Shown in Daily/Weekly when **Unique** view is selected (not shown in **By Pool** view). Percentage of active wallets whose first-ever platform trade falls within the period. The first 7 days are trimmed because the seen-wallet pool is too small for meaningful percentages.
+- **New %** (orange, right axis): Shown in Daily/Weekly when **Unique** view is selected (not shown in **By Pool** view). Percentage of active wallets not previously seen since Apr 2025 (data start). May include returning users from before that date; accuracy improves over time as the seen-wallet pool grows. Wallets whose first observed transaction requires prior state (e.g. ClosePosition) are classified as returning, not new. The first 7 days are trimmed because the seen-wallet pool is too small for meaningful percentages.
 
 **Chart (Unique / By Pool toggle):**
 - **Unique view**: Aggregate trader wallets across all pools (default)

@@ -30,7 +30,7 @@ I built reconciliation tools that trace every USDC atom through Flash.Trade's on
 
 Before diving into on-chain details, here is a simplified thought exercise with round numbers. Fee shares and splits below do not reflect the exact on-chain situation. More precise mechanics follow in the next section.
 
-Let's say a trader opens a $1,000 leveraged FARTCOIN position on the Trump.1 pool, paying a **$10 fee**. Here is the high-level path that fee takes before a portion reaches you via FAF staking rewards:
+Let's say a trader opens a $1,000 leveraged FARTCOIN position on the Trump.1 pool (which is the FARTCOIN pool, it has not been renamed on-chain), paying a **$10 fee**. Here is the high-level path that fee takes before a portion reaches you via FAF staking rewards:
 
 
 
@@ -64,7 +64,7 @@ graph TD
 <li><strong>Fee generation:</strong> The $10 entry fee accumulates on the Trump.1 <a href="https://solscan.io/account/Crk3yzGpPCt9thXmV9wCkBM9nBq8EHhBct71ArkKY9wA#accountData">Pool account</a> in a field called <code>fees_obligation_usd</code>. It sits there until the next consolidation run.</li>
 <li><strong>Hourly consolidation:</strong> Roughly once per hour and per pool, a <code>swap_fee_internal</code> instruction moves the $10 from the Pool into the reward <a href="https://solscan.io/account/B1b3WnCbwrQC8yk6o5rVLGGJFD7BdQBLyaWsRw4Lqgp2#accountData">Custody account</a> (<code>fees_stats.accrued</code>). In the early days there was one <code>swap_fee_internal</code> per collateral type; now all fees accrue in USD, so there is one per pool per hour.</li>
 <li><strong>Distribution trigger:</strong> Accrued fees need to be committed/distributed to liquidity providers (LPs). When certain on-chain events fire (such as <code>refresh_stake</code> or <code>compounding_fees</code>), the pool's reward-per-LP-staked counter (rPLS) increments and <code>distributed</code> is raised to match <code>accrued</code>. The rPLS increase equals the not-yet-distributed fees (i.e., the then delta between <code>accrued</code> and <code>distributed</code>). But nothing lands in anyone's wallet yet.</li>
-<li><strong>Fee split:</strong> When staker rewards are settled via the twice-daily <code>refresh_stake</code> bursts (midnight and noon UTC), manual <code>collect_stake_fees</code> claims, or <code>compounding_fees</code> the gross amount is split. With Trump.1's 80/20 staking vault split: $8 goes to the LP, $2 goes to the protocol. The $2 is booked to <code>fees_stats.protocol_fee</code>. In practice the effective protocol share might be lower (see below).</li>
+<li><strong>Fee split:</strong> When staker rewards are settled via the twice-daily <code>refresh_stake</code> bursts (midnight and noon UTC), manual <code>collect_stake_fees</code> claims, or <code>compounding_fees</code> the gross amount is split. With Trump.1's [80/20 fee share](https://docs.flash.trade/flash-trade/flash-trade-protocol/technical-architecture/fee-distribution): $8 goes to the LP, $2 goes to the protocol. The $2 is booked to <code>fees_stats.protocol_fee</code>. In practice the effective protocol share might be lower (see below).</li>
 <li><strong>The sweep:</strong> Every ~6 hours, <code>move_protocol_fees</code> sweeps accumulated protocol fees and splits them 50/50: <strong>$1 to FAF stakers</strong>, $1 to the protocol treasury.</li>
 </ol>
 
@@ -105,11 +105,11 @@ No fee split happens at this stage. The full amount moves 1:1 into the Custody's
 
 In the current V3 format, there is one `swap_fee_internal` per pool per hour and the fee is already in USDC. In the earlier V1/V2 format, there was one per collateral type (SOL, BTC, ETH, etc.), and the instruction converted non-USDC fees to their USDC equivalent via oracle prices.
 
-**Example:** The 12:32 UTC `swap_fee_internal` for Trump.1 swept exactly 4,411,682 atoms, matching the single trade from 13 minutes earlier. A perfect 1:1 transfer from Pool to Custody. ([View on Solscan](https://solscan.io/tx/3RXnFQrN7wuRMNvZERBgz3mQ51vmCuLsBKBUN7ZfKz54fqn49D1rF1G9PmuJx4UhJrdf5aQa41pwAYWRSVRr3mNp))
+**Example:** The 12:32 UTC `swap_fee_internal` for Trump.1 swept exactly 4,411,682 atoms (check #3.1 Inner Instruction <code>feeAmount</code>), matching the single trade from 13 minutes earlier. A perfect 1:1 transfer from Pool to Custody. ([View on Solscan](https://solscan.io/tx/3RXnFQrN7wuRMNvZERBgz3mQ51vmCuLsBKBUN7ZfKz54fqn49D1rF1G9PmuJx4UhJrdf5aQa41pwAYWRSVRr3mNp))
 
 ### Step 3: Distribution Trigger (rPLS Bump)
 
-After `swap_fee_internal` runs, `fees_stats.accrued` is higher than `fees_stats.distributed`. This difference represents fees that are staged but not yet committed to LP token holders. If the two values are equal, there is nothing to distribute.
+After non-zero `swap_fee_internal` runs, `fees_stats.accrued` is higher than `fees_stats.distributed`. This difference represents fees that are staged but not yet committed to LP token holders. If the two values are equal, there is nothing to distribute.
 
 The commitment happens through a counter on the Pool account called `reward_per_lp_staked` (rPLS for short). When a distribution-triggering instruction executes and there are pending fees, the on-chain program:
 
@@ -127,9 +127,7 @@ Pool.reward_per_lp_staked += delta_rPLS
 
 Here `total_staked` is the sum of LP tokens across **both** the staking vault (sFLP.x) and the compounding vault (FLP.x). This is a key property: all LP tokens earn at the same rPLS rate, regardless of which vault they sit in. The different fee splits between vaults are applied later, at claim time.
 
-The `floor()` operation is integer division: fractional remainders are lost as dust. Over many distribution events, this dust is negligible.
-
-**Seven instruction types trigger distribution.** Any of these, as part of their execution, cause the program to distribute pending accrued fees and update rPLS:
+**From what I see, seven instruction types trigger distribution.** Any of these, as part of their execution, cause the program to distribute pending accrued fees and update rPLS:
 
 
 | Instruction                    | Purpose                                           |
@@ -149,7 +147,7 @@ The `floor()` operation is integer division: fractional remainders are lost as d
 
 When LP provider rewards are settled, the gross earned amount is split between the LP provider and the protocol. For the staking vault (sFLP.x), settlement happens through the twice-daily `refresh_stake` bursts (midnight and noon UTC) that process all LP stakers at once, or through manual `collect_stake_fees` claims. For the compounding vault (FLP.x), settlement happens when `compounding_fees` fires and mints new LP tokens into the vault. In both cases, the protocol's share is booked to `fees_stats.protocol_fee`. The split ratio depends on which vault the LP belongs to.
 
-Each pool has **two vaults** with different fee structures:
+Each pool has **two vaults**, sometimes with different fee structures:
 
 
 | Vault                         | Settlement triggers                    | Trump.1 LP Share | Trump.1 Protocol Share |
@@ -186,7 +184,7 @@ This 50/50 split is configured on-chain with `fee_share_bps = 5000` in the Proto
 
 ## Why the Effective Fee Share is Lower Than the Docs Suggest
 
-The [official Flash.Trade documentation](https://docs.flash.trade/flash-trade/flash-trade-protocol/technical-architecture/fee-distribution) states fixed LP/protocol splits per pool (e.g. 70/30 for Crypto Pool, 80/20 for Meme Pool). These numbers are accurate for the **staking vault** only. They do not account for the compounding vault, which typically has a higher LP share and therefore generates less protocol revenue.
+The [official Flash.Trade documentation](https://docs.flash.trade/flash-trade/flash-trade-protocol/technical-architecture/fee-distribution) states fixed LP/protocol splits per pool (e.g. 70/30 for Crypto.1, 80/20 for Trump.1). These numbers are accurate for the **staking vault** only. They do not account for the compounding vault, which sometimes has a higher LP share and therefore generates less protocol revenue.
 
 Here are the actual on-chain fee splits for all active pools. Several pools had their staking vault shares changed in late September 2025 (around the program upgrade on Sep 23). Compounding vault shares have never changed since pool creation.
 

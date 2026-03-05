@@ -136,26 +136,6 @@ export default function StakingBalanceChart({
         textAlign: 'center',
       }}>{tokenSymbol} Staking Over Time</h3>
       {latest && (
-        <p style={{
-          color: 'var(--ifm-color-emphasis-700)',
-          marginLeft: isMobile ? '16px' : 0,
-          marginRight: isMobile ? '16px' : 0,
-          marginBottom: '16px',
-          fontSize: isMobile ? '13px' : '15px',
-          textAlign: isMobile ? 'left' : 'center',
-        }}>
-          {Math.abs(deviation) < 0.01 ? (
-            <span style={{ color: '#10B981', fontWeight: 500 }}>
-              {'\u2713'} Staked {tokenSymbol} currently at ATH
-            </span>
-          ) : (
-            <span style={{ color: '#EF4444', fontWeight: 500 }}>
-              {'\u2193'} Staked {tokenSymbol} {Math.abs(deviation).toFixed(2)}% below ATH
-            </span>
-          )}
-        </p>
-      )}
-      {latest && (
         <div
           style={{
             display: isMobile ? 'grid' : 'flex',
@@ -163,6 +143,7 @@ export default function StakingBalanceChart({
             gap: isMobile ? '8px' : '16px',
             marginBottom: '16px',
             flexWrap: isMobile ? undefined : 'wrap',
+            alignItems: 'center',
             marginLeft: isMobile ? '16px' : 0,
             marginRight: isMobile ? '16px' : 0,
           }}
@@ -200,6 +181,25 @@ export default function StakingBalanceChart({
             }}>
               <strong>{(latest.vested ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong> reserved {tokenSymbol}
             </div>
+          )}
+          {Math.abs(deviation) < 0.01 ? (
+            <span style={{
+              color: '#10B981',
+              fontWeight: 500,
+              fontSize: isMobile ? '12px' : '14px',
+              whiteSpace: 'nowrap',
+            }}>
+              {'\u2713'} Staked {tokenSymbol} at ATH
+            </span>
+          ) : (
+            <span style={{
+              color: '#EF4444',
+              fontWeight: 500,
+              fontSize: isMobile ? '12px' : '14px',
+              whiteSpace: 'nowrap',
+            }}>
+              {'\u2193'} Staked {tokenSymbol} {Math.abs(deviation).toFixed(2)}% below ATH
+            </span>
           )}
         </div>
       )}

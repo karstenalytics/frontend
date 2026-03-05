@@ -184,8 +184,8 @@ Tracks unique wallets interacting with the DefiTuna protocol through revenue-gen
 
       const title = view === 'daily' ? 'Daily Active Wallets' : 'Weekly Active Wallets';
       const description = view === 'daily'
-        ? 'New % (orange, right axis) shows acquisition rate. 30-day MA shows trend.'
-        : 'Rolling 7-day unique wallets. New % shows first-time users within the window.';
+        ? 'New % (orange, right axis) shows the share of active wallets not previously seen since Jul 2025 (data start). May include returning users from before that date; accuracy improves over time as the seen-wallet pool grows. 30-day MA shows trend.'
+        : 'Rolling 7-day unique wallets. New % shows wallets not previously seen since Jul 2025 (data start). Accuracy improves over time as the seen-wallet pool grows.';
 
       return (
         <div style={{
