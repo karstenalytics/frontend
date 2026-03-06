@@ -23,8 +23,6 @@ export default function StakingBalanceChart({
   // Track whether price trace is visible (for secondary y-axis)
   const [showPrice, setShowPrice] = useState(false);
 
-  // Track y-axis range state for preset zoom with reset capability
-  const [usePresetZoom, setUsePresetZoom] = useState(true);
 
   // Mobile detection
   // Initialize with actual window size to prevent hydration mismatch
@@ -79,20 +77,13 @@ export default function StakingBalanceChart({
   const hasVested = vested.some((val) => val > 0);
   const hasPrice = prices.some((val) => val !== null && val > 0);
   const maxStackHeight = hasData ? Math.max(...totals) : 0;
-  const [minStaked, maxTotal] = hasData
-    ? [Math.min(...staked), Math.max(...totals)]
-    : [0, 0];
+  const minStaked = hasData ? Math.min(...staked) : 0;
   // Calculate maximum staked amount and current deviation
   const maxStaked = hasData ? Math.max(...staked) : 0;
-  // Dynamic buffer: subtract 10M from lowest staked value for better visibility
-  const dynamicLowerBound = hasData ? Math.max(0, minStaked - 10_000_000) : 0;
-  // Upper bound: round up to next 50M bucket
-  const BUCKET = 50_000_000;
-  const upperBound = hasData ? Math.ceil(maxStackHeight / BUCKET) * BUCKET : 0;
-  // Preset zoom range (if initialYMin provided)
-  const presetYRange = initialYMin !== undefined && hasData ? [initialYMin, upperBound] : undefined;
-  // Use preset zoom on initial load, null triggers autorange after reset
-  const yRange = usePresetZoom && presetYRange ? presetYRange : null;
+  // Upper bound: 2% headroom above max value
+  const upperBound = hasData ? Math.ceil(maxStackHeight * 1.02) : 0;
+  // Fixed y-axis range (if initialYMin provided) - always applied for readability
+  const yRange = initialYMin !== undefined && hasData ? [initialYMin, upperBound] : null;
   const latest = hasData ? sorted[sorted.length - 1] : null;
   const deviation = latest ? ((latest.staked - maxStaked) / maxStaked) * 100 : 0;
 
@@ -209,7 +200,7 @@ export default function StakingBalanceChart({
         </div>
       ) : (
         <Plot
-          key={usePresetZoom ? 'preset-zoom' : 'full-range'}
+          key="staking-chart"
           data={[
             {
               x,
@@ -295,7 +286,7 @@ export default function StakingBalanceChart({
             autosize: true,
             height: chartHeight,
             hovermode: 'x unified',
-            uirevision: usePresetZoom ? 'preset' : 'full',
+            uirevision: 'stable',
             xaxis: {
               ...template.layout.xaxis,
               title: isMobile ? '' : {
@@ -380,24 +371,6 @@ export default function StakingBalanceChart({
               return false; // Prevent default Plotly behavior
             }
             return undefined; // Allow default behavior for other traces
-          }}
-          onDoubleClick={() => {
-            // Double-click resets to full range
-            if (presetYRange) {
-              setUsePresetZoom(false);
-            }
-          }}
-          onRelayout={(event: any) => {
-            // Detect home button click (resetScale2d triggers autorange on both axes)
-            const keys = Object.keys(event);
-            const isReset = keys.some(k =>
-              k.includes('autorange') ||
-              k === 'xaxis.range[0]' ||
-              k === 'yaxis.range[0]'
-            );
-            if (isReset && usePresetZoom && presetYRange) {
-              setUsePresetZoom(false);
-            }
           }}
         />
       )}

@@ -82,6 +82,8 @@ export const ChartPageSEO: React.FC<ChartPageSEOProps> = ({
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content="@karstenalytics" />
+      <meta name="twitter:creator" content="@karstenalytics" />
       <meta name="twitter:url" content={pageUrl} />
       <meta name="twitter:title" content={`${title} | karstenalytics`} />
       <meta name="twitter:description" content={fullDescription} />

@@ -331,12 +331,12 @@ Tracks unique wallets interacting with the DefiTuna protocol through revenue-gen
 
           <div style={{ marginTop: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-              <h2 id="top-wallets-by-days-active" style={{ margin: 0 }}>Top Wallets by Days Active</h2>
+              <h2 id="top-wallets" style={{ margin: 0 }}>Top Wallets by Transaction Count</h2>
               <ChartToggle value={walletRange} onChange={setWalletRange}
                            options={WALLET_RANGE_OPTIONS} variant="primary" />
             </div>
             <p style={{ marginBottom: '16px' }}>
-              Wallets ranked by the number of distinct days they executed fee-generating transactions{walletRange === '30d'
+              Wallets ranked by total transaction count{walletRange === '30d'
                   ? ' in the last 30 days.'
                   : walletRange === '7d'
                   ? ' in the last 7 days.'
@@ -366,7 +366,7 @@ This page helps you:
 - **Assess wallet retention**: Weekly active wallet trends reveal whether wallets return after their first interaction
 - **Evaluate protocol changes**: Identify the impact of feature launches, parameter updates, or integrations on usage numbers by comparing activity before and after changes
 - **Benchmark growth**: Use daily and weekly metrics to measure protocol health over time
-- **Identify power users**: Use the Top Wallets by Days Active table to find the most consistently engaged wallets
+- **Identify power users**: Use the Top Wallets table to find the most active wallets by transaction count
 
 ## How to Read This Chart
 
@@ -391,10 +391,10 @@ This page helps you:
 **View Toggle:**
 - Switch between **Daily** and **Weekly** using the chart toggle in the chart header
 
-**Top Wallets by Days Active Table:**
+**Top Wallets Table:**
 - **Wallet Address**: Solana address (links to Solscan)
+- **Tx Count**: Total number of fee-generating transactions across all days
 - **Days Active**: Total distinct days the wallet executed fee-generating transactions (scoped to the selected time range)
-- **Transactions**: Total number of fee-generating transactions across those days
 - **First/Last Seen**: Date range of wallet activity
 - **Wallet Details**: Link to view staking activity for each wallet
 
@@ -457,12 +457,12 @@ For each UTC day:
 
 This **rolling 7-day union** smooths daily volatility and highlights sustained participation patterns.
 
-**Top Wallets by Days Active Ranking**
+**Top Wallets Ranking**
 
 The top wallets table ranks by:
-- **Activity frequency**: Number of distinct calendar days (UTC) the wallet executed fee-generating transactions
-- **Not by transaction volume**: A wallet with 100 transactions on 1 day ranks below a wallet with 10 transactions on 10 different days
-- **Purpose**: Identifies consistently engaged wallets rather than high-volume traders
+- **Transaction count**: Total number of fee-generating transactions (primary sort)
+- **Days active**: Number of distinct calendar days (UTC) the wallet was active (tiebreaker)
+- **Purpose**: Identifies the most active users on the platform by transaction count
 
 **Update Frequency**
 

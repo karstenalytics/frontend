@@ -174,6 +174,10 @@ const config: Config = {
   themeConfig: {
     // Social media preview image (1200x675px for Twitter/X optimization)
     image: 'img/og-preview.png',
+    metadata: [
+      { name: 'twitter:site', content: '@karstenalytics' },
+      { name: 'twitter:creator', content: '@karstenalytics' },
+    ],
     navbar: {
       title: '',
       logo: {

@@ -42,13 +42,13 @@ Source: [Flash.Trade Tokenomics](https://docs.flash.trade/flash-trade/flash-trad
 
 This means: No VC allocation, and team compensation is not pre-allocated. It is determined by [futarchy governance](https://docs.flash.trade/flash-trade/flash-trade-protocol/tokenomics), where prediction markets guide key decisions including token parameters.
 
-**a) Staking rewards (9.6%)** fund monthly distributions to active stakers. The team treasury sends a fixed allocation to the protocol multisig each month (8M FAF through October 2025, reduced to 5.6M from December onward), which is then deposited into the vault alongside harvested penalties. After 10 epochs, 72.8M of the 96M (75.8%) has been distributed, leaving 23.2M, roughly four more months at the current rate. [Section 7](#7-the-monthly-reward-machine) covers the full reward cycle.
+**a) Staking rewards (9.6%)** fund monthly distributions to active stakers. The team treasury sends a fixed allocation to the protocol multisig each month (8M FAF through November 2025, reduced to 5.6M from December onward), which is then deposited into the vault alongside harvested penalties. After 10 epochs, 72.8M of the 96M (75.8%) has been distributed, leaving 23.2M, roughly four more months at the current rate. [Section 7](#7-the-monthly-reward-machine) covers the full reward cycle.
 
 **b) Incubation and c) advisors (6.4% combined)** vest linearly through [Streamflow](https://streamflow.finance/) contracts; our [Vesting Timeline](/analysis/flash-trade/staking/vesting-timeline) dashboard tracks unlock schedules, withdrawn amounts, and how much vesting recipients have re-staked. On-chain, the team treasury sent exactly 54M FAF for incubation vesting (matching the 5.4% allocation) and 4.25M for advisory contracts. The five active Streamflow contracts total 44.4M FAF; the remaining 13.8M likely sits in the intermediary funding vault or in contracts I have not yet indexed.
 
 **d) Liquidity (4%)** went to a FAF/SOL pool on Raydium. The team deposited 37.7M FAF paired with 1,207 SOL across two tranches on April 14-15. On February 15, 2026, the LP was fully closed, returning 40.4M FAF (+7.1%) and 1,453 SOL (+20.3%) to the treasury.
 
-**e) Community (80%)** dominates the allocation. No cliff, no vesting. Of that 800M, **788M FAF** was deposited into the staking pool as a reserve for Beast NFT holders. The remaining tokens went to airdrops: on April 19, the team treasury distributed 12.2M FAF across 28 wallets in four tiers (771K, 429K, 343K, and 86K FAF per recipient). The total slightly exceeds the clean 12M difference between 800M and 788M, suggesting some airdrop tokens may have come from outside the 80% community allocation. Only 23 of the 28 recipients ever staked their FAF, and as of this writing, 9 still hold an active staking position. All 23 can be looked up in the [Wallet Timeline](/analysis/flash-trade/staking/wallet-timeline).
+**e) Community (80%)** dominates the allocation. No cliff, no vesting. Of that 800M, **788M FAF** was deposited into the staking pool as a reserve for Beast NFT holders. The remaining tokens went to airdrops: on April 19, the team treasury distributed ~12.0M FAF across 28 wallets in four tiers (771K, 429K, 343K, and 86K FAF per recipient). Only 23 of the 28 recipients ever staked their FAF, and as of this writing, 10 still hold a staking position (though one is effectively dust at ~0.004 FAF). All 23 can be looked up in the [Wallet Timeline](/analysis/flash-trade/staking/wallet-timeline).
 
 Where did the 788M go? I traced every token on-chain. Here is the full picture in one chart:
 
@@ -250,7 +250,7 @@ As of February 22, the pool has stabilized: **687M staked**, 10.7M queued, 10.8M
 
 The 96M staking rewards from the [TGE allocation](#1-the-tge-how-1-billion-faf-were-split) fund a monthly distribution cycle ("Epoch Rewards"). Every month on the 15th, a three-step process recycles penalties and distributes fresh rewards:
 
-1. **Team allocation arrives**: The team treasury sends a fixed monthly allocation to the protocol multisig (8M FAF through October 2025, reduced to 5.6M from December onward)
+1. **Team allocation arrives**: The team treasury sends a fixed monthly allocation to the protocol multisig (8M FAF through November 2025, reduced to 5.6M from December onward)
 2. **Penalties are harvested**: `WithdrawInstantFees` pulls all accumulated penalties from the staker pool, both the 3% instant unstake fees and the 5% BurnAndClaim fees
 3. **Combined redistribution**: The multisig deposits the combined total back into the staker pool via `DistributeTokenReward`, where it is distributed proportionally to all active stakers
 
@@ -349,7 +349,7 @@ The median holder owns 24 FAF (less than $1 at current prices), while the mean i
 </details>
 
 <details>
-<summary>Validation against official reports (7 of 10 months within 0.1%)</summary>
+<summary>Validation against official reports (5 of 10 months within 0.1%)</summary>
 
 I validated my on-chain data against Flash.Trade's official monthly protocol reports ([docs](https://docs.flash.trade/flash-trade/resources/monthly-protocol-reports), [Notion](https://flash-trade.notion.site/1df1d77c7290809280a0fcd6df397aed?v=1df1d77c7290802f90bf000cd62d99cb)), comparing end-of-month staked balances:
 
@@ -358,19 +358,19 @@ I validated my on-chain data against Flash.Trade's official monthly protocol rep
 | Report | Official Staked FAF | My Data (month-end) | Diff |
 |--------|-------------------|----------|------|
 | April 2025 | 459,382,818 | 476,969,891 | +3.8% |
-| May 2025 | 532,975,618 | 496,213,788 | -6.9% |
-| June 2025 | 616,294,303 | 616,419,767 | +0.02% |
-| July 2025 | 686,240,201 | 684,002,437 | -0.3% |
-| August 2025 | 692,470,000 | 696,815,183 | +0.6% |
-| September 2025 | 643,440,000 | 643,829,703 | +0.06% |
-| October 2025 | 657,380,000 | 657,299,513 | -0.01% |
-| November 2025 | 683,106,758 | 683,010,965 | -0.01% |
-| December 2025 | 712,876,743 | 712,618,470 | -0.04% |
-| January 2026 | 732,826,209 | 727,954,572 | -0.66% |
+| May 2025 | 532,975,618 | 496,136,467 | -6.9% |
+| June 2025 | 616,294,303 | 616,342,446 | +0.008% |
+| July 2025 | 686,240,201 | 683,925,116 | -0.34% |
+| August 2025 | 692,470,000 | 696,737,862 | +0.62% |
+| September 2025 | 643,440,000 | 643,752,383 | +0.05% |
+| October 2025 | 657,380,000 | 657,222,193 | -0.02% |
+| November 2025 | 683,106,758 | 682,933,644 | -0.03% |
+| December 2025 | 712,876,743 | 712,541,149 | -0.05% |
+| January 2026 | 732,826,209 | 727,877,251 | -0.68% |
 
 </div>
 
-Seven of ten months match within 0.1%. The larger deviations in April, May, July, August, and January may be explained by the reports capturing a snapshot at compilation time rather than at strict month-end: for example, the April report's official figure matches my April 24 data to the atom, and the May report's figure aligns closely with my June 2 data.
+Five of ten months match within 0.1%. The larger deviations in April, May, July, August, and January may be explained by the reports capturing a snapshot at compilation time rather than at strict month-end: for example, the April report's official figure matches my April 24 data to the atom, and the May report's figure aligns closely with my June 2 data.
 
 </details>
 

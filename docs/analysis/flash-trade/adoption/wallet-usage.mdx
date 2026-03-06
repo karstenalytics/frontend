@@ -428,12 +428,12 @@ Tracks unique trader wallets on Flash.Trade (positions, swaps, orders). FAF stak
           <div style={{ marginTop: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                           flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-              <h2 id="top-wallets-by-days-active" style={{ margin: 0 }}>Top Wallets by Days Active</h2>
+              <h2 id="top-wallets" style={{ margin: 0 }}>Top Wallets by Transaction Count</h2>
               <ChartToggle value={walletRange} onChange={setWalletRange}
                            options={WALLET_RANGE_OPTIONS} variant="primary" />
             </div>
             <p style={{ marginBottom: '16px' }}>
-              Wallets ranked by the number of distinct days they executed fee-generating transactions
+              Wallets ranked by total transaction count
               {walletRange === 'all'
                 ? ' across the entire measurement period (since April 12, 2025).'
                 : walletRange === '30d'
@@ -465,7 +465,7 @@ This page helps you:
 - **Assess user retention**: Weekly active wallet trends reveal whether traders return after their first interaction
 - **Evaluate protocol changes**: Identify the impact of new markets, fee changes, or integrations on usage numbers by comparing activity before and after changes
 - **Benchmark growth**: Use daily and weekly metrics to measure protocol health over time
-- **Identify power traders**: Use the Top Wallets by Days Active table to find the most consistently engaged traders
+- **Identify power traders**: Use the Top Wallets table to find the most active traders by transaction count
 
 ## How to Read This Chart
 
@@ -481,10 +481,10 @@ This page helps you:
 - **Unique view**: Aggregate trader wallets across all pools (default)
 - **By Pool view**: Stacked areas showing per-pool trader counts. Wallets trading multiple pools are counted in each.
 
-**Top Wallets by Days Active Table:**
+**Top Wallets Table:**
 - **Wallet Address**: Solana address (links to Solscan)
-- **Days Active**: Total distinct days the wallet executed trading transactions
 - **Tx Count**: Total number of trading transactions across all days
+- **Days Active**: Total distinct days the wallet executed trading transactions
 - **First/Last Seen**: Date range of wallet activity
 
 </details>
@@ -561,12 +561,12 @@ For each UTC day:
 
 This **rolling 7-day union** smooths daily volatility and highlights sustained participation patterns.
 
-**Top Wallets by Days Active Ranking**
+**Top Wallets Ranking**
 
-The Top Wallets by Days Active table ranks by:
-- **Activity frequency**: Number of distinct calendar days (UTC) the wallet executed trading transactions
-- **Not by transaction volume**: A wallet with 100 transactions on 1 day ranks below a wallet with 10 transactions on 10 different days
-- **Purpose**: Identifies consistently engaged traders rather than high-volume traders
+The Top Wallets table ranks by:
+- **Transaction count**: Total number of fee-generating trading transactions (primary sort)
+- **Days active**: Number of distinct calendar days (UTC) the wallet was active (tiebreaker)
+- **Purpose**: Identifies the most active traders on the platform by transaction count
 
 **Update Frequency**
 

@@ -15,6 +15,8 @@ export default function BlogPostPageMetadata(): ReactNode {
       keywords={keywords}
       image={image}>
       <meta property="og:type" content="article" />
+      <meta name="twitter:site" content="@karstenalytics" />
+      <meta name="twitter:creator" content="@karstenalytics" />
       <meta property="article:published_time" content={date} />
       {/* TODO double check those article meta array syntaxes, see https://ogp.me/#array */}
       {authors.some((author) => author.url) && (
