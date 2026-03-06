@@ -7,7 +7,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Staking Overview
 
-Daily time-series view of treasury TUNA allocation showing the split between staked and unstaked tokens. The chart tracks how the how much staked or unstaked TUNA the treasury holds over time, whether staked TUNA is at all-time high (ATH), and identifies the most important stakers and withdrawers in recent periods.
+Daily time-series view of treasury TUNA allocation showing the split between staked and unstaked tokens. The chart tracks how much staked and unstaked TUNA the treasury holds over time, whether staked TUNA is at all-time high (ATH), and identifies the most important stakers and withdrawers in recent periods.
 
 ## Data
 
@@ -46,7 +46,7 @@ Daily time-series view of treasury TUNA allocation showing the split between sta
             <h2 id="top-stakers-withdrawers">Recent Activity</h2>
             <p style={{ marginBottom: '16px' }}>
               The tables below show the most relevant stakers and withdrawers over the last 7 days, ranked by TUNA amount.
-              Click "Staking Timeline" to view detailed staking history for each wallet.
+              Click "See details" to view detailed staking history for each wallet.
             </p>
             <StakingTopTables topStakers={top_stakers_7d} topWithdrawers={top_withdrawers_7d} />
           </div>
@@ -81,23 +81,23 @@ This page helps you:
 - **Max Staked line** (dashed red): Historical peak staked amount for comparison
 
 **Status Indicators:**
-- **✓ Staked TUNA currently at ATH**: Current staked amount equals or exceeds all previous amounts
-- **↓ Staked TUNA X% below ATH**: Current staked amount has declined from peak by X%
+- **Staked TUNA currently at ATH**: Current staked amount equals or exceeds all previous amounts
+- **Staked TUNA X% below ATH**: Current staked amount has declined from peak by X%
 
 **Current Values:**
 The badges at the top show:
 - **Staked TUNA**: Amount currently locked in staking positions
 - **Unstaked TUNA**: Amount held liquid in treasury
-- **Total TUNA**: Combined holdings (sum of staked and unstaked)
+- **Total TUNA**: Represented by the stacked height and visible in chart hover values
 
 **Recent Activity Tables:**
 - **Top Stakers (7d)**: Wallets that staked the most TUNA in the last 7 days
-- **Top Withdrawers (7d)**: Wallets that withdrew the most TUNA in the last 7 days
-- **Staking Timeline button**: Links to detailed staking history for each wallet
+- **Top Unstakers (7d)**: Wallets that withdrew/unstaked the most TUNA in the last 7 days
+- **See details button**: Links to detailed staking history for each wallet
 
 **Interactive Features:**
 - **Hover**: See exact staked/unstaked amounts for any date
-- **Legend**: Click legend items to show/hide staked or unstaked areas
+- **Legend**: Click legend items to show/hide staked and unstaked areas, plus the max-staked reference line
 
 </details>
 

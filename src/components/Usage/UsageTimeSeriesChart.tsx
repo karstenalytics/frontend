@@ -167,8 +167,8 @@ export default function UsageTimeSeriesChart({
               marginLeft: '25px',
               lineHeight: '1.6',
             }}>
-              <div>↑ {yAxisLabel}</div>
-              <div>→ Date (UTC)</div>
+              <div>-> {yAxisLabel}</div>
+              <div>-> Date (UTC)</div>
             </div>
           )}
         </>

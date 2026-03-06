@@ -64,7 +64,7 @@ graph TD
 <li><strong>Fee generation:</strong> The $10 entry fee accumulates on the Trump.1 <a href="https://solscan.io/account/Crk3yzGpPCt9thXmV9wCkBM9nBq8EHhBct71ArkKY9wA#accountData">Pool account</a> in a field called <code>fees_obligation_usd</code>. It sits there until the next consolidation run.</li>
 <li><strong>Hourly consolidation:</strong> Roughly once per hour and per pool, a <code>swap_fee_internal</code> instruction moves the $10 from the Pool into the reward <a href="https://solscan.io/account/B1b3WnCbwrQC8yk6o5rVLGGJFD7BdQBLyaWsRw4Lqgp2#accountData">Custody account</a> (<code>fees_stats.accrued</code>). In the early days there was one <code>swap_fee_internal</code> per collateral type; now all fees accrue in USD, so there is one per pool per hour.</li>
 <li><strong>Distribution trigger:</strong> Accrued fees need to be committed/distributed to liquidity providers (LPs). When certain on-chain events fire (such as <code>refresh_stake</code> or <code>compounding_fees</code>), the pool's reward-per-LP-staked counter (rPLS) increments and <code>distributed</code> is raised to match <code>accrued</code>. The rPLS increase equals the not-yet-distributed fees (i.e., the then delta between <code>accrued</code> and <code>distributed</code>). But nothing lands in anyone's wallet yet.</li>
-<li><strong>Fee split:</strong> When staker rewards are settled via the twice-daily <code>refresh_stake</code> bursts (midnight and noon UTC), manual <code>collect_stake_fees</code> claims, or <code>compounding_fees</code> the gross amount is split. With Trump.1's [80/20 fee share](https://docs.flash.trade/flash-trade/flash-trade-protocol/technical-architecture/fee-distribution): $8 goes to the LP, $2 goes to the protocol. The $2 is booked to <code>fees_stats.protocol_fee</code>. In practice the effective protocol share might be lower (see below).</li>
+<li><strong>Fee split:</strong> When staker rewards are settled via the twice-daily <code>refresh_stake</code> bursts (midnight and noon UTC), manual <code>collect_stake_fees</code> claims, or <code>compounding_fees</code> the gross amount is split. With Trump.1's <a href="https://docs.flash.trade/flash-trade/flash-trade-protocol/technical-architecture/fee-distribution">80/20 fee share</a>: $8 goes to the LP, $2 goes to the protocol. The $2 is booked to <code>fees_stats.protocol_fee</code>. In practice the effective protocol share might be lower (see below).</li>
 <li><strong>The sweep:</strong> Every ~6 hours, <code>move_protocol_fees</code> sweeps accumulated protocol fees and splits them 50/50: <strong>$1 to FAF stakers</strong>, $1 to the protocol treasury.</li>
 </ol>
 
@@ -127,7 +127,9 @@ Pool.reward_per_lp_staked += delta_rPLS
 
 Here `total_staked` is the sum of LP tokens across **both** the staking vault (sFLP.x) and the compounding vault (FLP.x). This is a key property: all LP tokens earn at the same rPLS rate, regardless of which vault they sit in. The different fee splits between vaults are applied later, at claim time.
 
-**From what I see, seven instruction types trigger distribution.** Any of these, as part of their execution, cause the program to distribute pending accrued fees and update rPLS:
+The `floor()` operation is integer division: fractional remainders are lost as dust. Over many distribution events, this dust is negligible.
+
+**Distribution is triggered by multiple instruction families.** In current on-chain logs and in my reconciliation pipeline, the following instructions can trigger pending-fee distribution and update rPLS:
 
 
 | Instruction                    | Purpose                                           |
@@ -139,6 +141,9 @@ Here `total_staked` is the sum of LP tokens across **both** the staking vault (s
 | `remove_compounding_liquidity` | Removes LP from the compounding vault             |
 | `migrate_stake`                | Migrates LP from staking to compounding vault     |
 | `migrate_flp`                  | Migrates LP from compounding to staking vault     |
+| `add_liquidity_and_stake`      | Adds liquidity and stakes LP in one instruction   |
+| `deposit_stake`                | Deposits LP into the staking vault                |
+| `withdraw_stake`               | Withdraws LP from the staking vault               |
 
 
 **Example:** At 14:02 UTC, a `compounding_fees` instruction triggered distribution on Trump.1, bumping rPLS. The compounding vault's share of 17,404,514 atoms ($17.40) was converted into newly minted LP tokens and added to the compounding vault's LP balance, making each FLP share worth more. This is the auto-compounding mechanism: rewards are reinvested as additional LP rather than paid out as USDC. ([View on Solscan](https://solscan.io/tx/4BRQqodbjQaaxWyAreWdwJuqDbVWJRCVbdJ4BL2rkUanfga5gYtpidLgzgZQU6X5ej5YHi7UgPk26wtKU5q1c7Q1))
@@ -265,7 +270,7 @@ Every atom from the trading events appears in the SFI sweeps. Perfect match.
 
 **Leg 2: Protocol fees to `move_protocol_fees`: 13 atoms gap**
 
-During this interval, 58 staker claims and 7 compounding distributions generated protocol fees:
+During this interval, 58 staker-claim events and 7 compounding-distribution events were processed. A small subset had zero reward (and therefore zero protocol fee), but the event totals below reconcile to the observed sweep:
 
 | Fee Source                     | LP Payout      | Protocol Fee  | Count |
 | ------------------------------ | -------------- | ------------- | ----- |
@@ -273,7 +278,7 @@ During this interval, 58 staker claims and 7 compounding distributions generated
 | Compounding vault (5.26% rate) | 36,777,112     | 1,935,640     | 7     |
 | **Total**                      | **52,397,331** | **5,840,712** | 65    |
 
-The `move_protocol_fees` at 18:03 UTC swept **5,840,725** atoms ([View on Solscan](https://solscan.io/tx/kDDnEXanh7QescKeozcz4zTdPiWppiLe7ayKrZVBzmiBsDVnW5juLev6v4uYvQbtHdMu4mPPcmSYzbb2cbLsJPe)). That is 13 atoms more than the 5,840,712 atoms I computed from individual events. The 13-atom difference should be explainable from rounding in the on-chain integer arithmetic across 65 protocol fee calculations.
+The `move_protocol_fees` at 18:03 UTC swept **5,840,725** atoms ([View on Solscan](https://solscan.io/tx/kDDnEXanh7QescKeozcz4zTdPiWppiLe7ayKrZVBzmiBsDVnW5juLev6v4uYvQbtHdMu4mPPcmSYzbb2cbLsJPe)). That is 13 atoms more than the 5,840,712 atoms I computed from individual events. The 13-atom difference is consistent with rounding in on-chain integer arithmetic across these 65 events.
 
 **Where the $69.13 went**
 

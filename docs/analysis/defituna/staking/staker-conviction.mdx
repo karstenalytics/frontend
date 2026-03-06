@@ -116,6 +116,12 @@ This page helps you:
 <details>
 <summary>Click to expand chart reading guide</summary>
 
+**How to Use:**
+- Start with the two summary metrics to separate wallet-count conviction from amount-weighted reinvestment
+- Use the waterfall chart to see how active stakers split into no reward activity, compound-only, mixed, and claim-only cohorts
+- Use the stake-size chart to see whether behavior differs across small and large stakers
+- Hover both charts for exact counts, percentages, rewards, and stake totals
+
 **Loyalty Summary Statistics:**
 - **Compound-Only Rate**: Percentage of reward-active stakers who have ONLY compounded (never claimed) - a wallet-count-based metric
 - **Reinvestment Rate**: Percentage of total reward SOL that was compounded rather than claimed - an amount-weighted metric that is much lower than the Compound-Only Rate because large claimers (whales) dominate total SOL volume
@@ -204,7 +210,7 @@ Not all active stakers have reward activity - some may have staked recently and 
 
 **Date Range**
 
-Analysis covers the period dynamically shown in the data (typically from when reward tracking began to the most recent data update). The date range is displayed in the methodology section.
+Analysis covers the period available in the current conviction dataset, from reward tracking start through the latest data update.
 
 **Reward Extraction**
 
@@ -233,7 +239,7 @@ Data is automatically updated once per day. Check the "Last updated" timestamp i
 
 **Known Limitations**
 
-- Only tracks stakers who have claimed OR compounded at least once (no reward activity = not included)
+- Behavior segmentation is only defined for reward-active stakers. Wallets without reward activity are still shown as a separate group in the waterfall chart when current active-staker data is available, but they are not assigned to compound-only, mixed, or claim-only behavior buckets.
 - Doesn't track unclaimed rewards still accumulating in staking contracts
 - Wallet-level tracking (multi-wallet stakers counted separately)
 - Historical data only (no predictive modeling of future behavior)

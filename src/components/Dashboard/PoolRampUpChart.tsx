@@ -389,8 +389,8 @@ export default function PoolRampUpChart(): React.ReactElement {
             marginLeft: '25px',
             lineHeight: '1.6',
           }}>
-            <div>↑ Cumulative Revenue (SOL)</div>
-            <div>→ Days Since Establishment</div>
+            <div>-> Cumulative Revenue (SOL)</div>
+            <div>-> Days Since Establishment</div>
           </div>
         )}
       </div>

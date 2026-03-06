@@ -516,7 +516,7 @@ export default function AprChart(): React.ReactElement {
           marginTop: '8px',
           lineHeight: '1.5',
         }}>
-          Enter the USD price you paid per TUNA to see your personal APR. Since rewards are paid in WSOL, a lower entry price means a higher effective APR. Defaults to $0.05 (public pre-sale price).
+          Enter the USD price you paid per TUNA to see your personal APR. Since rewards are paid in WSOL, a lower entry price means a higher effective APR. Placeholder example: $0.05 (public pre-sale price).
         </div>
       </div>
     </>

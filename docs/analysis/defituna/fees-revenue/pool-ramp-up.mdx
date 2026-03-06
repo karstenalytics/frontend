@@ -47,13 +47,14 @@ Related pages: [Revenue by Pool](./by-pool) for total pool revenue, [Orca vs Fus
 
 **Interactive Features:**
 - **Days slider**: Adjust the time window (7-90 days) to focus on early growth or full lifecycle
-- **Pool visibility buttons**: "Select All Pools", "Deselect All Pools", or "10 Newest Pools" for quick filtering
-- **Default visibility**: Pools are hidden by default if their 90-day cumulative revenue is less than 5 SOL, or if they are the two main SOL-USDC pools (Orca (SOL&#x2013;USDC) and Fusion SOL-USDC) which dominate the scale - use "Select All Pools" to show all pools
+- **Pool visibility buttons (desktop only)**: "Select All Pools", "Deselect All Pools", or "10 Newest Pools" for quick filtering
+- **Default visibility**: Pools are hidden by default if their latest available cumulative revenue in the ramp-up window is less than 5 SOL, or if they are the two main SOL-USDC pools (Orca (SOL&#x2013;USDC) and Fusion SOL-USDC) which dominate the scale - use "Select All Pools" to show all pools
 - **Hover on lines**: See pool name, protocol, day number, date, daily revenue, and cumulative total
 - **Click legend**: Show/hide individual pools to declutter the view
 - **Double-click legend**: Isolate a single pool to focus on its trajectory
-- **Drag to zoom**: Select specific day number ranges or revenue ranges
+- **Drag to zoom (desktop only)**: Select specific day number ranges or revenue ranges
 - **Double-click chart**: Reset zoom to the original axis range
+- **Mobile behavior**: Pools with latest available cumulative revenue < 5 SOL are excluded from the mobile chart for readability
 
 </details>
 
@@ -87,11 +88,11 @@ Related pages: [Revenue by Pool](./by-pool) for total pool revenue, [Orca vs Fus
 For the Fusion SOL-USDC pool established on 2025-07-31 (values from a point-in-time snapshot; hover over this pool in the chart above for current figures):
 
 ```
-Day 1  (2025-07-31):    0.000013 SOL daily →      0.000013 SOL cumulative
-Day 2  (2025-08-01):    0.0      SOL daily →      0.000013 SOL cumulative
-Day 3  (2025-08-02):    0.000015 SOL daily →      0.000029 SOL cumulative
+ Day 1  (2025-07-31):    0.000013 SOL daily ->      0.000013 SOL cumulative
+ Day 2  (2025-08-01):    0.0      SOL daily ->      0.000013 SOL cumulative
+ Day 3  (2025-08-02):    0.000015 SOL daily ->      0.000029 SOL cumulative
 ...
-Day 90 (2025-10-28):    8.41     SOL daily →  1,629.56     SOL cumulative
+ Day 90 (2025-10-28):    8.41     SOL daily ->  1,629.56     SOL cumulative
 ```
 
 **Limitations**

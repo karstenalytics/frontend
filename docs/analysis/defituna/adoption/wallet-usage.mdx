@@ -315,9 +315,9 @@ Tracks unique wallets interacting with the DefiTuna protocol through revenue-gen
           ? (daily_users.top_wallets_30d || [])
           : daily_users.top_wallets;
 
-      // Filter out treasury infrastructure wallet
+      // Filter out known treasury infrastructure wallet
       const filteredTopWallets = topWalletRows.filter(
-        wallet => !wallet.address.startsWith('9j6d')
+        wallet => wallet.address !== '9j6dHYVg6jkWX2Ejp1i6M4HkzRqKtVdWfLNE9ZUhsUxM'
       );
 
       return (
@@ -366,24 +366,30 @@ This page helps you:
 - **Assess wallet retention**: Weekly active wallet trends reveal whether wallets return after their first interaction
 - **Evaluate protocol changes**: Identify the impact of feature launches, parameter updates, or integrations on usage numbers by comparing activity before and after changes
 - **Benchmark growth**: Use daily and weekly metrics to measure protocol health over time
-- **Identify power users**: Use the Top Daily Wallets table to find the most consistently engaged wallets
+- **Identify power users**: Use the Top Wallets by Days Active table to find the most consistently engaged wallets
 
 ## How to Read This Chart
 
 <details>
 <summary>Click to expand chart reading guide</summary>
 
-**Daily Active Wallets Chart:**
+**Daily View:**
 - **X-axis**: Date (UTC days)
 - **Y-axis**: Number of unique wallets executing fee-generating actions each day
+- **New % line (right axis)**: Share of active wallets that are first seen on that day
+- **30-day MA**: Trend line for active wallets and New % (daily view only)
 - **Spikes**: May indicate marketing campaigns, token launches, or protocol events
 - **Baseline**: Represents core user base executing regular transactions
 
-**Weekly Active Wallets Chart:**
+**Weekly View:**
 - **X-axis**: Date (UTC days)
 - **Y-axis**: Rolling 7-day union of active wallets (counts each wallet once even if active on multiple days)
+- **New % line (right axis)**: Share of first-seen wallets within each rolling 7-day window
 - **Smooths volatility**: Filters out single-day spikes to show sustained engagement trends
 - **Lag effect**: Changes appear gradually due to 7-day rolling window
+
+**View Toggle:**
+- Switch between **Daily** and **Weekly** using the chart toggle in the chart header
 
 **Top Wallets by Days Active Table:**
 - **Wallet Address**: Solana address (links to Solscan)
@@ -451,7 +457,7 @@ For each UTC day:
 
 This **rolling 7-day union** smooths daily volatility and highlights sustained participation patterns.
 
-**Top Daily Wallets Ranking**
+**Top Wallets by Days Active Ranking**
 
 The top wallets table ranks by:
 - **Activity frequency**: Number of distinct calendar days (UTC) the wallet executed fee-generating transactions

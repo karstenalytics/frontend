@@ -55,6 +55,9 @@ export default function TopTransactionsTable({
       ? typeFilter.filter(Boolean)
       : [typeFilter]
     : [];
+  const normalizedTypeFilterSet = new Set(
+    typeFilterArray.map((type) => String(type).toLowerCase())
+  );
   const hasPoolTypeFilter = Boolean(poolIdFilter && typeFilterArray.length > 0);
 
   // Select data based on group mode or pool/type filters
@@ -63,9 +66,22 @@ export default function TopTransactionsTable({
   let allTransactions: Array<any> = [];
 
   if (hasPoolTypeFilter) {
-    const combinedTransactions = typeFilterArray.flatMap((type) =>
-      topTransactionsPoolType[`${poolIdFilter}_${type}`] || []
-    );
+    const combinedTransactions = typeFilterArray.flatMap((type) => {
+      const directKey = `${poolIdFilter}_${type}`;
+      const directMatches = topTransactionsPoolType[directKey];
+      if (directMatches && directMatches.length > 0) {
+        return directMatches;
+      }
+
+      const normalizedType = String(type).toLowerCase();
+      const fallbackKey = Object.keys(topTransactionsPoolType).find((key) => {
+        if (!key.startsWith(`${poolIdFilter}_`)) return false;
+        const keyType = key.slice(String(poolIdFilter).length + 1);
+        return keyType.toLowerCase() === normalizedType;
+      });
+
+      return fallbackKey ? (topTransactionsPoolType[fallbackKey] || []) : [];
+    });
 
     if (combinedTransactions.length > 0) {
       allTransactions = combinedTransactions.map((tx) => ({ ...tx, group: poolIdFilter }));
@@ -111,7 +127,9 @@ export default function TopTransactionsTable({
 
     // Apply additional type filter if provided (for dual filtering: pool AND type)
     if (typeFilterArray.length > 0) {
-      allTransactions = allTransactions.filter(tx => typeFilterArray.includes(tx.type));
+      allTransactions = allTransactions.filter(tx =>
+        normalizedTypeFilterSet.has(String(tx.type || '').toLowerCase())
+      );
     }
   }
 
@@ -229,6 +247,15 @@ export default function TopTransactionsTable({
     }
     // Otherwise, abbreviate the mint address
     return abbreviateMint(tx.mint);
+  };
+
+  const normalizePoolLabel = (poolLabel?: string): string => {
+    const cleaned = (poolLabel || '')
+      .replace(/<br\s*\/?>/gi, ' ')
+      .replace(/\s+\)/g, ')')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return cleaned || 'N/A';
   };
 
   let tableTitle = selectedFilter
@@ -361,7 +388,7 @@ export default function TopTransactionsTable({
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                   }}>
-                    {tx.pool_label.replace(/<br>/g, ' ')}
+                    {normalizePoolLabel(tx.pool_label)}
                   </div>
                 </td>
               )}
@@ -390,7 +417,7 @@ export default function TopTransactionsTable({
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                   }}>
-                    {tx.pool_label.replace(/<br>/g, ' ')}
+                    {normalizePoolLabel(tx.pool_label)}
                   </div>
                 </td>
               )}

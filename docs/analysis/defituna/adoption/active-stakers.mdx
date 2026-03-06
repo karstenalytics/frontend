@@ -141,7 +141,7 @@ Tracks the number of unique wallets holding active TUNA stakes over time. The co
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>Current Stake</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>% of Total</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>vs. Peak</th>
-                  <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>30d Change</th>
+                  <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>30d Balance %</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'center' }}>Timeline</th>
                 </tr>
               </thead>
@@ -221,13 +221,13 @@ This chart helps you:
 <summary>Click to expand reading guide</summary>
 
 **Summary Cards:**
-- **Active Stakers**: Current count of wallets with staked TUNA > 0. Change badge shows the percentage change vs. 30 days ago.
+- **Active Stakers**: Current count of wallets with staked TUNA > 0.001. Change badge shows the percentage change vs. 30 days ago.
 - **Top 50 Concentration**: Combined share of all staked TUNA held by the 50 largest stakers. Change badge shows the percentage point shift vs. 30 days ago.
 - **Top 50 at Peak**: Percentage of the top 50 stakers currently at their all-time-high staked balance. Includes first-time stakers who are trivially at their peak. Change badge shows the percentage point shift vs. 30 days ago.
 
 **Active Stakers Time Series:**
 - **X-axis**: Date (UTC days)
-- **Y-axis**: Number of unique wallets with staked TUNA balance > 0
+- **Y-axis**: Number of unique wallets with staked TUNA balance > 0.001
 - **Line trend**: Shows the snapshot count of wallets with a positive staked balance at the end of each day
 - **Increases**: New stakers or wallets that restaked
 - **Decreases**: Wallets that fully unstaked all their positions
@@ -238,7 +238,7 @@ This chart helps you:
 - **Current Stake**: Current staked TUNA balance
 - **% of Total**: Wallet's share of all currently staked TUNA
 - **vs. Peak**: Current balance as a percentage of the wallet's all-time-high staked balance (100% = at peak, lower = has partially unstaked)
-- **30d Change (pp)**: Change in % of Total over the last 30 days, in percentage points. "--" if wallet was first seen after the 30-day snapshot date
+- **30d Balance %**: Percent change in the wallet's own staked TUNA balance vs. the 30-day snapshot. "--" if wallet was first seen after the 30-day snapshot date
 - **Timeline**: "See details" button linking to the wallet's full staking timeline page
 
 </details>
@@ -256,12 +256,12 @@ This chart helps you:
 **Active Staker Calculation**
 
 A wallet is counted as an **active staker** on a given day if:
-- Its staked TUNA balance > 0 at 23:59:59 UTC
+- Its staked TUNA balance > 0.001 at 23:59:59 UTC
 - The balance is calculated by processing all stake/unstake events chronologically
 
 **Summary Cards**
 
-- **Active Stakers**: Number of wallets with staked TUNA > 0 at the latest data point. Change badge shows the percentage change vs. 30 days ago.
+- **Active Stakers**: Number of wallets with staked TUNA > 0.001 at the latest data point. Change badge shows the percentage change vs. 30 days ago.
 - **Top 50 Concentration**: Sum of the "% of Total" column for the 50 largest stakers. Change badge shows the percentage point difference vs. the top-50 concentration 30 days ago (recomputed from the snapshot's top 50).
 - **Top 50 at Peak**: Percentage of the current top 50 stakers whose staked balance equals their all-time high. First-time stakers are trivially at their peak and are included. Change badge shows the percentage point difference vs. the snapshot 30 days ago.
 
@@ -275,7 +275,7 @@ The Top 50 Stakers table ranks by:
 - **Current staked balance**: Wallets sorted by their TUNA balance at the latest data point (descending)
 - **% of Total**: Each wallet's share of the total staked TUNA across all wallets
 - **vs. Peak**: Compares current balance to the wallet's all-time-high staked balance, showing retention
-- **30d Change**: Difference in share percentage between now and 30 days ago, showing trend
+- **30d Balance %**: Percent change in each wallet's own staked TUNA balance between now and the 30-day snapshot
 
 **Active Staker Threshold**
 

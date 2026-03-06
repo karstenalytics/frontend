@@ -65,14 +65,31 @@ Protocol revenue over time, broken down by liquidity pool. Click a pool in the l
         return <div>No data available</div>;
       }
 
-      // Map visiblePools (labels) to pool_ids for table filtering
+      // Map visiblePools (labels) to pool_ids for table filtering.
+      // Special case: "Others" should expand to all non-top-8 pool_ids present
+      // in topTransactionsPool, not the synthetic "OTHERS" summary bucket id.
       const selectedPoolIds = (() => {
         if (!visiblePools || !summary.top_pools_by_value) return null;
-        const labelToId = {};
+        const top8PoolIds = (summary.top_pools_by_value || [])
+          .filter(p => p.pool_label !== 'Others')
+          .slice(0, 8)
+          .map(p => p.pool_id);
+
+        const nonTopPoolIds = Object.keys(data.topTransactionsPool || {}).filter(
+          (poolId) => poolId !== 'OTHERS' && !top8PoolIds.includes(poolId)
+        );
+
+        const labelToIds = {};
         for (const p of summary.top_pools_by_value) {
-          labelToId[p.pool_label] = p.pool_id;
+          if (p.pool_label === 'Others') {
+            labelToIds[p.pool_label] = nonTopPoolIds;
+          } else {
+            labelToIds[p.pool_label] = [p.pool_id];
+          }
         }
-        return visiblePools.map(label => labelToId[label]).filter(Boolean);
+
+        const selectedIds = [...new Set(visiblePools.flatMap(label => labelToIds[label] || []))];
+        return selectedIds.length > 0 ? selectedIds : null;
       })();
 
       const poolLabels = (summary.top_pools_by_value || [])
@@ -158,7 +175,7 @@ This chart helps you:
 **Data Sources**
 
 - **Treasury transactions**: On-chain data from DefiTuna treasury PDA (`G9XfJoY81n8A9bZKaJFhJYomRrcvFkuJ22em2g8rZuCh`)
-- **Pool attribution**: Multi-source matching system (registry lookups + auto labels) reconciled against the revenue totals described in [Data Quality](/analysis/data-quality); flows that cannot be confidently matched remain in "Other" until labeled
+- **Pool attribution**: Multi-source matching system (registry lookups + auto labels) reconciled against the revenue totals described in [Data Quality](/analysis/data-quality); flows that cannot be confidently matched are assigned to **Other / Not Applicable** until labeled
 - **Pool labels**: Automatically created and manually curated pool names maintained in the backend
 
 For complete pipeline details, see [Data Pipeline](/analysis/data-pipeline).
@@ -190,7 +207,7 @@ Data is automatically updated once per day. Check the "Last updated" timestamp i
 **Known Limitations**
 
 - Pool labels may show addresses for newly discovered pools until manual names are added
-- The "Others" bucket aggregates all pools outside the top 8, which may include meaningful individual pools
-- The "Other / Not Applicable" named pool represents system-level or unattributed revenue (e.g., direct transfers, protocol operations). It appears inside the top-8 series if it ranks high enough, otherwise it is included in the "Others" aggregation bucket
+- The **Others** bucket aggregates all pools outside the top 8, which may include meaningful individual pools
+- **Other / Not Applicable** is a real pool label (`unknown_pool`) for system-level or unattributed revenue (e.g., direct transfers, protocol operations). If it ranks in the top 8 it appears as its own series; otherwise it contributes to **Others**
 
 </details>

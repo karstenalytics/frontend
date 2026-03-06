@@ -45,21 +45,21 @@ Both token types earn from the same fee sources: position open/close fees, margi
 
 ## What can I learn from the data?
 
-- Where do Flash.Trade's fees and revenue come from? -> [By Pool](./fees-revenue/by-pool), [By Type](./fees-revenue/by-type)
-- How do fees break down across pools and transaction types? -> [Pools vs Types](./fees-revenue/pools-vs-types)
-- What share of fees does the protocol capture as revenue? -> [Effective Take Rate](./fees-revenue/effective-take-rate)
-- How active is the Flash.Trade user base? -> [Wallet Usage](./adoption/wallet-usage)
-- How many stakers are actively participating on-chain? -> [Active Stakers](./adoption/active-stakers)
-- How much FAF is staked and what are the yields? -> [Stake Pool Overview](./staking/stake-pool-overview), [FAF Staking APR](./staking/faf-staking-apr)
-- What does a specific staker's history look like? -> [Wallet Timeline](./staking/wallet-timeline)
-- Are stakers compounding or claiming rewards? -> [Staker Conviction](./staking/staker-conviction)
-- When do vesting contracts unlock? -> [Vesting Timeline](./staking/vesting-timeline)
+- [By Pool](./fees-revenue/by-pool), [By Type](./fees-revenue/by-type): Where Flash.Trade's fees and revenue come from.
+- [Pools vs Types](./fees-revenue/pools-vs-types): How fees break down across pools and transaction types.
+- [Effective Take Rate](./fees-revenue/effective-take-rate): What share of fees the protocol captures as revenue.
+- [Wallet Usage](./adoption/wallet-usage): How active the Flash.Trade user base is.
+- [Active Stakers](./adoption/active-stakers): How many stakers are actively participating on-chain.
+- [Stake Pool Overview](./staking/stake-pool-overview), [FAF Staking APR](./staking/faf-staking-apr): How much FAF is staked and what yields stakers earn.
+- [Wallet Timeline](./staking/wallet-timeline): What a specific staker's history looks like.
+- [Staker Conviction](./staking/staker-conviction): Whether stakers are compounding or claiming rewards.
+- [Vesting Timeline](./staking/vesting-timeline): When vesting contracts unlock.
 
 ## About the data presented in this section
 
 **Coverage**: Data begins on April 12, 2025 (the launch of Flash.Trade's FAF token) and is current through the latest daily update.
 
-**On-chain sources**: The pipeline monitors approximately 50 on-chain addresses across the Flash.Trade protocol, including:
+**On-chain sources**: The pipeline monitors roughly 70+ core on-chain addresses across the Flash.Trade protocol (currently ~75 in the pda-only enumeration set), including:
 
 - **Stake Pool Authority** ([81xGA...biiG](https://solscan.io/account/81xGAvJ27ZeRThU2JEfKAUeT4Fx6qCCd8WHZpujZbiiG)): The PDA that owns the staking pool's token accounts. Protocol fee sweep events move revenue through this account to the staking vault and protocol treasury. FAF staking, unstaking, reward collection, and compounding events also flow through here, powering the staker analytics, conviction analysis, and APR calculations.
 - **Pool and custody accounts**: Each perpetual market (Crypto.1, Trump.1, etc.) has a pool program account and custody accounts that track fee generation from trading operations. This is where per-pool and per-type breakdowns come from.

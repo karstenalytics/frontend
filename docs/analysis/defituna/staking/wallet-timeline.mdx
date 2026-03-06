@@ -228,7 +228,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
               fontSize: '13px',
               color: 'var(--ifm-color-secondary)',
             }}>
-              Enter any wallet address from the staking cache ({loading ? '...' : '7,861 wallets available'}). No idea which address to enter? Check <a href="/analysis/defituna/staking/staked-tuna" style={{ color: 'var(--accent)', textDecoration: 'none' }}>recent stakers/withdrawers</a> or <a href="https://defituna.com/stake" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>DefiTuna Leaderboard</a> or use the notable wallets below.
+              Enter any wallet address from the staking cache. No idea which address to enter? Check <a href="/analysis/defituna/staking/staked-tuna" style={{ color: 'var(--accent)', textDecoration: 'none' }}>recent stakers/withdrawers</a> or <a href="https://defituna.com/stake" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>DefiTuna Leaderboard</a> or use the notable wallets below.
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '12px', color: 'var(--ifm-color-secondary)' }}>
@@ -294,7 +294,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
               <h3 style={{ marginTop: 0 }}>Error Loading Wallet</h3>
               <p>{error}</p>
               <p style={{ fontSize: '14px', color: 'var(--ifm-color-secondary)', marginTop: '16px', marginBottom: 0 }}>
-                Please check the wallet address and try again. The wallet must exist in the staking cache (active from 2025-07-25 onwards).
+                Please check the wallet address and try again. The wallet must exist in the staking cache.
               </p>
             </div>
           )}
@@ -341,7 +341,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
 
                   <div>
                     <div style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)', marginBottom: '4px' }}>
-                      Current Unstaked
+                      Pending Unstake (Queued)
                     </div>
                     <div style={{ fontSize: '20px', fontWeight: 600 }}>
                       {data.summary.current_unstaked.toLocaleString(undefined, { maximumFractionDigits: 2 })} TUNA
@@ -615,7 +615,7 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                 {data.error || 'This wallet is not in the staking cache.'}
               </p>
               <p style={{ fontSize: '14px', color: 'var(--ifm-color-secondary)' }}>
-                The cache contains 7,861 wallets active from 2025-07-25 onwards.
+                The wallet must be present in the current staking cache to appear here.
               </p>
             </div>
           )}
@@ -653,7 +653,7 @@ This page helps you:
 **Wallet Summary Metrics:**
 - **Current Staked**: TUNA currently in staking positions
 - **Current Locked (Vesting)**: TUNA locked by vesting schedule (unlocks over time)
-- **Current Unstaked**: TUNA held liquid by the wallet
+- **Pending Unstake (Queued)**: TUNA in the unstake queue awaiting withdrawal
 - **Realized Rewards**: Cumulative SOL from claimed + compounded rewards (unclaimed rewards not shown)
 - **Total Operations**: Count of all staking transactions
 - **Active Since**: First staking transaction date and total days active
@@ -663,7 +663,7 @@ This page helps you:
 - **Stacked Area (Three Colors)**: TUNA balance split into:
   - Pink (bottom) = Staked TUNA (Vesting) - locked by vesting schedule
   - Teal (middle) = Staked TUNA (Unlocked) - freely available staked tokens
-  - Gray (top) = Unstaked TUNA - pending withdrawal
+  - Gray (top) = Pending Unstake (Queued) - TUNA awaiting withdrawal
 - **Dashed Gold Line (Right Y-axis)**: Cumulative realized rewards in SOL (claimed + compounded)
 - **Colored Dots**: Individual staking operations with distinct shapes and colors:
   - Purple diamond = Initialize Position
@@ -701,7 +701,7 @@ This page helps you:
 
 - **Staker cache**: Compressed snapshot of all staking positions and operations
 - **On-chain transactions**: Staking instructions from DefiTuna staking program
-- **Balance tracking**: Daily snapshots of staked and unstaked TUNA balances
+- **Balance tracking**: Event-level reconstruction of staked, queued-unstake, and locked TUNA balances
 - **Reward calculations**: Realized rewards from claim and compound operations
 
 For complete pipeline details, see [Data Pipeline](/analysis/data-pipeline).
@@ -709,19 +709,19 @@ For complete pipeline details, see [Data Pipeline](/analysis/data-pipeline).
 **Wallet Lookup Process**
 
 1. **Address validation**: Input validated as 32-44 character Solana address
-2. **Cache search**: Wallet looked up in staker cache (7,861 wallets active from 2025-07-25 onwards)
+2. **Cache search**: Wallet looked up in the current staker cache
 3. **Timeline reconstruction**: All operations sorted chronologically to rebuild balance history
 4. **Metrics calculation**: Summary statistics computed from operation history
 
 **Balance Calculation**
 
-Daily staked and unstaked balances are calculated by:
+Wallet balances are reconstructed event by event:
 
-1. **Starting balances**: Begin with earliest known state (or zero if cache started after first stake)
-2. **Operation application**: Each stake/unstake/withdraw operation adjusts balances
-3. **Daily snapshots**: End-of-day balances recorded in UTC timezone
-4. **Compound handling**: Compounded rewards increase staked balance
-5. **Claim handling**: Claimed rewards tracked separately as realized SOL
+1. **Starting balances**: Begin with the wallet's earliest event in the cache
+2. **Operation application**: Each stake, unstake, withdraw, claim, and compound event updates the running balances
+3. **Timeline points**: A point is recorded at each event timestamp in UTC rather than once per day
+4. **Vesting extension**: Additional synthetic points are inserted for vesting unlocks and the cache end date when needed
+5. **Reward handling**: Claimed and compounded SOL are tracked separately as realized rewards
 
 **Vesting/Locked Balance Calculation**
 
@@ -763,7 +763,7 @@ This wallet-level detail complements:
 
 **Date Range and Limitations**
 
-- **Data start**: 2025-07-25 (when staker cache tracking began)
+- **Data start**: Earliest date available in the current staker cache
 - **Update frequency**: Data refreshes when staker cache is rebuilt (once a day)
 - **Realized rewards only**: Shows claimed + compounded SOL; unclaimed rewards not included
 - **Operation granularity**: Each transaction counted as one operation regardless of size

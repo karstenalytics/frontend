@@ -120,7 +120,7 @@ This page helps you:
 - **X-axis**: Date (chronological from protocol start)
 - **Y-axis**: Cumulative revenue in SOL (running total since revenue sharing is enabled)
 - **Stacked Areas**: Each colored area represents accumulated revenue from Orca and Fusion ecosystems
-- **Secondary Y-axis (right)**: Fusion Dominance (%) as a dashed orange line, showing Fusion's share of total cumulative revenue over time (can be toggled on/off via legend click)
+- **Secondary Y-axis (right)**: Fusion Dominance (%) as a dashed orange line, showing Fusion's share of displayed AMM cumulative revenue (`Fusion / (Orca + Fusion)`) over time (can be toggled on/off via legend click)
 - **Total Height**: The top edge shows total cumulative revenue across both ecosystems
 
 **Key Comparison Metrics:**
@@ -158,7 +158,7 @@ This page helps you:
 **Data Sources**
 
 - **Treasury transactions**: On-chain data from DefiTuna treasury PDA (`G9XfJoY81n8A9bZKaJFhJYomRrcvFkuJ22em2g8rZuCh`)
-- **Pool attribution**: Multi-source matching system (registry + auto labels) reconciled against the revenue totals described in [Data Quality](/analysis/data-quality); flows without confident matches remain in “Other” until labeled
+- **Pool attribution**: Multi-source matching system (registry + auto labels) reconciled against the revenue totals described in [Data Quality](/analysis/data-quality); flows without confident matches remain in "Other" until labeled
 - **Ecosystem classification**: Pools categorized as Orca Whirlpools, Fusion AMM, or Other
 
 **Cumulative Revenue Calculation**
@@ -186,13 +186,13 @@ Each transaction's revenue type label is classified into an ecosystem:
 - **Fusion AMM**: Labels containing "fusion" or the `collect_protocol_fees` type
 - **Pre-Fusion transfers**: Early `token_transfer` revenue attributed to Orca (all pre-Fusion era revenue was Orca-based)
 
-Residual labels (staking operations, protocol-neutral spot opens) are excluded from the chart as they represent negligible, non-AMM revenue.
+Residual labels (staking operations, protocol-neutral spot opens) and tiny uncategorized amounts (`other_sol`) are excluded from this Orca/Fusion comparison to keep the chart focused on AMM ecosystem revenue.
 
 **Growth Metrics**
 
 Key metrics derivable from this chart:
 - **Total Revenue**: Final value (rightmost point on chart)
-- **Average Daily Revenue**: Total Revenue ÷ Number of Days
+- **Average Daily Revenue**: Total Revenue / Number of Days
 - **Growth Rate**: Compare slopes between different time periods
 - **Ecosystem Contribution**: Height of each area shows its cumulative share
 
@@ -200,7 +200,7 @@ Key metrics derivable from this chart:
 
 This cumulative comparison complements:
 - **[By Pool](/analysis/defituna/fees-revenue/by-pool)**: Shows individual pool breakdowns without time dimension
-- **[Types per Day](/analysis/defituna/fees-revenue/by-type)**: Shows daily revenue patterns instead of cumulative totals
+- **[By Type](/analysis/defituna/fees-revenue/by-type)**: Shows daily revenue patterns instead of cumulative totals
 - **[Pools vs. Types](/analysis/defituna/fees-revenue/pools-vs-types)**: Shows pool-type combinations without ecosystem grouping
 
 **Update Frequency**

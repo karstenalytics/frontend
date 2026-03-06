@@ -163,11 +163,19 @@ This page helps you:
 <details>
 <summary>Click to expand chart reading guide</summary>
 
+**How to Use:**
+
+1. Review the current 7d, 30d, and all-time APR cards
+2. Enter your TUNA purchase price below the chart to enable Entry Price APR
+3. Use the Reference / Entry Price toggle above the cards to switch the card values
+4. Use the 7d / 30d chart toggle to inspect short-term vs. smoother APR history
+
 - **7-Day APR card**: Annualized yield based on the last 7 days of treasury inflows (most volatile window)
 - **30-Day APR card**: Smoothed over 30 days for a more stable estimate
 - **All-Time APR card**: Lifetime average since staking began (summary card only; the chart shows 7-day and 30-day rolling windows)
 - **Reference / Entry Price toggle**: Appears when an entry price is set; switches all three cards between reference APR (current TUNA market price) and entry price APR (your purchase price)
 - **Change badge**: Shows the change in percentage points (pp): 7-Day compares to one week ago, 30-Day and All-Time compare to 30 days ago
+- **Personal mode note**: In Entry Price APR mode, card values switch to your entry-price APR, while change badges continue to show the reference APR deltas for each window
 - **Teal line (chart)**: Reference APR for the selected rolling window (7d or 30d), using that day's historical TUNA price
 - **Green dashed line (chart)**: Entry Price APR (only shown when an entry price is set)
 - **TUNA Reference Price (chart, hidden)**: Click "TUNA Reference Price" in the legend to overlay a secondary y-axis with TUNA price history
@@ -183,10 +191,10 @@ This page helps you:
 
 **Formula**
 
-The staking APR is calculated as:
+The rolling staking APR is calculated as:
 
 ```
-APR = (Revenue per TUNA / TUNA Price) * 100
+Rolling APR = ((Rolling Revenue USD / Days in Window) * 365 / Total TUNA Supply) / TUNA Price * 100
 ```
 
 Where:
@@ -214,7 +222,7 @@ Where:
 - APR is **realized yield** based on actual treasury inflows, not projected returns
 - Short-term APR (7d) can be volatile due to trading volume fluctuations
 - TUNA price is derived from on-chain swap data; low-volume days may have less accurate prices
-- APR does not account for TUNA token price changes (impermanent gain/loss)
+- APR does not account for TUNA price appreciation/depreciation in total return
 
 **Update Frequency**
 

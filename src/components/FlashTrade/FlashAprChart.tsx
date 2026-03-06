@@ -224,6 +224,12 @@ export default function FlashAprChart(): React.ReactElement {
   const dates = filteredData.map(d => d.date);
   const aprValues = filteredData.map(d => d[aprKey] as number);
   const tokenPrices = filteredData.map(d => d.faf_price_usd);
+  const latestFafPrice = data.timeline.reduce<number | null>((latest, entry) => {
+    return entry.faf_price_usd !== null && entry.faf_price_usd > 0 ? entry.faf_price_usd : latest;
+  }, null);
+  const entryPricePlaceholder = latestFafPrice !== null
+    ? `e.g. ${latestFafPrice.toFixed(6).replace(/\.?0+$/, '')}`
+    : 'e.g. 0.0012';
 
   const primaryColor = isDark ? '#14BCCD' : '#00A3B4';
   const personalColor = 'rgba(34, 197, 94, 1)';
@@ -491,7 +497,7 @@ export default function FlashAprChart(): React.ReactElement {
             <input
               type="text"
               inputMode="decimal"
-              placeholder="e.g. 0.0012"
+              placeholder={entryPricePlaceholder}
               value={entryPriceInput}
               onChange={(e) => handleEntryPriceChange(e.target.value)}
               style={{

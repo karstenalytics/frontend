@@ -136,6 +136,12 @@ This page helps you:
 <details>
 <summary>Click to expand chart reading guide</summary>
 
+**How to Use:**
+- Start in Equal mode to compare composition across pools
+- Switch to Proportional mode to compare total revenue contribution across pools
+- Click any segment to filter the transactions table below to that pool-type combination
+- Clear the filter chip above the table to return to the full transaction list
+
 **Understanding the Marimekko Format**
 
 The Marimekko (also called mosaic) chart provides a two-dimensional view of revenue where both dimensions matter:
@@ -160,7 +166,7 @@ This chart answers:
 **Color Coding:**
 - Each color represents a specific transaction type
 - Same color across pools = same transaction type in different pools
-- Legend shows all transaction types present in the data
+- Legend shows the top 10 transaction types by revenue. Smaller types may still appear in the chart even if they are not listed in the legend.
 
 **Interactive Features:**
 - **Equal / Proportional toggle**: Switch between equal column widths (default, for easier composition comparison) and proportional widths (reflecting revenue share)
@@ -196,7 +202,7 @@ This visualization combines two classification systems to create a matrix view:
 
 **Data Accuracy**
 
-All values maintain 100% attribution accuracy. Each transaction is counted exactly once, assigned to one pool and one type. The chart shows the top 10 pools by revenue, covering approximately 90-95% of total revenue; remaining pools are excluded for visual clarity.
+All values maintain 100% attribution accuracy. Each transaction is counted exactly once, assigned to one pool and one type. The chart is limited to the top revenue pools for readability; the long tail of smaller pools is omitted from this view.
 
 For complete pipeline details, see [Data Pipeline](/analysis/data-pipeline).
 

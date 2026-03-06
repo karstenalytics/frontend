@@ -55,7 +55,7 @@ Fees and revenue categorized by liquidity pool over time. Toggle between daily a
 
 ## Top Transactions
 
-The table displays the largest individual transactions contributing to protocol fees and revenue. Clicking a pool in the chart or legend filters this table to that pool's transactions.
+The table displays the largest individual transactions contributing to protocol fees. Clicking a pool in the chart or legend filters this table to that pool's transactions.
 
 <BrowserOnly fallback={<div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
   {() => {
@@ -294,7 +294,7 @@ Data is automatically updated once per day. Check the "Last updated" timestamp i
 
 **Known Limitations**
 
-- Transaction table stores up to 10 entries per pool (90 total) and displays the top 10 for the active view; applying a pool filter reveals that pool's individual top 10
+- Transaction table stores up to 10 entries per pool and displays the top 10 for the active view; applying a pool filter reveals that pool's individual top 10
 - Pool versions are consolidated (V1/V2 shown together)
 - New pools may appear with generated names until manually labeled
 - Revenue metric shows zero for April 12 - June 18, 2025 because MoveProtocolFees tracking began on June 19, 2025

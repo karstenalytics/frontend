@@ -7,7 +7,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Vesting Timeline
 
-Tracks TUNA tokens locked in vesting schedules and their unlock timeline, showing how locked TUNA decreases as unlock events occur and what vesting wallets do with their unlocked tokens.
+Tracks TUNA tokens locked in vesting schedules and their unlock timeline, showing how locked TUNA decreases over time and how much unlocked TUNA remains staked or held by vesting wallets.
 
 ## Current Metrics
 
@@ -258,7 +258,7 @@ Tracks TUNA tokens locked in vesting schedules and their unlock timeline, showin
                       <thead>
                         <tr style={tableStyles.headerRow}>
                           <th style={tableStyles.headerCell}>Start Date</th>
-                          <th style={tableStyles.headerCell}>Locked (TUNA) ▼</th>
+                          <th style={tableStyles.headerCell}>Locked (TUNA, desc.)</th>
                           <th style={tableStyles.headerCell}>per Unlock (TUNA)</th>
                           <th style={tableStyles.headerCell}>Cliff (days)</th>
                           <th style={tableStyles.headerCell}>Unlock Period (days)</th>
@@ -353,6 +353,12 @@ This page helps you:
 - **Remaining Locked**: Percentage of total vesting allocation still locked
 - **Vesting Wallet Conviction**: Ratio of freely available TUNA (staked minus locked + held) to unlocked TUNA across all vesting wallets. Values above 100% indicate wallets acquired additional TUNA beyond their unlocked vesting amount
 
+**How to Use:**
+1. Check the summary cards for total vesting, remaining locked, and vesting wallet conviction
+2. Use the unlock chart to see the long-term release curve and the historical staked + held overlay
+3. Click a date in the "Next 10 Unlock Days" table to filter the full schedules table to that unlock day
+4. Use "Clear Filter" to return to all schedules
+
 **Unlock Timeline Chart:**
 - **X-axis**: Date (chronological, extending into future)
 - **Y-axis**: Total TUNA tokens remaining locked across all vesting schedules
@@ -369,7 +375,7 @@ Shows upcoming unlock events sorted by date, including:
 
 **All Vesting Schedules (expandable):**
 - **Start Date**: When the vesting schedule began
-- **Locked (TUNA) ▼**: Total amount initially locked in this schedule (sorted descending - highest amounts first)
+- **Locked (TUNA, desc.)**: Total amount initially locked in this schedule (sorted descending - highest amounts first)
 - **per Unlock (TUNA)**: Amount of TUNA released per unlock event
 - **Cliff (days)**: Initial waiting period before any tokens unlock
 - **Unlock Period (days)**: Time between each unlock event
@@ -405,7 +411,7 @@ For each vesting schedule, the unlock timeline is calculated based on:
 - **Cliff Period**: Initial waiting period before first unlock (specified in hours, displayed in days)
 - **Unlock Period**: Time between subsequent unlock events (specified in hours, displayed in days)
 - **Unlock Rate**: Amount of TUNA released per unlock period
-- **Number of Unlocks**: Total unlock events = (Total Locked ÷ Unlock Rate)
+- **Number of Unlocks**: Total unlock events = (Total Locked / Unlock Rate)
 
 **Unlock Event Timing:**
 

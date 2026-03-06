@@ -188,6 +188,7 @@ This page helps you:
 - **Toggle**: Switch between Daily and Cumulative views using the button in the chart header
 - **Hover**: See the SOL values for all visible transaction types on that day
 - **Legend**: Click legend items to show/hide specific transaction types
+- **Chart click**: Click a segment to isolate that type; click it again to restore all types
 
 **Top Transactions Table:**
 - **Rank**: Position by SOL amount (largest first)
@@ -229,7 +230,7 @@ The cumulative view computes a running total for each transaction type independe
 - **UTC days**: All transactions are grouped by UTC day for consistent timezone handling
 - **Daily composition**: Each bar shows the breakdown of that day's revenue by transaction type
 - **Gap handling**: Days with zero revenue have no bar
-- **Completeness**: All revenue-generating transactions are included (100% attribution accuracy)
+- **Completeness**: Revenue attribution is complete at the classification layer (100% attribution accuracy), while chart traces omit per-type daily values `<= 0.001 SOL` for readability
 
 **Type Grouping**
 
