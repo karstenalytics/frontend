@@ -1,14 +1,14 @@
 {
   "compound_rate": 56.5,
   "compound_rate_faf": 62.5,
-  "total_claimed_faf": 82039976.4,
-  "compounded_faf": 51286488.56,
-  "compound_count": 3350,
-  "claim_count": 2590,
+  "total_claimed_faf": 82052894.85,
+  "compounded_faf": 51292866.99,
+  "compound_count": 3354,
+  "claim_count": 2593,
   "compounders": 1149,
   "non_compounders": 635,
   "faf_token_claimers": 1784,
-  "faf_token_claim_count": 5940,
+  "faf_token_claim_count": 5947,
   "compound_by_epoch": [
     {
       "epoch": "2025-05",
@@ -414,33 +414,33 @@
       "epoch": "2026-03-active",
       "compound_rate": 51.1,
       "compound_rate_faf": 54.3,
-      "compounders": 287,
-      "non_compounders": 275,
-      "claimed_faf": 4865880.42,
+      "compounders": 291,
+      "non_compounders": 278,
+      "claimed_faf": 4878798.87,
       "by_stake_size": [
         {
           "tier": "<10K",
-          "compound_rate": 37.9,
+          "compound_rate": 37.5,
           "compound_rate_faf": 32.8,
-          "total_wallets": 256
+          "total_wallets": 259
         },
         {
           "tier": "10K-100K",
-          "compound_rate": 58.5,
-          "compound_rate_faf": 51.8,
-          "total_wallets": 94
+          "compound_rate": 58.9,
+          "compound_rate_faf": 51.9,
+          "total_wallets": 95
         },
         {
           "tier": "100K-1M",
-          "compound_rate": 67.4,
-          "compound_rate_faf": 56.2,
-          "total_wallets": 132
+          "compound_rate": 68.7,
+          "compound_rate_faf": 57.3,
+          "total_wallets": 134
         },
         {
           "tier": "1M-10M",
-          "compound_rate": 57.4,
-          "compound_rate_faf": 56.5,
-          "total_wallets": 68
+          "compound_rate": 56.5,
+          "compound_rate_faf": 56.2,
+          "total_wallets": 69
         },
         {
           "tier": "10M+",
@@ -454,6 +454,6 @@
   "changes": {
     "compound_rate_pct": -1.9,
     "compound_rate_faf_pct": -19.5,
-    "claimed_faf_30d": 5168870.9
+    "claimed_faf_30d": 5168119.6
   }
 }
