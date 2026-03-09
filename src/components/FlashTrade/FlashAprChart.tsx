@@ -6,6 +6,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ChartToggle from '../common/ChartToggle';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import { safeGetItem, safeSetItem, safeRemoveItem } from '@site/src/utils/localStorage';
 
 interface AprTimelineEntry {
@@ -351,36 +352,19 @@ export default function FlashAprChart(): React.ReactElement {
           marginBottom: '24px',
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '8px',
-            marginBottom: '8px',
-            paddingLeft: isMobile ? '16px' : 0,
-            paddingRight: isMobile ? '16px' : 0,
-          }}
-        >
-          <h3
-            style={{
-              margin: 0,
-              fontSize: isMobile ? '1.1rem' : '1.25rem',
-              fontWeight: 600,
-            }}
-          >
-            {title}
-          </h3>
-          <div style={{ flexShrink: 0 }}>
+        <ChartHeader
+          title={title}
+          plotRef={plotRef}
+          isMobile={isMobile}
+          toggle={
             <ChartToggle
               value={view}
               onChange={(v) => setView(v as '7d' | '30d')}
               options={VIEW_OPTIONS}
               variant="primary"
             />
-          </div>
-        </div>
+          }
+        />
 
         <Plot
           data={traces}

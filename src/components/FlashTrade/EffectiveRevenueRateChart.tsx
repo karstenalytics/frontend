@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import type { Data } from 'plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
@@ -6,6 +6,7 @@ import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/pl
 import { buildColorMap } from '@site/src/utils/chartColors';
 import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 import ChartToggle from '@site/src/components/common/ChartToggle';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 
 interface WeeklyPoolEntry {
   fees_usdc: number;
@@ -103,6 +104,8 @@ export default function EffectiveRevenueRateChart(): React.ReactElement {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  const plotRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch('/data/flash-trade/weekly_pool_metrics.json')
@@ -210,32 +213,19 @@ export default function EffectiveRevenueRateChart(): React.ReactElement {
   const windowLabel = windowSize === 0 ? 'Cumulative' : `${windowSize}-Week Rolling`;
 
   return (
-    <div style={{
+    <div ref={plotRef} style={{
       background: 'var(--ifm-background-surface-color)',
       border: '1px solid var(--ifm-toc-border-color)',
       borderRadius: 'var(--ifm-global-radius)',
       padding: isMobile ? '16px 0px 16px 0px' : '16px',
       marginBottom: '24px',
     }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingLeft: isMobile ? '16px' : '0px',
-        paddingRight: isMobile ? '16px' : '0px',
-        marginBottom: '16px',
-        flexWrap: 'wrap',
-        gap: '12px',
-      }}>
-        <h3 style={{
-          margin: 0,
-          fontSize: isMobile ? '15px' : '18px',
-          fontWeight: 600,
-        }}>
-          {windowLabel} Effective Take Rate by Pool
-        </h3>
-        <ChartToggle value={windowSize} onChange={setWindowSize} options={WINDOW_OPTIONS} variant="primary" />
-      </div>
+      <ChartHeader
+        title={`${windowLabel} Effective Take Rate by Pool`}
+        plotRef={plotRef}
+        isMobile={isMobile}
+        toggle={<ChartToggle value={windowSize} onChange={setWindowSize} options={WINDOW_OPTIONS} variant="primary" />}
+      />
 
       <Plot
         data={traces}

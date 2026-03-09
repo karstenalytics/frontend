@@ -3,6 +3,14 @@ id: wallet-usage
 title: Wallet Usage
 ---
 
+import ChartPageSEO from '@site/src/components/SEO/ChartPageSEO';
+
+<ChartPageSEO
+  title="Daily/Weekly Active Wallets"
+  description="Unique wallets interacting with DefiTuna daily and weekly"
+  chartType="line"
+/>
+
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
@@ -21,6 +29,8 @@ Tracks unique wallets interacting with the DefiTuna protocol through revenue-gen
     const UsageTopAddresses = require('@site/src/components/Usage/UsageTopAddresses').default;
     const { useUsageMetrics } = require('@site/src/hooks/useUsageMetrics');
     const ChartToggle = require('@site/src/components/common/ChartToggle').default;
+    const ChartHeader = require('@site/src/components/common/ChartHeader').default;
+    const { useRef } = require('react');
 
     // Calculate 30-day moving average. `key` selects the numeric field to average.
     function calc30DayMA(data, windowSize = 30, key = 'count') {
@@ -56,6 +66,7 @@ Tracks unique wallets interacting with the DefiTuna protocol through revenue-gen
       const spikeColor = isDark ? '#1a2832' : '#cbd5e0';
 
       const [view, setView] = useState('daily');
+      const plotRef = useRef(null);
       const [isMobile, setIsMobile] = useState(() =>
         typeof window !== 'undefined' ? window.innerWidth <= 996 : false
       );
@@ -188,7 +199,7 @@ Tracks unique wallets interacting with the DefiTuna protocol through revenue-gen
         : 'Rolling 7-day unique wallets. New % shows wallets not previously seen since Jul 2025 (data start). Accuracy improves over time as the seen-wallet pool grows.';
 
       return (
-        <div style={{
+        <div ref={plotRef} style={{
           background: 'var(--ifm-background-surface-color)',
           border: '1px solid var(--ifm-toc-border-color)',
           borderRadius: 'var(--ifm-global-radius)',
@@ -196,25 +207,14 @@ Tracks unique wallets interacting with the DefiTuna protocol through revenue-gen
           padding: isMobile ? '16px 0px 16px 0px' : '24px',
           marginBottom: '24px',
         }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '8px',
-            marginBottom: '8px',
-            paddingLeft: isMobile ? '16px' : 0,
-            paddingRight: isMobile ? '16px' : 0,
-          }}>
-            <h3 style={{
-              margin: 0,
-              fontSize: isMobile ? '1.1rem' : '1.25rem',
-              fontWeight: 600,
-            }}>{title}</h3>
-            <div style={{ flexShrink: 0 }}>
+          <ChartHeader
+            title={title}
+            plotRef={plotRef}
+            isMobile={isMobile}
+            toggle={
               <ChartToggle value={view} onChange={setView} options={VIEW_OPTIONS} variant="primary" />
-            </div>
-          </div>
+            }
+          />
 
           <Plot
             data={traces}

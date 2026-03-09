@@ -3,6 +3,7 @@ import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import { useManifest } from '@site/src/hooks/useManifest';
 
 interface UnlockTimelineChartProps {
@@ -130,14 +131,11 @@ export default function UnlockTimelineChart({
         marginBottom: '32px',
       }}
     >
-      <h3 style={{
-        margin: 0,
-        marginBottom: '16px',
-        marginLeft: isMobile ? '16px' : 0,
-        fontSize: isMobile ? '1.1rem' : '1.25rem',
-        fontWeight: 600,
-        textAlign: 'center',
-      }}>Vesting Unlock Timeline</h3>
+      <ChartHeader
+        title="Vesting Unlock Timeline"
+        plotRef={plotRef}
+        isMobile={isMobile}
+      />
       <div
         style={{
           display: isMobile ? 'grid' : 'flex',

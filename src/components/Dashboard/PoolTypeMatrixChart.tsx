@@ -6,6 +6,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
 import { buildColorMap } from '@site/src/utils/chartColors';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import ChartToggle from '../common/ChartToggle';
 
 type WidthMode = 'proportional' | 'equal';
@@ -365,26 +366,19 @@ export default function PoolTypeMatrixChart({ onSegmentClick }: PoolTypeMatrixCh
       padding: isMobile ? '16px 0px 16px 0px' : '16px',
       marginBottom: '24px',
     }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '8px',
-        paddingRight: isMobile ? '16px' : 0,
-        paddingLeft: isMobile ? '16px' : 0,
-        marginBottom: '4px',
-      }}>
-        <span style={{ fontWeight: 600, fontSize: isMobile ? 15 : 18 }}>
-          Revenue by Pool & Transaction Type
-        </span>
-        <ChartToggle
-          value={widthMode}
-          onChange={(v) => setWidthMode(v as WidthMode)}
-          options={WIDTH_OPTIONS}
-          variant="secondary"
-        />
-      </div>
+      <ChartHeader
+        title="Revenue by Pool & Transaction Type"
+        plotRef={plotRef}
+        isMobile={isMobile}
+        toggle={
+          <ChartToggle
+            value={widthMode}
+            onChange={(v) => setWidthMode(v as WidthMode)}
+            options={WIDTH_OPTIONS}
+            variant="secondary"
+          />
+        }
+      />
       <Plot
         data={traces}
         layout={{

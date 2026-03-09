@@ -3,6 +3,7 @@ import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import type { Visualizations } from '@site/src/hooks/useStakerConviction';
 
 interface CompoundVsStakeScatterProps {
@@ -134,6 +135,7 @@ export default function CompoundVsStakeScatter({
         </div>
       </div>
 
+      <ChartHeader title="Compound Rate vs Stake Size - The Inverse Whale Effect" plotRef={plotRef} isMobile={isMobile} />
       <Plot
         data={[
           createTrace(compoundOnly, 'compound_only', behaviorLabels.compound_only),
@@ -142,10 +144,6 @@ export default function CompoundVsStakeScatter({
         ]}
         layout={{
           ...template.layout,
-          title: {
-            text: 'Compound Rate vs Stake Size - The Inverse Whale Effect',
-            font: { size: 18, weight: 600 },
-          },
           xaxis: {
             ...template.layout.xaxis,
             title: 'Compound Rate (%)',
@@ -241,7 +239,7 @@ export default function CompoundVsStakeScatter({
             },
           ],
           dragmode: isMobile ? false : 'zoom',
-          margin: { l: 80, r: 40, t: 50, b: 100 },
+          margin: { l: 80, r: 40, t: 10, b: 100 },
           height: 600,
         }}
         config={{

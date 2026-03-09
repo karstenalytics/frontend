@@ -5,6 +5,7 @@ import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 import ChartToggle from '@site/src/components/common/ChartToggle';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 
 interface TierData {
   tier: string;
@@ -252,26 +253,12 @@ export default function ConvictionEpochChart(): React.ReactElement {
       marginBottom: '24px',
       boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
     }}>
-      {/* Title and Toggle */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingLeft: isMobile ? '16px' : '0px',
-        paddingRight: isMobile ? '16px' : '0px',
-        marginBottom: '16px',
-        flexWrap: 'wrap',
-        gap: '12px',
-      }}>
-        <h3 style={{
-          margin: 0,
-          fontSize: isMobile ? '15px' : '18px',
-          fontWeight: 600,
-        }}>
-          {chartTitle}
-        </h3>
-        <ChartToggle value={weight} onChange={setWeight} options={WEIGHT_OPTIONS} variant="secondary" />
-      </div>
+      <ChartHeader
+        title={chartTitle}
+        plotRef={plotRef}
+        isMobile={isMobile}
+        toggle={<ChartToggle value={weight} onChange={setWeight} options={WEIGHT_OPTIONS} variant="secondary" />}
+      />
 
       <Plot
         data={traces}

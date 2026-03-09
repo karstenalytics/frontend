@@ -4,6 +4,7 @@ import type { Data } from 'plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import type { DailyDataPoint } from './types';
 
 interface DailyStackedChartProps {
@@ -132,14 +133,12 @@ export default function DailyStackedChart({ data }: DailyStackedChartProps): Rea
       padding: isMobile ? '16px 0px 16px 0px' : '16px',
       marginBottom: '24px',
     }}>
+      <ChartHeader title="Orca vs. Fusion-generated Protocol Revenue" plotRef={plotRef} isMobile={isMobile} />
       <Plot
         data={traces}
         layout={{
           ...template.layout,
-          title: {
-            text: 'Orca vs. Fusion-generated Protocol Revenue',
-            font: { size: isMobile ? 15 : 18, weight: 600 },
-          },
+          title: undefined,
           xaxis: {
             ...template.layout.xaxis,
             title: isMobile ? '' : {
@@ -192,14 +191,14 @@ export default function DailyStackedChart({ data }: DailyStackedChartProps): Rea
             margin: {
               l: 25,
               r: showFusionDominance ? 20 : 5,
-              t: 30,
+              t: 10,
               b: 80,
             },
           } : {
             margin: {
               l: 70,
               r: showFusionDominance ? 80 : 40,
-              t: 50,
+              t: 16,
               b: 80,
             },
           }),

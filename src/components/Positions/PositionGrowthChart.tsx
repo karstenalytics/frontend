@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 
 interface PositionMetric {
   date: string;
@@ -36,6 +37,8 @@ export default function PositionGrowthChart({ data }: PositionGrowthChartProps):
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  const plotRef = useRef<HTMLDivElement>(null);
 
   if (data.length === 0) {
     return (
@@ -92,21 +95,18 @@ export default function PositionGrowthChart({ data }: PositionGrowthChartProps):
   };
 
   return (
-    <div style={{
+    <div ref={plotRef} style={{
       background: 'var(--ifm-background-surface-color)',
       border: '1px solid var(--ifm-toc-border-color)',
       borderRadius: 'var(--ifm-global-radius)',
       padding: '16px',
       marginBottom: '24px',
     }}>
+      <ChartHeader title="Open Positions Over Time" plotRef={plotRef} isMobile={isMobile} />
       <Plot
         data={[netOpenTrace, dailyOpenedTrace, dailyClosedTrace]}
         layout={{
           ...template.layout,
-          title: {
-            text: 'Open Positions Over Time',
-            font: { size: 16, color: 'var(--ifm-font-color-base)' },
-          },
           xaxis: {
             ...template.layout.xaxis,
             title: 'Date',
@@ -129,7 +129,7 @@ export default function PositionGrowthChart({ data }: PositionGrowthChartProps):
             margin: {
               l: 25,
               r: 5,
-              t: 30,
+              t: 10,
               b: 32,
             },
           } : {}),

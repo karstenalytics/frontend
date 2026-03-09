@@ -6,6 +6,7 @@ import { getPlotlyTemplate, getResponsivePlotlyConfig} from '@site/src/utils/plo
 import { buildColorMap } from '@site/src/utils/chartColors';
 import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 import ChartToggle from '@site/src/components/common/ChartToggle';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 
 // Per-pool bucket breakdown (new three-bucket format)
 interface PoolBuckets {
@@ -432,29 +433,17 @@ export default function PoolStackedAreaChart({
       padding: isMobile ? '16px 0px 16px 0px' : '16px',
       marginBottom: '24px',
     }}>
-      {/* Title and Toggles Row */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingLeft: isMobile ? '16px' : '0px',
-        paddingRight: isMobile ? '16px' : '0px',
-        marginBottom: '16px',
-        flexWrap: 'wrap',
-        gap: '12px',
-      }}>
-        <h3 style={{
-          margin: 0,
-          fontSize: isMobile ? '15px' : '18px',
-          fontWeight: 600,
-        }}>
-          {chartTitle}
-        </h3>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', flexShrink: 0 }}>
-          <ChartToggle value={view} onChange={setView} options={VIEW_OPTIONS} variant="primary" />
-          <ChartToggle value={metric} onChange={setMetric} options={metricOptions} variant="secondary" />
-        </div>
-      </div>
+      <ChartHeader
+        title={chartTitle}
+        plotRef={plotRef}
+        isMobile={isMobile}
+        toggle={
+          <>
+            <ChartToggle value={view} onChange={setView} options={VIEW_OPTIONS} variant="primary" />
+            <ChartToggle value={metric} onChange={setMetric} options={metricOptions} variant="secondary" />
+          </>
+        }
+      />
 
       <Plot
         data={traces}

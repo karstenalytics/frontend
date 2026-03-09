@@ -3,6 +3,7 @@ import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import type { UserSegments } from '@site/src/hooks/useStakerConviction';
 
 interface BehaviorPieChartProps {
@@ -215,14 +216,12 @@ export default function BehaviorPieChart({
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       }}
     >
+      <ChartHeader title="How Stakers Manage Their Rewards" plotRef={plotRef} isMobile={isMobile} />
       <Plot
         data={traces}
         layout={{
           ...template.layout,
-          title: {
-            text: 'How Stakers Manage Their Rewards',
-            font: { size: isMobile ? 15 : 18, weight: 600 },
-          },
+          title: undefined,
           hovermode: 'closest',
           xaxis: {
             ...template.layout.xaxis,
@@ -244,9 +243,9 @@ export default function BehaviorPieChart({
           shapes,
           dragmode: isMobile ? false : 'zoom',
           ...(isMobile ? {
-            margin: { l: 45, r: 10, t: 40, b: 70 },
+            margin: { l: 45, r: 10, t: 10, b: 70 },
           } : {
-            margin: { l: 70, r: 24, t: 50, b: 80 },
+            margin: { l: 70, r: 24, t: 16, b: 80 },
           }),
           height: chartHeight,
           autosize: true,

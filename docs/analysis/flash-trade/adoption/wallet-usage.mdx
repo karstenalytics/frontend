@@ -3,6 +3,14 @@ id: wallet-usage
 title: Wallet Usage
 ---
 
+import ChartPageSEO from '@site/src/components/SEO/ChartPageSEO';
+
+<ChartPageSEO
+  title="Daily/Weekly Active Traders"
+  description="Unique trader wallets on Flash.Trade with daily and weekly metrics"
+  chartType="line"
+/>
+
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
@@ -21,6 +29,8 @@ Tracks unique trader wallets on Flash.Trade (positions, swaps, orders). FAF stak
     const UsageTopAddresses = require('@site/src/components/Usage/UsageTopAddresses').default;
     const { useUsageMetrics } = require('@site/src/hooks/useUsageMetrics');
     const ChartToggle = require('@site/src/components/common/ChartToggle').default;
+    const ChartHeader = require('@site/src/components/common/ChartHeader').default;
+    const { useRef } = require('react');
 
     // Pool colors for stacked chart
     const POOL_COLORS = {
@@ -78,6 +88,7 @@ Tracks unique trader wallets on Flash.Trade (positions, swaps, orders). FAF stak
 
       const [timeView, setTimeView] = useState('daily');
       const [poolView, setPoolView] = useState('unique');
+      const plotRef = useRef(null);
       const [isMobile, setIsMobile] = useState(() =>
         typeof window !== 'undefined' ? window.innerWidth <= 996 : false
       );
@@ -242,7 +253,7 @@ Tracks unique trader wallets on Flash.Trade (positions, swaps, orders). FAF stak
         : (poolView === 'byPool' ? 'Weekly Active Wallets by Pool' : 'Weekly Active Wallets');
 
       return (
-        <div style={{
+        <div ref={plotRef} style={{
           background: 'var(--ifm-background-surface-color)',
           border: '1px solid var(--ifm-toc-border-color)',
           borderRadius: 'var(--ifm-global-radius)',
@@ -250,40 +261,29 @@ Tracks unique trader wallets on Flash.Trade (positions, swaps, orders). FAF stak
           padding: isMobile ? '16px 0px 16px 0px' : '24px',
           marginBottom: '24px',
         }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '8px',
-            marginBottom: '16px',
-            paddingLeft: isMobile ? '16px' : 0,
-            paddingRight: isMobile ? '16px' : 0,
-          }}>
-            <h3 style={{
-              margin: 0,
-              fontSize: isMobile ? '1.1rem' : '1.25rem',
-              fontWeight: 600,
-            }}>
-              {title}
-            </h3>
-            <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-              <ChartToggle
-                value={timeView}
-                onChange={setTimeView}
-                options={TIME_OPTIONS}
-                variant="primary"
-              />
-              {hasPoolData && (
+          <ChartHeader
+            title={title}
+            plotRef={plotRef}
+            isMobile={isMobile}
+            toggle={
+              <div style={{ display: 'flex', gap: '8px' }}>
                 <ChartToggle
-                  value={poolView}
-                  onChange={setPoolView}
-                  options={POOL_OPTIONS}
-                  variant="secondary"
+                  value={timeView}
+                  onChange={setTimeView}
+                  options={TIME_OPTIONS}
+                  variant="primary"
                 />
-              )}
-            </div>
-          </div>
+                {hasPoolData && (
+                  <ChartToggle
+                    value={poolView}
+                    onChange={setPoolView}
+                    options={POOL_OPTIONS}
+                    variant="secondary"
+                  />
+                )}
+              </div>
+            }
+          />
           {traces.length === 0 ? (
             <div style={{ padding: '48px', textAlign: 'center', color: 'var(--ifm-color-secondary)' }}>
               No data available for this view.

@@ -3,6 +3,7 @@ import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import type { WalletTimelineData } from '@site/src/hooks/useWalletTimeline';
 
 interface WalletTimelineChartProps {
@@ -362,10 +363,7 @@ export default function WalletTimelineChart({
   const layout: any = {
     ...template.layout,
     uirevision: uiRevision,
-    title: {
-      text: `Wallet Staking Timeline for ${truncateAddress(data.wallet)}`,
-      font: { size: isMobile ? 15 : 18, weight: 600 },
-    },
+    title: undefined,
     xaxis: {
       ...template.layout.xaxis,
       title: isMobile ? '' : {
@@ -422,14 +420,14 @@ export default function WalletTimelineChart({
       margin: {
         l: 25,
         r: showRewards ? 25 : 5,  // Space for secondary y-axis ticks when visible, 5px otherwise
-        t: 30,
+        t: 10,
         b: bottomMargin,
       },
     } : {
       margin: {
         l: 80,
         r: showRewards ? 80 : 40,
-        t: 60,
+        t: 10,
         b: 100,
       },
     }),
@@ -446,6 +444,7 @@ export default function WalletTimelineChart({
         marginBottom: '24px',
       }}
     >
+      <ChartHeader title={`Wallet Staking Timeline for ${truncateAddress(data.wallet)}`} plotRef={plotRef} isMobile={isMobile} />
       <Plot
         data={traces}
         layout={layout}

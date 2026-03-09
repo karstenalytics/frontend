@@ -3,6 +3,7 @@ import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import type { DailyTrend } from '@site/src/hooks/useStakerConviction';
 
 interface DailyTrendsChartProps {
@@ -54,6 +55,7 @@ export default function DailyTrendsChart({
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       }}
     >
+      <ChartHeader title="Reward Allocation Over Time (Daily)" plotRef={plotRef} isMobile={isMobile} />
       <Plot
         data={[
           {
@@ -85,10 +87,6 @@ export default function DailyTrendsChart({
         ]}
         layout={{
           ...template.layout,
-          title: {
-            text: 'Reward Allocation Over Time (Daily)',
-            font: { size: isMobile ? 15 : 18, weight: 600 },
-          },
           xaxis: {
             title: isMobile ? '' : {
               text: 'Date (UTC)',
@@ -115,10 +113,10 @@ export default function DailyTrendsChart({
           },
           dragmode: isMobile ? false : 'zoom',
           ...(isMobile ? {
-            margin: { l: 25, r: 5, t: 40, b: 80 },
+            margin: { l: 25, r: 5, t: 10, b: 80 },
             height: 350,
           } : {
-            margin: { l: 60, r: 40, t: 50, b: 100 },
+            margin: { l: 60, r: 40, t: 10, b: 100 },
             height: 400,
           }),
           hovermode: 'x unified',

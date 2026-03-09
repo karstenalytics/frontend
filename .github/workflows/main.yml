@@ -29,6 +29,10 @@ jobs:
         run: npm ci
       - name: Build site
         run: npm run build
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Generate OG images
+        run: node scripts/generate-og-images.mjs
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

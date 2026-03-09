@@ -4,6 +4,7 @@ import type { Data } from 'plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import type { SummaryData, GroupMode } from './types';
 
 interface BreakdownChartProps {
@@ -173,14 +174,12 @@ export default function BreakdownChart({ summary, groupMode, onBarClick }: Break
       padding: isMobile ? '16px 0px 16px 0px' : '16px',
       marginBottom: '24px',
     }}>
+      <ChartHeader title={title} plotRef={plotRef} isMobile={isMobile} />
       <Plot
         data={[trace]}
         layout={{
           ...template.layout,
-          title: {
-            text: title,
-            font: { size: isMobile ? 15 : 18, weight: 600 },
-          },
+          title: undefined,
           xaxis: {
             ...template.layout.xaxis,
             title: isMobile ? '' : {
@@ -207,14 +206,14 @@ export default function BreakdownChart({ summary, groupMode, onBarClick }: Break
             margin: {
               l: 25,
               r: 5,
-              t: 30,
+              t: 10,
               b: 120, // Increased bottom margin for vertical labels on mobile
             },
           } : {
             margin: {
               l: 70,
               r: 24,
-              t: 50,
+              t: 16,
               b: 70,
             },
           }),

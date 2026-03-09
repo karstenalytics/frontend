@@ -3,6 +3,7 @@ import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import type { UsageDailyRecord } from '@site/src/hooks/useUsageMetrics';
 
 interface UsageTimeSeriesChartProps {
@@ -83,6 +84,7 @@ export default function UsageTimeSeriesChart({
         </div>
       ) : (
         <>
+          <ChartHeader title={title} plotRef={plotRef} isMobile={isMobile} />
           <Plot
             data={[
               {
@@ -99,10 +101,6 @@ export default function UsageTimeSeriesChart({
               ...template.layout,
               autosize: true,
               height: isMobile ? 350 : 420,
-              title: {
-                text: title,
-                font: { size: isMobile ? 17 : 20, weight: 600 },
-              },
               xaxis: {
                 ...template.layout.xaxis,
                 title: isMobile ? '' : {
@@ -134,7 +132,7 @@ export default function UsageTimeSeriesChart({
                 margin: {
                   l: 25,
                   r: 5,
-                  t: 40,
+                  t: 10,
                   b: 32,
                 },
               } : {
@@ -142,7 +140,7 @@ export default function UsageTimeSeriesChart({
                 margin: {
                   l: 70,
                   r: 24,
-                  t: 50,
+                  t: 10,
                   b: 48,
                 },
               }),

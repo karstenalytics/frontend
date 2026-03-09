@@ -5,6 +5,7 @@ import { useColorMode } from '@docusaurus/theme-common';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 interface PoolDay {
@@ -281,15 +282,13 @@ export default function PoolRampUpChart(): React.ReactElement {
         padding: isMobile ? '16px 0px 16px 0px' : '16px',
         marginBottom: '24px',
       }}>
+        <ChartHeader title={`Pool Revenue Ramp-Up (First ${maxDays} Days)`} plotRef={plotRef} isMobile={isMobile} />
         <Plot
           data={traces}
           revision={plotRevision}
           layout={{
             ...template.layout,
-            title: {
-              text: `Pool Revenue Ramp-Up (First ${maxDays} Days)`,
-              font: { size: isMobile ? 15 : 18, weight: 600 },
-            },
+            title: undefined,
             xaxis: {
               ...template.layout.xaxis,
               title: isMobile ? '' : {
@@ -332,14 +331,14 @@ export default function PoolRampUpChart(): React.ReactElement {
               margin: {
                 l: 25,
                 r: 5,
-                t: 30,
+                t: 10,
                 b: bottomMargin,
               },
             } : {
               margin: {
                 l: 70,
                 r: 10,
-                t: 50,
+                t: 30,
                 b: 50,
               },
             }),
@@ -348,9 +347,9 @@ export default function PoolRampUpChart(): React.ReactElement {
                 text: 'Default: Orca (SOL\u2013USDC), Fusion SOL-USDC, and pools with <5 SOL 90-day cumulative revenue are hidden. On mobile: pools <5 SOL excluded completely.',
                 xref: 'paper',
                 yref: 'paper',
-                x: 0.6,
-                y: 1.015,
-                xanchor: 'center',
+                x: 0,
+                y: 1.03,
+                xanchor: 'left',
                 yanchor: 'bottom',
                 showarrow: false,
                 font: {

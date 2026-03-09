@@ -3,6 +3,7 @@ import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import type { UserSegments } from '@site/src/hooks/useStakerConviction';
 
 interface StakeSizeBreakdownChartProps {
@@ -188,6 +189,7 @@ export default function StakeSizeBreakdownChart({
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       }}
     >
+      <ChartHeader title="Compound Rate by Stake Size (TUNA)" plotRef={plotRef} isMobile={isMobile} />
       <Plot
         data={[
           {
@@ -280,10 +282,7 @@ export default function StakeSizeBreakdownChart({
         ]}
         layout={{
           ...template.layout,
-          title: {
-            text: 'Compound Rate by Stake Size (TUNA)',
-            font: { size: isMobile ? 15 : 18, weight: 600 },
-          },
+          title: undefined,
           barmode: 'stack',
           hovermode: 'closest',
           xaxis: {
@@ -319,14 +318,14 @@ export default function StakeSizeBreakdownChart({
             margin: {
               l: 80,
               r: 20,
-              t: 40,
+              t: 10,
               b: bottomMargin,
             },
           } : {
             margin: {
               l: 160,
               r: 20,
-              t: 50,
+              t: 16,
               b: bottomMargin,
             },
           }),

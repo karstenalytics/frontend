@@ -3,6 +3,7 @@ import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import type { StakingDailyRecord } from '@site/src/hooks/useStakingMetrics';
 
 interface StakingBalanceChartProps {
@@ -118,14 +119,11 @@ export default function StakingBalanceChart({
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       }}
     >
-      <h3 style={{
-        margin: 0,
-        marginBottom: '16px',
-        marginLeft: isMobile ? '16px' : 0,
-        fontSize: isMobile ? '1.1rem' : '1.25rem',
-        fontWeight: 600,
-        textAlign: 'center',
-      }}>{tokenSymbol} Staking Over Time</h3>
+      <ChartHeader
+        title={`${tokenSymbol} Staking Over Time`}
+        plotRef={plotRef}
+        isMobile={isMobile}
+      />
       {latest && (
         <div
           style={{

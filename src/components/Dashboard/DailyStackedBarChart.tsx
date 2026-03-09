@@ -6,6 +6,7 @@ import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/pl
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
 import { buildColorMap } from '@site/src/utils/chartColors';
 import ChartToggle from '@site/src/components/common/ChartToggle';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import type { DailyTypeDataPoint } from './types';
 
 interface GroupInfo {
@@ -439,28 +440,14 @@ export default function DailyStackedBarChart({
       padding: isMobile ? '16px 0px 16px 0px' : '16px',
       marginBottom: '24px',
     }}>
-      {/* Title and Toggle */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingLeft: isMobile ? '16px' : '0px',
-        paddingRight: isMobile ? '16px' : '0px',
-        marginBottom: '16px',
-        flexWrap: 'wrap',
-        gap: '12px',
-      }}>
-        <h3 style={{
-          margin: 0,
-          fontSize: isMobile ? '15px' : '18px',
-          fontWeight: 600,
-        }}>
-          {chartTitle}
-        </h3>
-        <div style={{ flexShrink: 0 }}>
+      <ChartHeader
+        title={chartTitle}
+        plotRef={plotRef}
+        isMobile={isMobile}
+        toggle={
           <ChartToggle value={view} onChange={setView} options={VIEW_OPTIONS} variant="primary" />
-        </div>
-      </div>
+        }
+      />
 
       <Plot
         data={traces}

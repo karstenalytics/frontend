@@ -47,8 +47,12 @@ export const ChartPageSEO: React.FC<ChartPageSEOProps> = ({
   // Build full URL for current page
   const pageUrl = `${siteConfig.url}${location.pathname}`;
 
-  // Use custom image or default to site logo
-  const ogImage = imageUrl || `${siteConfig.url}/img/logo.png`;
+  // Derive OG image from URL path: /analysis/defituna/staking/staked-tuna -> defituna-staking-staked-tuna.png
+  const slug = location.pathname
+    .replace(/^\/analysis\//, '')
+    .replace(/\//g, '-')
+    .replace(/^-|-$/g, '');
+  const ogImage = imageUrl || `${siteConfig.url}/img/og/${slug}.png`;
 
   // Add chart type to description if provided
   const fullDescription = chartType

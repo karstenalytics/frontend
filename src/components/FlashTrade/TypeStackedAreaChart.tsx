@@ -6,6 +6,7 @@ import { getPlotlyTemplate, getResponsivePlotlyConfig} from '@site/src/utils/plo
 import { buildColorMap } from '@site/src/utils/chartColors';
 import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 import ChartToggle from '@site/src/components/common/ChartToggle';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 
 interface DailyTypeData {
   date: string;
@@ -292,28 +293,12 @@ export default function TypeStackedAreaChart({
       padding: isMobile ? '16px 0px 16px 0px' : '16px',
       marginBottom: '24px',
     }}>
-      {/* Title and Toggle Row */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '8px',
-        paddingLeft: isMobile ? '16px' : '0px',
-        paddingRight: isMobile ? '16px' : '0px',
-        marginBottom: '16px',
-      }}>
-        <h3 style={{
-          margin: 0,
-          fontSize: isMobile ? '15px' : '18px',
-          fontWeight: 600,
-        }}>
-          {chartTitle}
-        </h3>
-        <div style={{ flexShrink: 0 }}>
-          <ChartToggle value={view} onChange={setView} options={VIEW_OPTIONS} variant="primary" />
-        </div>
-      </div>
+      <ChartHeader
+        title={chartTitle}
+        plotRef={plotRef}
+        isMobile={isMobile}
+        toggle={<ChartToggle value={view} onChange={setView} options={VIEW_OPTIONS} variant="primary" />}
+      />
 
       <Plot
         data={traces}

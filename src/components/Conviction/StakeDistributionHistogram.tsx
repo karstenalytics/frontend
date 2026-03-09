@@ -3,6 +3,7 @@ import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import type { Visualizations } from '@site/src/hooks/useStakerConviction';
 
 interface StakeDistributionHistogramProps {
@@ -93,6 +94,7 @@ export default function StakeDistributionHistogram({
         </div>
       </div>
 
+      <ChartHeader title="Stake Size Distribution - Power Law Revealed" plotRef={plotRef} isMobile={isMobile} />
       <Plot
         data={[
           {
@@ -120,10 +122,7 @@ export default function StakeDistributionHistogram({
         ]}
         layout={{
           ...template.layout,
-          title: {
-            text: 'Stake Size Distribution - Power Law Revealed',
-            font: { size: 18, weight: 600 },
-          },
+          title: undefined,
           xaxis: {
             ...template.layout.xaxis,
             title: 'Stake Size Range (TUNA)',
@@ -135,7 +134,7 @@ export default function StakeDistributionHistogram({
             type: 'log',
           },
           dragmode: isMobile ? false : 'zoom',
-          margin: { l: 80, r: 40, t: 50, b: 120 },
+          margin: { l: 80, r: 40, t: 16, b: 120 },
           height: 500,
         }}
         config={{

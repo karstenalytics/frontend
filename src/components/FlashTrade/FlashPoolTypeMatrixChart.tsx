@@ -5,6 +5,7 @@ import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
 import { buildColorMap } from '@site/src/utils/chartColors';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 import ChartToggle from '@site/src/components/common/ChartToggle';
 
@@ -293,26 +294,19 @@ export default function FlashPoolTypeMatrixChart({
       padding: isMobile ? '16px 0px 16px 0px' : '16px',
       marginBottom: '24px',
     }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '8px',
-        padding: isMobile ? '0 12px 8px' : '0 0 8px',
-      }}>
-        <span style={{ fontWeight: 600, fontSize: isMobile ? 15 : 18 }}>
-          Fees by Pool & Transaction Type
-        </span>
-        <div style={{ flexShrink: 0 }}>
+      <ChartHeader
+        title="Fees by Pool & Transaction Type"
+        plotRef={plotRef}
+        isMobile={isMobile}
+        toggle={
           <ChartToggle
             value={widthMode}
             onChange={setWidthMode}
             options={WIDTH_OPTIONS}
             variant="secondary"
           />
-        </div>
-      </div>
+        }
+      />
       <Plot
         data={traces}
         layout={{

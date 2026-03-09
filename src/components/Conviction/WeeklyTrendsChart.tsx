@@ -1,8 +1,9 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import { useColorMode } from '@docusaurus/theme-common';
 import { getPlotlyTemplate, getResponsivePlotlyConfig } from '@site/src/utils/plotlyTheme';
 import { useChartTracking } from '@site/src/hooks/useChartTracking';
+import ChartHeader from '@site/src/components/common/ChartHeader';
 import type { WeeklyTrend } from '@site/src/hooks/useStakerConviction';
 
 interface WeeklyTrendsChartProps {
@@ -14,6 +15,16 @@ export default function WeeklyTrendsChart({
 }: WeeklyTrendsChartProps): React.ReactElement {
   const { colorMode } = useColorMode();
   const template = getPlotlyTemplate(colorMode === 'dark');
+
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 996 : false
+  );
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 996);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const plotRef = useRef<HTMLDivElement>(null);
   useChartTracking(plotRef, {
@@ -40,6 +51,7 @@ export default function WeeklyTrendsChart({
         marginBottom: '32px',
       }}
     >
+      <ChartHeader title="Reward Allocation Over Time" plotRef={plotRef} isMobile={isMobile} />
       <Plot
         data={[
           {
@@ -71,10 +83,6 @@ export default function WeeklyTrendsChart({
         ]}
         layout={{
           ...template.layout,
-          title: {
-            text: 'Reward Allocation Over Time',
-            font: { size: 18, weight: 600 },
-          },
           xaxis: {
             title: 'Week',
             tickangle: -45,
@@ -89,7 +97,7 @@ export default function WeeklyTrendsChart({
             xanchor: 'right',
             x: 1,
           },
-          margin: { l: 60, r: 40, t: 50, b: 100 },
+          margin: { l: 60, r: 40, t: 10, b: 100 },
           height: 400,
           hovermode: 'x unified',
         }}
