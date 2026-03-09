@@ -200,8 +200,9 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
         await navigator.share({ files: [file] });
         return;
       } catch {
-        // User cancelled or share failed - fall through
+        // User cancelled - don't fall through to download
       }
+      return;
     }
 
     // Desktop: copy image to clipboard
