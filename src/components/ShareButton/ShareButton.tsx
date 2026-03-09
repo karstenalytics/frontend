@@ -191,13 +191,27 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
     const blob = await exportChartWithBranding();
     if (!blob) return;
     trackCustomEvent('Share', 'copy', chartName);
+    const filename = `${chartName.toLowerCase().replace(/\s+/g, '-')}.png`;
+    const file = new File([blob], filename, { type: 'image/png' });
+
+    // iOS/mobile: use native share sheet if available
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file] });
+        return;
+      } catch {
+        // User cancelled or share failed - fall through
+      }
+    }
+
+    // Desktop: copy image to clipboard
     try {
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': blob }),
       ]);
     } catch {
       // Fallback: download instead
-      downloadBlob(blob, `${chartName.toLowerCase().replace(/\s+/g, '-')}.png`);
+      downloadBlob(blob, filename);
     }
   };
 
@@ -214,7 +228,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
     trackCustomEvent('Share', 'twitter', chartName);
     downloadBlob(blob, `${chartName.toLowerCase().replace(/\s+/g, '-')}.png`);
     const text = shareText || `Check out this ${chartName} from @karstenalytics`;
-    const url = 'https://karstenalytics.com';
+    const url = window.location.href;
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
       '_blank',
