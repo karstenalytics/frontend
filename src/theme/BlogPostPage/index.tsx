@@ -5,6 +5,7 @@ import {
   BlogPostProvider,
   useBlogPost,
 } from '@docusaurus/plugin-content-blog/client';
+import {useLocation} from '@docusaurus/router';
 import BlogLayout from '@theme/BlogLayout';
 import BlogPostItem from '@theme/BlogPostItem';
 import BlogPostPaginator from '@theme/BlogPostPaginator';
@@ -12,6 +13,7 @@ import BlogPostPageMetadata from '@theme/BlogPostPage/Metadata';
 import BlogPostPageStructuredData from '@theme/BlogPostPage/StructuredData';
 import TOC from '@theme/TOC';
 import ContentVisibility from '@theme/ContentVisibility';
+import XArticleView from '@site/src/components/XArticleView';
 import type {Props} from '@theme/BlogPostPage';
 import type {BlogSidebar} from '@docusaurus/plugin-content-blog';
 
@@ -29,6 +31,21 @@ function BlogPostPageContent({
     toc_min_heading_level: tocMinHeadingLevel,
     toc_max_heading_level: tocMaxHeadingLevel,
   } = frontMatter;
+
+  const location = useLocation();
+  const isXFormat = new URLSearchParams(location.search).get('format') === 'x';
+
+  if (isXFormat) {
+    const slug = metadata.permalink.split('/').filter(Boolean).pop() || '';
+    return (
+      <div className="blog-layout">
+        <BlogLayout sidebar={sidebar}>
+          <XArticleView slug={slug} originalUrl={metadata.permalink} />
+        </BlogLayout>
+      </div>
+    );
+  }
+
   return (
     <div className="blog-layout">
       <BlogLayout

@@ -24,7 +24,9 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
+    "prestart": "node scripts/copy-x-articles.mjs",
     "start": "docusaurus start",
+    "prebuild": "node scripts/copy-x-articles.mjs",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",

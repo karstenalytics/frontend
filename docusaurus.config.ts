@@ -145,6 +145,7 @@ const config: Config = {
           path: 'articles',
           routeBasePath: 'articles',
           showReadingTime: true,
+          exclude: ['**/*.x.md'],
         },
         theme: {
           customCss: './src/css/custom.css',
