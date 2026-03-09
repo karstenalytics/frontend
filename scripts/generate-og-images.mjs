@@ -24,6 +24,7 @@ const ROOT = resolve(__dirname, '..');
 const BUILD_DIR = join(ROOT, 'build');
 const OG_DIR = join(BUILD_DIR, 'img', 'og');
 const PAGES_FILE = join(ROOT, 'og-pages.json');
+const PLOTLY_JS = join(ROOT, 'node_modules', 'plotly.js-dist-min', 'plotly.min.js');
 
 const MIME_TYPES = {
   '.html': 'text/html',
@@ -237,7 +238,11 @@ async function main() {
     const page = await context.newPage();
     try {
       await page.goto(url, { waitUntil: 'networkidle', timeout: 15000 });
-      await page.waitForSelector('.js-plotly-plot', { timeout: 10000 });
+      await page.waitForSelector('.js-plotly-plot', { timeout: 15000 });
+
+      // Inject Plotly UMD bundle so window.Plotly is available in page.evaluate
+      await page.addScriptTag({ path: PLOTLY_JS });
+      await page.waitForFunction(() => window.Plotly, { timeout: 5000 });
 
       // Small delay for chart data to fully render
       await page.waitForTimeout(1000);
