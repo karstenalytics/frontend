@@ -54,6 +54,12 @@ export const ChartPageSEO: React.FC<ChartPageSEOProps> = ({
     .replace(/^-|-$/g, '');
   const ogImage = imageUrl || `${siteConfig.url}/img/og/${slug}.png`;
 
+  // Derive protocol prefix from URL path
+  const protocol = location.pathname.includes('/flash-trade/') ? 'Flash.Trade'
+    : location.pathname.includes('/defituna/') ? 'DefiTuna'
+    : '';
+  const ogTitle = protocol ? `${protocol}: ${title}` : title;
+
   // Add chart type to description if provided
   const fullDescription = chartType
     ? `${description} | Interactive ${chartType} chart`
@@ -78,10 +84,10 @@ export const ChartPageSEO: React.FC<ChartPageSEOProps> = ({
       {/* Open Graph / Facebook */}
       <meta property="og:type" content="article" />
       <meta property="og:url" content={pageUrl} />
-      <meta property="og:title" content={`${title} | karstenalytics`} />
+      <meta property="og:title" content={`${ogTitle} | karstenalytics`} />
       <meta property="og:description" content={fullDescription} />
       <meta property="og:image" content={ogImage} />
-      <meta property="og:image:alt" content={title} />
+      <meta property="og:image:alt" content={ogTitle} />
       <meta property="og:site_name" content="karstenalytics" />
 
       {/* Twitter */}
@@ -89,10 +95,10 @@ export const ChartPageSEO: React.FC<ChartPageSEOProps> = ({
       <meta name="twitter:site" content="@karstenalytics" />
       <meta name="twitter:creator" content="@karstenalytics" />
       <meta name="twitter:url" content={pageUrl} />
-      <meta name="twitter:title" content={`${title} | karstenalytics`} />
+      <meta name="twitter:title" content={`${ogTitle} | karstenalytics`} />
       <meta name="twitter:description" content={fullDescription} />
       <meta name="twitter:image" content={ogImage} />
-      <meta name="twitter:image:alt" content={title} />
+      <meta name="twitter:image:alt" content={ogTitle} />
 
       {/* Additional SEO */}
       <meta name="author" content="karstenalytics" />
