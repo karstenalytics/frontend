@@ -230,7 +230,7 @@ export default function FlashAprChart(): React.ReactElement {
   }, null);
   const entryPricePlaceholder = latestFafPrice !== null
     ? `e.g. ${latestFafPrice.toFixed(6).replace(/\.?0+$/, '')}`
-    : 'e.g. 0.0012';
+    : 'e.g. 0.003';
 
   const primaryColor = isDark ? '#14BCCD' : '#00A3B4';
   const personalColor = 'rgba(34, 197, 94, 1)';
