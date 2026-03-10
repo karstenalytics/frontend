@@ -40,7 +40,7 @@ Source: [Flash.Trade Tokenomics](https://docs.flash.trade/flash-trade/flash-trad
 
 </div>
 
-This means: No VC allocation, and team compensation is not pre-allocated. It is determined by [futarchy governance](https://docs.flash.trade/flash-trade/flash-trade-protocol/tokenomics), where prediction markets guide key decisions including token parameters.
+This means: No VC allocation, and team compensation is not pre-allocated. It is determined by [futarchy governance](https://docs.flash.trade/flash-trade/flash-trade-protocol/faftarchy-governance), where prediction markets guide key decisions including token parameters.
 
 **a) Staking rewards (9.6%)** fund monthly distributions to active stakers. The team treasury sends a fixed allocation to the protocol multisig each month (8M FAF through November 2025, reduced to 5.6M from December onward), which is then deposited into the vault alongside harvested penalties. After 10 epochs, 72.8M of the 96M (75.8%) has been distributed, leaving 23.2M, roughly four more months at the current rate. [Section 7](#7-the-monthly-reward-machine) covers the full reward cycle.
 
@@ -65,7 +65,7 @@ Where did the 788M go? I traced every token on-chain. Here is the full picture i
   }}>2</a>
   {/* Section 3: Burn Window - purple shrinking, teal growing */}
   <a href="#3-the-burn-window-april---october-2025" title="3. The Burn Window" style={{
-    position: 'absolute', top: '42%', left: '26%',
+    position: 'absolute', top: '42%', left: '23%',
     width: '28px', height: '28px', borderRadius: '50%',
     background: 'rgba(139, 92, 246, 0.7)', color: '#fff',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -74,7 +74,7 @@ Where did the 788M go? I traced every token on-chain. Here is the full picture i
   }}>3</a>
   {/* Section 4: Growth Phase - teal climbing toward ATH */}
   <a href="#4-growth-phase" title="4. Growth Phase" style={{
-    position: 'absolute', top: '40%', left: '43%',
+    position: 'absolute', top: '34%', left: '41%',
     width: '28px', height: '28px', borderRadius: '50%',
     background: 'rgba(94, 234, 212, 0.7)', color: '#fff',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -83,7 +83,7 @@ Where did the 788M go? I traced every token on-chain. Here is the full picture i
   }}>4</a>
   {/* Section 5: Unstake Queue - orange/gray bands appearing */}
   <a href="#5-the-unstake-queue" title="5. The Unstake Queue" style={{
-    position: 'absolute', top: '36%', left: '50%',
+    position: 'absolute', top: '30%', left: '47%',
     width: '28px', height: '28px', borderRadius: '50%',
     background: 'rgba(251, 191, 36, 0.7)', color: '#fff',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -92,7 +92,7 @@ Where did the 788M go? I traced every token on-chain. Here is the full picture i
   }}>5</a>
   {/* Oct 15 Deadline - purple cliff drops to zero (subsection of 3) */}
   <a href="#the-deadline-october-15-2025" title="The Deadline: October 15" style={{
-    position: 'absolute', top: '29%', left: '61%',
+    position: 'absolute', top: '29%', left: '57%',
     width: '28px', height: '28px', borderRadius: '50%',
     background: 'rgba(139, 92, 246, 0.7)', color: '#fff',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -101,7 +101,7 @@ Where did the 788M go? I traced every token on-chain. Here is the full picture i
   }}>3</a>
   {/* Section 6: Epoch 10 Shift - right edge, orange collapse */}
   <a href="#the-epoch-10-shift-february-15-2026" title="6. The Epoch 10 Shift" style={{
-    position: 'absolute', top: '32%', left: '96%',
+    position: 'absolute', top: '27%', left: '90%',
     width: '28px', height: '28px', borderRadius: '50%',
     background: 'rgba(251, 191, 36, 0.7)', color: '#fff',
     display: 'flex', alignItems: 'center', justifyContent: 'center',

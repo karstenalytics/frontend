@@ -20,7 +20,7 @@ Flash.Trade launched [FAF](https://solscan.io/token/FAFxVxnkzZHMCodkWyoccgUNgVSc
 
 Source: [Flash.Trade Tokenomics](https://docs.flash.trade/flash-trade/flash-trade-protocol/tokenomics)
 
-This means: No VC allocation, and team compensation is not pre-allocated. It is determined by [futarchy governance](https://docs.flash.trade/flash-trade/flash-trade-protocol/tokenomics), where prediction markets guide key decisions including token parameters.
+This means: No VC allocation, and team compensation is not pre-allocated. It is determined by [futarchy governance](https://docs.flash.trade/flash-trade/flash-trade-protocol/faftarchy-governance), where prediction markets guide key decisions including token parameters.
 
 **a) Staking rewards (9.6%)** fund monthly distributions to active stakers. The team treasury sends a fixed allocation to the protocol multisig each month (8M FAF through November 2025, reduced to 5.6M from December onward), which is then deposited into the vault alongside harvested penalties. After 10 epochs, 72.8M of the 96M (75.8%) has been distributed, leaving 23.2M, roughly four more months at the current rate. Section 7 covers the full reward cycle.
 
