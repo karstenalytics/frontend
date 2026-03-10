@@ -6,13 +6,13 @@ authors:
 tags: [flash.trade, staking, FAF, supply]
 ---
 
-My [other Flash.Trade article](/articles/2026/02/12/how-flash-trade-fees-reach-faf-stakers) traced the USDC fee flow from traders to FAF stakers. This article looks at the other side: the FAF tokens themselves. Where did they come from, where did they go, and can every token be accounted for? I looked at 80,000+ on-chain events to find out.
+My [other Flash.Trade article](/articles/2026/03/05/how-flash-trade-fees-reach-faf-stakers) traced the USDC fee flow from traders to FAF stakers. This article looks at the other side: the FAF tokens themselves. Where did they come from, where did they go, and can every token be accounted for? I looked at 84,000+ on-chain events to find out.
 
 <div className="note-small" style={{fontSize: '0.85em'}}>
 
 :::note
 
-- This article reflects my personal understanding of Flash.Trade's on-chain mechanics, derived entirely from observing on-chain state and transaction data. Data is from mid-end February 2026. Check dashboards for live data.
+- This article reflects my personal understanding of Flash.Trade's on-chain mechanics, derived entirely from observing on-chain state and transaction data. Data is from early March 2026. Check dashboards for live data.
 - All FAF amounts are in whole tokens unless noted otherwise. On-chain values are tracked to 6 decimal places.
 - The [Staking Overview](/analysis/flash-trade/staking/stake-pool-overview) dashboard shows the live version of the data discussed here.
 
@@ -121,7 +121,7 @@ Where did the 788M go? I traced every token on-chain. Here is the full picture i
 
 <div style={{fontSize: '0.75rem', color: 'var(--ifm-color-emphasis-700)'}}>
 
-Source: [Staking Overview](/analysis/flash-trade/staking/stake-pool-overview) dashboard. Numbered bubbles link to the corresponding section below - you can click it! Screenshot date: February 22, 2026
+Source: [Staking Overview](/analysis/flash-trade/staking/stake-pool-overview) dashboard. Numbered bubbles link to the corresponding section below - you can click it! Screenshot date: March 9, 2026
 
 </div>
 
@@ -193,9 +193,9 @@ Over the full period, the cumulative inflows into staking tell a clear story:
 | Source | Events | Cumulative FAF Staked |
 |--------|--------|-----------|
 | `burn_and_stake` (from reserve) | 3,397 | 537M |
-| `deposit_token_stake` (from outside) | 12,849 | 1,258M |
+| `deposit_token_stake` (from outside) | 13,346 | 1,291M |
 
-These are lifetime totals, not the current balance: FAF that was staked, unstaked, and re-staked counts each time. The 1,258M from outside deposits potentially includes FAF that cycled through the pool multiple times. Still, outside deposits contributed **2.3x more staked FAF** than the reserve burns, showing that the staking pool attracted far more capital than the initial NFT allocation alone.
+These are lifetime totals, not the current balance: FAF that was staked, unstaked, and re-staked counts each time. The 1,291M from outside deposits potentially includes FAF that cycled through the pool multiple times. Still, outside deposits contributed **2.4x more staked FAF** than the reserve burns, showing that the staking pool attracted far more capital than the initial NFT allocation alone.
 
 <div style={{fontSize: '0.8rem'}}><a href="#chart">Back to chart</a></div>
 
@@ -242,7 +242,7 @@ The net effect: staked FAF recovered from 670M to 684M, but total FAF in the poo
 
 ### The new regime
 
-As of February 22, the pool has stabilized: **687M staked**, 10.7M queued, 10.8M unstaked. Staked FAF remains 50M below the February 9 ATH (a 6.8% decline) and has not yet recovered.
+As of March 9, the pool sits at **689M staked**, 36.4M queued, 11.4M unstaked. The queued balance has grown significantly under the new 90-day vesting regime, rising from 3.3M on rollover day to 36.4M as new unstake requests outpace daily queue maturation. Staked FAF remains 49M below the February 9 ATH (a 6.6% decline) and has not yet recovered.
 
 <div style={{fontSize: '0.8rem'}}><a href="#chart">Back to chart</a></div>
 
@@ -300,39 +300,39 @@ Let's summarize a bit. First - where did 788,000,000 FAF go? Here is every token
 
 The 10.2M in BurnAndClaim penalties stayed in the vault and was redistributed to stakers via the [monthly reward cycle](#7-the-monthly-reward-machine), alongside the 20.9M in InstantUnstake penalties that accumulated separately.
 
-The 536.9M that entered via BurnAndStake did not all stay staked. Over the following months, stakers unstaked, re-staked, claimed rewards, and moved in and out of the queue. But that initial 68% chose the long-term path, and that decision built the 687M staked base that exists today.
+The 536.9M that entered via BurnAndStake did not all stay staked. Over the following months, stakers unstaked, re-staked, claimed rewards, and moved in and out of the queue. But that initial 68% chose the long-term path, and that decision built the 689M staked base that exists today.
 
 ### Where is the full 1 billion now?
 
-Okay, okay, let's do the full work. FAF has a fixed supply of 1,000,000,000. Where are all of them? I pulled every non-zero FAF token account on-chain (1,801 accounts) and categorized them:
+Okay, okay, let's do the full work. FAF has a fixed supply of 1,000,000,000. Where are all of them? I pulled every non-zero FAF token account on-chain (1,827 accounts) and categorized them:
 
 | Location | FAF | Share |
 |----------|-----|-------|
-| [Staking pool](https://solscan.io/account/7tULeZXC2UyPPzHyE9BhFJmFtfNedACJrVywyWYSwzJP) | 713,813,540 | 71.4% |
-| [Team treasury](https://solscan.io/account/GzqP64zjbSQJ5MFREwMTZhvhUzfwMDVit4bPxWH52Xm) (Squads vault) | 72,071,418 | 7.2% |
-| Liquidity: [FutarchyAMM](https://solscan.io/account/Dg9okAkkXoGaj9pXdrMBbUeLtb11SpM6uwGfK59EKPm9), Meteora (7 pools), Orca | 50,528,000 | 5.1% |
-| Streamflow vesting (5 contracts) + vesting wallet | 40,871,000 | 4.1% |
-| [MetaDAO multisig](https://solscan.io/account/6awyHMshBGVjJ3ozdSJdyyDE1CTAXUwrpNMaRGMsb4sf) | 591,000 | 0.1% |
-| Individual wallets (1,782 addresses) | 122,123,000 | 12.2% |
+| [Staking pool](https://solscan.io/account/7tULeZXC2UyPPzHyE9BhFJmFtfNedACJrVywyWYSwzJP) | 740,862,000 | 74.1% |
+| [Team treasury](https://solscan.io/account/GzqP64zjbSQJ5MFREwMTZhvhUzfwMDVit4bPxWH52Xm) (Squads vault) | 41,519,000 | 4.2% |
+| Liquidity: [FutarchyAMM](https://solscan.io/account/Dg9okAkkXoGaj9pXdrMBbUeLtb11SpM6uwGfK59EKPm9), Meteora, Orca | 77,825,000 | 7.8% |
+| Streamflow vesting (5 contracts) + vesting wallet | 45,439,000 | 4.5% |
+| [MetaDAO multisig](https://solscan.io/account/6awyHMshBGVjJ3ozdSJdyyDE1CTAXUwrpNMaRGMsb4sf) | 651,000 | 0.1% |
+| Individual wallets (1,785 addresses) | 93,702,000 | 9.4% |
 | **Total** | **~1,000,000,000** | **100%** |
 
-The staking pool dominates: 71.4% of all FAF sits here. I can break this down further into 687M staked, 10.7M queued, and 10.8M unstaked (as of February 22). Note that the ~5M difference between the cache total and the live on-chain balance reflects a few days activity after the last cache update.
+The staking pool dominates: 74.1% of all FAF sits here. I can break this down further into 689M staked, 36M queued, and 11M unstaked (as of March 9).
 
-The team treasury's current 72M FAF can be fully verified. Every FAF token that entered or left this account is on-chain. The full 1B was minted here at TGE, and across 47 transactions the treasury distributed it all. Two major returns topped it back up: the 46.2M FAF that NFT holders did not claim on October 15 and the 40.4M Raydium LP closure on February 15. After subtracting all outflows (original 788M staking reserve, 72.8M in epoch allocations, 54M to Streamflow for incubation vesting, 4.25M to Streamflow for advisory vesting, 40.3M to FutarchyAMM, 37.7M to Raydium LP, 12M in airdrops, and [5.5M to a Streamflow airdrop distributor](https://solscan.io/tx/4YFd6GQ2Xse2caAnzSTTHSZ5mTPhcfWiWoimcwChmeH4soBWbEE79tS6vKZSooxkFC39NWLVqTmXoXGENZoZq8df) for Voltage Points rewards), the computed balance is 72,071,417, one atom off the on-chain figure. The 5.5M VP airdrop was created on July 24, 2025, coinciding with the [Epoch 4 system change](https://docs.flash.trade/flash-trade/flash-trade-protocol/tokenomics/voltage-points-and-faf-rewards-system#current-system-epoch-4) that introduced non-staker rewards; 232 traders and LPs [claimed from the distributor](https://solscan.io/account/7J8s9m1uw42VHL3U7VZvLD6Enm39YRSz5nbUZAf3Dvxs) between July and December 2025. Of the original 96M staking reward budget, 23.2M remains, roughly four more months at the current 5.6M/month rate.
+The team treasury's current 42M FAF can be fully verified. Every FAF token that entered or left this account is on-chain. The full 1B was minted here at TGE, and across 49 transactions the treasury distributed it all. Two major returns topped it back up: the 46.2M FAF that NFT holders did not claim on October 15 and the 40.4M Raydium LP closure on February 15. After subtracting all outflows (original 788M staking reserve, 72.8M in epoch allocations, 54M to Streamflow for incubation vesting, 4.25M to Streamflow for advisory vesting, 70.8M to FutarchyAMM (40.3M at launch + [30.6M on March 7](https://solscan.io/tx/YnWs4Hh2dBLFYdDZi9vPub3U67eA3Kd1saz8Fk2NF63nbcq2e7AKkcA6VVLnbtUVL1dLUVRExzkPqyH4EFBViWm)), 37.7M to Raydium LP, 12M in airdrops, and [5.5M to a Streamflow airdrop distributor](https://solscan.io/tx/4YFd6GQ2Xse2caAnzSTTHSZ5mTPhcfWiWoimcwChmeH4soBWbEE79tS6vKZSooxkFC39NWLVqTmXoXGENZoZq8df) for Voltage Points rewards), the computed balance is 41,518,894, one atom off the on-chain figure. The 5.5M VP airdrop was created on July 24, 2025, coinciding with the [Epoch 4 system change](https://docs.flash.trade/flash-trade/flash-trade-protocol/tokenomics/voltage-points-and-faf-rewards-system#current-system-epoch-4) that introduced non-staker rewards; 232 traders and LPs [claimed from the distributor](https://solscan.io/account/7J8s9m1uw42VHL3U7VZvLD6Enm39YRSz5nbUZAf3Dvxs) between July and December 2025. Of the original 96M staking reward budget, 23.2M remains, roughly four more months at the current 5.6M/month rate.
 
-The remaining 122M FAF (12.2% of supply) is spread across 1,782 individual wallets. The distribution is top-weighted: 35 wallets hold more than 1M FAF each (96M total), 63 hold between 100K and 1M (21M total), and the remaining 1,684 wallets hold less than 100K each.
+The remaining 94M FAF (9.4% of supply) is spread across 1,785 individual wallets. The distribution is top-weighted: 32 wallets hold more than 1M FAF each (66M total), 64 hold between 100K and 1M (22M total), and the remaining 1,689 wallets hold less than 100K each.
 
 <details>
-<summary>Distribution metrics for 1,782 individual wallets</summary>
+<summary>Distribution metrics for 1,785 individual wallets</summary>
 
-**Concentration ratios** (share of the 122M free float):
+**Concentration ratios** (share of the 94M free float):
 
 | Top N wallets | FAF held | Share |
 |---------------|----------|-------|
-| Top 10 | 50,805,000 | 41.6% |
-| Top 25 | 83,991,000 | 68.8% |
-| Top 50 | 106,346,000 | 87.1% |
-| Top 100 | 116,958,000 | 95.8% |
+| Top 10 | 34,958,000 | 37.3% |
+| Top 25 | 58,086,000 | 62.0% |
+| Top 50 | 78,142,000 | 83.4% |
+| Top 100 | 88,672,000 | 94.6% |
 
 **Gini coefficient: 0.97** (0 = perfectly equal, 1 = maximally concentrated). For reference, Bitcoin's holder Gini is typically estimated around 0.99, and most DeFi governance tokens fall in the 0.95-0.99 range.
 
@@ -340,9 +340,9 @@ The remaining 122M FAF (12.2% of supply) is spread across 1,782 individual walle
 
 | Metric | Value |
 |--------|-------|
-| Mean holding | 68,531 FAF |
+| Mean holding | 52,494 FAF |
 | Median holding | 24 FAF |
-| Mean/median ratio | 2,829x |
+| Mean/median ratio | 2,187x |
 
 The median holder owns 24 FAF (less than $1 at current prices), while the mean is inflated by a handful of large wallets. Half of all wallets hold less than 25 FAF, and 75% hold less than 1,000.
 
@@ -376,4 +376,4 @@ Five of ten months match within 0.1%. The larger deviations in April, May, July,
 
 ---
 
-*All data sourced from on-chain transactions on Solana mainnet. The live data powers the [Staking Overview](/analysis/flash-trade/staking/stake-pool-overview) dashboard, updated daily. Data used in this article covers April 12, 2025 through February 22, 2026. Holder snapshot pulled via Helius DAS API on February 24, 2026.*
+*All data sourced from on-chain transactions on Solana mainnet. The live data powers the [Staking Overview](/analysis/flash-trade/staking/stake-pool-overview) dashboard, updated daily. Data used in this article covers April 12, 2025 through March 9, 2026. Holder snapshot pulled via Helius DAS API on March 10, 2026.*

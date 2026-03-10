@@ -1,6 +1,6 @@
 # How Flash.Trade Fees Reach FAF Stakers
 
-*This article was originally published on [karstenalytics.com](https://karstenalytics.com/articles/2026/02/12/how-flash-trade-fees-reach-faf-stakers), where it includes tables, interactive charts, and additional detail sections.*
+*This article was originally published on [karstenalytics.com](https://karstenalytics.com/articles/2026/03/05/how-flash-trade-fees-reach-faf-stakers), where it includes tables, interactive charts, and additional detail sections.*
 
 My ambition is to understand how value is generated for investors in Solana DeFi protocols. For Flash.Trade, I traced every fee-related USDC atom on-chain to map out how trading fees reach FAF stakers. This article documents the complete journey and shares what I found along the way, which partially surprised me.
 
@@ -144,4 +144,4 @@ Not all on-chain fees flow to the protocol and FAF stakers. Two categories are e
 
 ---
 
-*Read the full version of this article, including worked examples and verification methodology, on [karstenalytics.com](https://karstenalytics.com/articles/2026/02/12/how-flash-trade-fees-reach-faf-stakers).*
+*Read the full version of this article, including worked examples and verification methodology, on [karstenalytics.com](https://karstenalytics.com/articles/2026/03/05/how-flash-trade-fees-reach-faf-stakers).*
