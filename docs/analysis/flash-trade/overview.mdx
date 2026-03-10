@@ -65,8 +65,8 @@ Both token types earn from the same fee sources: position open/close fees, margi
 - **Pool and custody accounts**: Each perpetual market (Crypto.1, Trump.1, etc.) has a pool program account and custody accounts that track fee generation from trading operations. This is where per-pool and per-type breakdowns come from.
 - **LP vault accounts**: Staked and compounding LP vaults for each pool, capturing LP token flows and third-party integrations (e.g., Loopscale CPI calls).
 
-**What we track**: Fees, protocol revenue, revenue distribution to stakers, FAF staking activity, and wallet-level usage.
+**What I track**: Fees, protocol revenue, revenue distribution to stakers, FAF staking activity, and wallet-level usage.
 
-**What we don't track**: Trading volume, open interest, PnL, or liquidation sizes. While we see the underlying trading transactions, we extract only the fee components and don't decode position data (size, leverage, entry price).
+**What I don't track**: Trading volume, open interest, PnL, or liquidation sizes. While I see the underlying trading transactions, I extract only the fee components and don't decode position data (size, leverage, entry price).
 
 For a detailed explanation of how raw transactions are transformed into the charts you see here, see the [Data Pipeline](/analysis/data-pipeline) page.

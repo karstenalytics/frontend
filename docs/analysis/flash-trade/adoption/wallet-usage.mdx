@@ -527,9 +527,9 @@ Failed transactions and system transactions (price updates, oracle refreshes) ar
 
 **New vs Returning Wallet Classification**
 
-Not every wallet whose first observed transaction falls within our data window is genuinely new to the protocol. Some transaction types *require* prior on-chain state -- for example, you cannot `ClosePosition` without first having opened one, and `RefreshStake` requires an existing stake.
+Not every wallet whose first observed transaction falls within the data window is genuinely new to the protocol. Some transaction types *require* prior on-chain state -- for example, you cannot `ClosePosition` without first having opened one, and `RefreshStake` requires an existing stake.
 
-When a wallet's first observed transaction is one of these requires-prior-state types, it is classified as a **returning wallet** rather than a new one. This means the wallet must have interacted with Flash.Trade before our data start date (April 12, 2025) and is re-appearing in our window for the first time.
+When a wallet's first observed transaction is one of these requires-prior-state types, it is classified as a **returning wallet** rather than a new one. This means the wallet must have interacted with Flash.Trade before the data start date (April 12, 2025) and is re-appearing in the window for the first time.
 
 Entry-point transaction types (can genuinely be a first interaction):
 - **Trading**: OpenPosition, SwapAndOpen, PlaceLimitOrder
@@ -578,7 +578,7 @@ Data is scoped to transactions touching the Flash.Trade treasury, not all progra
 
 **Known Limitations**
 
-- **Data start date**: Our transaction history begins April 12, 2025. Wallets active before this date will appear as "returning" on their first observed transaction, not "new". True lifetime metrics require a complete history from protocol launch.
+- **Data start date**: The transaction history begins April 12, 2025. Wallets active before this date will appear as "returning" on their first observed transaction, not "new". True lifetime metrics require a complete history from protocol launch.
 - Multi-wallet addresses (same person controlling multiple wallets) are counted separately
 - Does not measure transaction size or volume, only participation
 - Single-day spike can inflate weekly metric for up to 7 days due to rolling window

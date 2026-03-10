@@ -177,7 +177,7 @@ To compare and aggregate transactions involving different tokens, values are nor
 
 ### Conversion Approach
 
-**On-chain rates only.** I never use external price feeds. When tokens are swapped on-chain, the actual exchange rate provides precise valuation for that moment. If there are multiple swaps per day, we always take the valuation of the moment and build an average if required for reporting purposes.
+**On-chain rates only.** I never use external price feeds. When tokens are swapped on-chain, the actual exchange rate provides precise valuation for that moment. If there are multiple swaps per day, I always take the valuation of the moment and build an average if required for reporting purposes.
 
 **Same-day pricing.** Conversion rates are applied only to transactions occurring on the same day, ensuring historical values are never retroactively adjusted based on future price changes.
 

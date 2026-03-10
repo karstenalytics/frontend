@@ -429,9 +429,9 @@ A wallet is counted as active when it executes transactions that generate protoc
 
 **New vs Returning Wallet Classification**
 
-Not every wallet whose first observed transaction falls within our data window is genuinely new to the protocol. Some transaction types require prior on-chain state --- for example, you cannot close a position without first having opened one.
+Not every wallet whose first observed transaction falls within the data window is genuinely new to the protocol. Some transaction types require prior on-chain state --- for example, you cannot close a position without first having opened one.
 
-When a wallet's first observed transaction is one of these requires-prior-state types, it is classified as a **returning wallet** rather than a new one. This means the wallet interacted with DefiTuna before our data start date and is re-appearing in our window for the first time.
+When a wallet's first observed transaction is one of these requires-prior-state types, it is classified as a **returning wallet** rather than a new one. This means the wallet interacted with DefiTuna before the data start date and is re-appearing in the window for the first time.
 
 Entry-point transaction types (can genuinely be a first interaction):
 - Opening new positions, adding liquidity, initial swaps
@@ -474,7 +474,7 @@ Data is scoped to transactions touching the DefiTuna treasury, not all program i
 
 **Known Limitations**
 
-- **Data start date**: Our transaction history begins July 24, 2025. Wallets active before this date will appear as "returning" on their first observed transaction, not "new". True lifetime metrics require a complete history from protocol launch.
+- **Data start date**: The transaction history begins July 24, 2025. Wallets active before this date will appear as "returning" on their first observed transaction, not "new". True lifetime metrics require a complete history from protocol launch.
 - Only tracks fee-generating activities; non-revenue operations excluded
 - Multi-wallet users (same person controlling multiple addresses) are counted separately
 - Does not measure transaction size or volume, only participation
