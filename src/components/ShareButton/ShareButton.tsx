@@ -59,126 +59,118 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
         return null;
       }
 
-      // Snapshot original layout values we'll override for export
+      // Clone chart data into an off-screen div to avoid flickering the visible chart
       const gd = plotlyDiv as any;
-      const fl = gd._fullLayout || {};
-      const orig = {
-        'margin.t': fl.margin?.t ?? null,
-        'margin.b': fl.margin?.b ?? null,
-        'margin.r': fl.margin?.r ?? null,
-        'legend.orientation': fl.legend?.orientation ?? null,
-        'legend.x': fl.legend?.x ?? null,
-        'legend.xanchor': fl.legend?.xanchor ?? null,
-        'legend.y': fl.legend?.y ?? null,
-        'legend.yanchor': fl.legend?.yanchor ?? null,
-        'legend.font.size': fl.legend?.font?.size ?? null,
-      };
-
-      // Hide legendonly traces (user-hidden) so they don't clutter the export
-      const hiddenTraceIndices: number[] = [];
-      (gd.data || []).forEach((trace: any, i: number) => {
-        if (trace.visible === 'legendonly') {
-          hiddenTraceIndices.push(i);
-        }
-      });
-      if (hiddenTraceIndices.length > 0) {
-        const restyleUpdate: Record<string, any> = { visible: Array(hiddenTraceIndices.length).fill(false) };
-        await Plotly.restyle(plotlyDiv, restyleUpdate, hiddenTraceIndices);
-      }
-
-      // Force horizontal bottom legend and tight margins for 1200x675 export
       const titleHeight = 36;
-      await Plotly.relayout(plotlyDiv, {
-        'margin.t': titleHeight,
-        'margin.b': 80,
-        'margin.r': 24,
-        'legend.orientation': 'h',
-        'legend.x': 0.5,
-        'legend.xanchor': 'center',
-        'legend.y': -0.15,
-        'legend.yanchor': 'top',
-        'legend.font.size': 10,
-      });
 
-      const imgData = await Plotly.toImage(plotlyDiv, {
-        format: 'png',
+      // Deep-copy traces, filtering out user-hidden ones
+      const exportData = (gd.data || [])
+        .filter((trace: any) => trace.visible !== 'legendonly')
+        .map((trace: any) => ({ ...trace }));
+
+      // Build export layout with tight margins and horizontal legend
+      const exportLayout = {
+        ...(gd.layout || {}),
+        margin: { ...(gd.layout?.margin || {}), t: titleHeight, b: 80, r: 24 },
+        legend: {
+          ...(gd.layout?.legend || {}),
+          orientation: 'h',
+          x: 0.5,
+          xanchor: 'center',
+          y: -0.15,
+          yanchor: 'top',
+          font: { ...(gd.layout?.legend?.font || {}), size: 10 },
+        },
         width: 1200,
         height: 675 - titleHeight,
-      });
+      };
 
-      // Restore hidden traces and original layout
-      if (hiddenTraceIndices.length > 0) {
-        const restoreUpdate: Record<string, any> = { visible: Array(hiddenTraceIndices.length).fill('legendonly') };
-        await Plotly.restyle(plotlyDiv, restoreUpdate, hiddenTraceIndices);
-      }
-      await Plotly.relayout(plotlyDiv, orig);
+      // Render into a hidden div
+      const offscreen = document.createElement('div');
+      offscreen.style.position = 'fixed';
+      offscreen.style.left = '-9999px';
+      document.body.appendChild(offscreen);
 
-      // Create canvas with theme-appropriate background
-      const canvas = document.createElement('canvas');
-      canvas.width = 1200;
-      canvas.height = 675;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return null;
-
-      // Fill background matching current theme
-      ctx.fillStyle = isDark ? '#1b1b1d' : '#ffffff';
-      ctx.fillRect(0, 0, 1200, 675);
-
-      // Load chart image
-      const chartImg = new Image();
-      await new Promise((resolve, reject) => {
-        chartImg.onload = resolve;
-        chartImg.onerror = reject;
-        chartImg.src = imgData;
-      });
-
-      // Draw chart below title area
-      ctx.drawImage(chartImg, 0, titleHeight);
-
-      // Add large centered logo watermark
       try {
-        const logoSrc = isDark ? '/img/logo_dark.png' : '/img/logo.png';
-        const logo = await new Promise<HTMLImageElement>((resolve, reject) => {
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-          img.onload = () => resolve(img);
-          img.onerror = () => reject(new Error('logo load failed'));
-          img.src = logoSrc;
+        await Plotly.newPlot(offscreen, exportData, exportLayout, { staticImage: true });
+
+        const imgData = await Plotly.toImage(offscreen, {
+          format: 'png',
+          width: 1200,
+          height: 675 - titleHeight,
         });
 
-        const targetWidth = 1000;
-        const aspect = logo.naturalHeight / logo.naturalWidth;
-        const targetHeight = targetWidth * aspect;
-        ctx.globalAlpha = 0.08;
-        ctx.drawImage(
-          logo,
-          (1200 - targetWidth) / 2,
-          (675 - targetHeight) / 2,
-          targetWidth,
-          targetHeight,
-        );
-        ctx.globalAlpha = 1.0;
-      } catch {
-        // Continue without logo
+        Plotly.purge(offscreen);
+
+        // Create canvas with theme-appropriate background
+        const canvas = document.createElement('canvas');
+        canvas.width = 1200;
+        canvas.height = 675;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return null;
+
+        // Fill background matching current theme
+        ctx.fillStyle = isDark ? '#1b1b1d' : '#ffffff';
+        ctx.fillRect(0, 0, 1200, 675);
+
+        // Load chart image
+        const chartImg = new Image();
+        await new Promise((resolve, reject) => {
+          chartImg.onload = resolve;
+          chartImg.onerror = reject;
+          chartImg.src = imgData;
+        });
+
+        // Draw chart below title area
+        ctx.drawImage(chartImg, 0, titleHeight);
+
+        // Add large centered logo watermark
+        try {
+          const logoSrc = isDark ? '/img/logo_dark.png' : '/img/logo.png';
+          const logo = await new Promise<HTMLImageElement>((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error('logo load failed'));
+            img.src = logoSrc;
+          });
+
+          const targetWidth = 1000;
+          const aspect = logo.naturalHeight / logo.naturalWidth;
+          const targetHeight = targetWidth * aspect;
+          ctx.globalAlpha = 0.08;
+          ctx.drawImage(
+            logo,
+            (1200 - targetWidth) / 2,
+            (675 - targetHeight) / 2,
+            targetWidth,
+            targetHeight,
+          );
+          ctx.globalAlpha = 1.0;
+        } catch {
+          // Continue without logo
+        }
+
+        // Add chart title top-left with protocol prefix
+        const path = window.location.pathname;
+        const protocol = path.includes('/flash-trade/') ? 'Flash.Trade'
+          : path.includes('/defituna/') ? 'DefiTuna'
+          : '';
+        const exportTitle = protocol ? `${protocol}: ${chartName}` : chartName;
+        ctx.fillStyle = isDark ? '#e3e3e3' : '#1b1b1d';
+        ctx.font = 'bold 20px Inter, Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(exportTitle, 16, 28);
+
+        // Convert canvas to blob
+        return new Promise((resolve) => {
+          canvas.toBlob((blob) => {
+            resolve(blob);
+          }, 'image/png');
+        });
+      } finally {
+        offscreen.remove();
       }
-
-      // Add chart title top-left with protocol prefix
-      const path = window.location.pathname;
-      const protocol = path.includes('/flash-trade/') ? 'Flash.Trade'
-        : path.includes('/defituna/') ? 'DefiTuna'
-        : '';
-      const exportTitle = protocol ? `${protocol}: ${chartName}` : chartName;
-      ctx.fillStyle = isDark ? '#e3e3e3' : '#1b1b1d';
-      ctx.font = 'bold 20px Inter, Arial, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(exportTitle, 16, 28);
-
-      // Convert canvas to blob
-      return new Promise((resolve) => {
-        canvas.toBlob((blob) => {
-          resolve(blob);
-        }, 'image/png');
-      });
     } catch (error) {
       console.error('Error exporting chart:', error);
       return null;
