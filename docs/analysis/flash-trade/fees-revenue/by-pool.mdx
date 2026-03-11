@@ -223,7 +223,7 @@ The table displays the largest individual transactions contributing to protocol 
 This chart helps you:
 
 - **Track fee and revenue trends**: Monitor how each pool's contribution changes over time
-- **Explore fee composition**: Use the metric toggles to compare Fees (trading + non-trading) and Revenue (protocol fee distributions)
+- **Explore fee composition**: Use the metric toggles to compare Fees (trade fees + position fees like margin, borrow, and funding) and Revenue (protocol fee distributions)
 - **Identify top performers**: See which perpetual markets generate the most protocol fees
 - **Compare fee magnitudes**: Switch metrics to see how gross fees compare to protocol revenue distributions
 - **Assess pool concentration**: Determine if revenue is concentrated in specific markets or distributed
@@ -238,7 +238,7 @@ This chart helps you:
 - **X-axis**: Date (UTC days) from April 12, 2025 onwards
 - **Y-axis**: Fees/Revenue in USDC (stacked, auto-scales to active metric)
 - **View modes**: Toggle between "Daily" (stacked bar chart) and "Cumulative" (stacked area chart, running total)
-- **Metric toggles**: Switch between Fees (trading + non-trading) and Revenue (MoveProtocolFees distributions). The y-axis auto-scales to the active metric.
+- **Metric toggles**: Switch between Fees (trade fees + position fees like margin, borrow, and funding) and Revenue (MoveProtocolFees distributions). The y-axis auto-scales to the active metric.
 - **Colored areas/bars**: Each color represents a different pool's contribution
 - **Total height**: In daily mode, sum of all pools for that day; in cumulative mode, total up to that date
 - **Interactions**:
@@ -264,25 +264,9 @@ This chart helps you:
 
 **Data Sources**
 
-- **Treasury transactions**: On-chain data from the Flash.Trade stake pool authority
-- **Fee attribution**: Internal fee events decoded from transaction logs
+- **Pool and custody accounts**: On-chain transactions from Flash.Trade's pool program accounts and custody accounts (~70+ addresses), which emit fee events during trading operations
+- **Fee attribution**: Internal fee events (SwapFeeInternal boundaries, MoveProtocolFees distributions) decoded from transaction logs
 - **Pool identification**: Borsh-encoded pool identifiers in CPI event data
-
-**Pool Types**
-
-Flash.Trade operates multiple perpetual markets (pools):
-
-| Pool | Market | Description |
-|------|--------|-------------|
-| Crypto.1 | BTC/ETH/SOL | Main crypto perpetuals (largest volume) |
-| Governance.1 | Governance tokens | Governance token perpetuals |
-| Community.1 | Community tokens | Community/meme token perpetuals |
-| Community.2 | Community tokens | Additional community markets |
-| Community.3 | Community tokens | Additional community markets (last active July 2025) |
-| Trump.1 | TRUMP | TRUMP memecoin perpetuals |
-| Ore.1 | ORE | ORE token perpetuals |
-| Virtual.1 | Virtual tokens | Virtual token perpetuals |
-| Remora.1 | Remora tokens | Remora perpetuals |
 
 **Pool Version Consolidation**
 
@@ -306,6 +290,6 @@ Data is automatically updated once per day. Check the "Last updated" timestamp i
 - Pool versions are consolidated (V1/V2 shown together)
 - New pools may appear with generated names until manually labeled
 - Revenue metric shows zero for April 12 - June 18, 2025 because MoveProtocolFees tracking began on June 19, 2025
-- Fees metric shows trading + non-trading fees; LP fees are excluded (less than 1% of total)
+- Fees metric includes trade fees and position fees (margin, borrow, funding); LP fees are excluded (less than 1% of total)
 
 </details>

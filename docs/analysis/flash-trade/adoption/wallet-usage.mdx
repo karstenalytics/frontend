@@ -519,8 +519,8 @@ A wallet is counted as an active *trader* when it executes transactions that gen
 - **Position management**: OpenPosition, ClosePosition, IncreaseSize, DecreaseSize
 - **Combined operations**: SwapAndOpen, CloseAndSwap
 - **Collateral operations**: AddCollateral, RemoveCollateral, SwapAndAddCollateral, RemoveCollateralAndSwap
-- **Order management**: PlaceTriggerOrder, PlaceLimitOrder, EditTriggerOrder, CancelTriggerOrder, CancelAllTriggerOrders, EditLimitOrder
-- **Order execution**: ExecuteTriggerOrder, ExecuteTriggerWithSwap, ExecuteLimitOrder, ExecuteLimitWithSwap
+- **Order management**: PlaceTriggerOrder, PlaceLimitOrder, EditTriggerOrder, CancelTriggerOrder, CancelAllTriggerOrders, EditLimitOrder, ExecuteLimitOrder
+- **Order execution**: ExecuteTriggerOrder, ExecuteTriggerWithSwap, ExecuteLimitWithSwap
 - **Liquidations**: Liquidating underwater positions
 
 Failed transactions and system transactions (price updates, oracle refreshes) are excluded from all categories.
@@ -532,14 +532,14 @@ Not every wallet whose first observed transaction falls within the data window i
 When a wallet's first observed transaction is one of these requires-prior-state types, it is classified as a **returning wallet** rather than a new one. This means the wallet must have interacted with Flash.Trade before the data start date (April 12, 2025) and is re-appearing in the window for the first time.
 
 Entry-point transaction types (can genuinely be a first interaction):
-- **Trading**: OpenPosition, SwapAndOpen, PlaceLimitOrder
+- **Trading**: OpenPosition, SwapAndOpen, PlaceLimitOrder, Swap
 - **LP**: AddLiquidityAndStake, AddCompoundingLiquidity
 - **Staking**: DepositTokenStake, BurnAndStake
 
 Requires-prior-state types (wallet classified as returning if seen first):
-- **Trading**: ClosePosition, CloseAndSwap, IncreaseSize, DecreaseSize, AddCollateral, RemoveCollateral, PlaceTriggerOrder, all trigger/limit order execution
+- **Trading**: ClosePosition, CloseAndSwap, IncreaseSize, DecreaseSize, AddCollateral, RemoveCollateral, SwapAndAddCollateral, RemoveCollateralAndSwap, PlaceTriggerOrder, EditTriggerOrder, CancelTriggerOrder, CancelAllTriggerOrders, EditLimitOrder, ExecuteTriggerOrder, ExecuteTriggerWithSwap, ExecuteLimitOrder, ExecuteLimitWithSwap, Liquidate
 - **LP**: RemoveLiquidity, RemoveCompoundingLiquidity, MigrateFlp
-- **Staking**: WithdrawStake, RefreshStake, CollectStakeFees, CollectTokenReward, MigrateStake, etc.
+- **Staking**: WithdrawStake, UnstakeTokenInstant, CompoundFees, CollectRevenue, CollectTokenReward, RefreshStake, CollectStakeFees, MigrateStake, BurnAndClaim, UnstakeTokenRequest, CancelUnstakeTokenRequest, WithdrawToken
 
 Note: this classification applies across all wallet categories. Only the trading category is shown on this page; LP and staking entry-point rules affect their respective category counts.
 
@@ -574,7 +574,7 @@ Data is automatically updated once a day. Check the "Last updated" timestamp in 
 
 **Scope**
 
-Data is scoped to transactions touching the Flash.Trade treasury, not all program interactions. This captures the vast majority of user activity since fee-generating operations route through the treasury. Known system wallets (liquidation bots, keeper bots, admin signers) are actively excluded from all counts.
+Data is sourced from transactions enumerated across Flash.Trade's pool and custody program accounts (~70+ addresses). The resulting transaction cache is keyed by the treasury PDA address but covers all fee-generating protocol interactions, not just direct treasury touches. Known system wallets (liquidation bots, keeper bots, staker bots, admin signers) are actively excluded from all counts.
 
 **Known Limitations**
 

@@ -269,21 +269,9 @@ This chart helps you:
 
 **Data Sources**
 
-- **Treasury transactions**: On-chain data from the Flash.Trade stake pool authority
+- **Pool and custody accounts**: On-chain transactions from Flash.Trade's pool program accounts and custody accounts (~70+ addresses), which emit fee events during trading operations
 - **Fee extraction**: Fee amounts extracted from transaction log entries
-- **Type identification**: Transaction types extracted from program instruction logs
-
-**Operation Categories**
-
-Flash.Trade operations can be grouped into categories:
-
-| Category | Operations | Description |
-|----------|------------|-------------|
-| Opening | SwapAndOpen, OpenPosition, IncreaseSize | Operations that open or increase positions |
-| Closing | CloseAndSwap, ClosePosition, DecreaseSize | Operations that close or reduce positions |
-| Collateral | AddCollateral, RemoveCollateral | Margin adjustments (no fees) |
-| Trigger | ExecuteTriggerWithSwap, ExecuteTriggerOrder, ExecuteLimitWithSwap, ExecuteLimitOrder | Automated order executions |
-| System | Liquidate | Protocol-initiated operations |
+- **Type identification**: Transaction types identified from program instruction logs
 
 **Instruction Name Normalization**
 

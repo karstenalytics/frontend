@@ -251,14 +251,6 @@ The Marimekko (also called mosaic or market map) chart provides a two-dimensiona
 - **Y-axis (Height)**: Within each pool, segments show **transaction types**. Height represents the percentage share of that type within the pool's fees (0-100%). Segments are stacked to show composition.
 - **Area**: In Proportional mode, the area of each segment is proportional to fees from that pool-type combination. In Equal mode (default), only segment height reflects the type's share of pool fees; column width is uniform.
 
-**Visual Interpretation:**
-
-This chart answers:
-- Which pool generates the most fees? (widest strip in Proportional mode, or check the percentage in pool labels in Equal mode)
-- What transaction types dominate each pool? (tallest segments)
-- Which pool-type combinations are most valuable? (largest areas in Proportional mode)
-- How does transaction composition vary across pools? (segment patterns)
-
 **Color Coding:**
 - Each color represents a specific transaction type
 - Same color across pools = same transaction type in different pools
@@ -268,16 +260,6 @@ This chart answers:
 - **Hover**: See exact USDC amounts and percentages for each pool-type segment (USDC values are absolute totals, independent of the display mode)
 - **Click segments**: Filter the transaction table by specific pool-type combinations
 - **Legend**: Click legend items to show/hide specific transaction types
-
-**Pattern Recognition:**
-
-Watch for:
-- **Large rectangular areas**: Pool-type combinations with substantial fees (high-value segments to optimize)
-- **Narrow but tall segments**: High concentration in one type within a small pool
-- **Wide but short segments**: Fees spread thinly across many types in a major pool
-- **Missing combinations**: Pool-type pairs with no fees (gaps in expected patterns)
-- **Similar pool patterns**: Pools with comparable transaction type distributions
-- **Unique pool patterns**: Pools with distinctive type compositions
 
 </details>
 
@@ -297,29 +279,12 @@ This visualization combines two classification systems to create a matrix view:
 
 **Relationship to Other Views**
 
-- **[By Pool](/analysis/flash-trade/fees-revenue/by-pool)**: Aggregates all types to show total pool performance (horizontal sum of Marimekko)
-- **[By Type](/analysis/flash-trade/fees-revenue/by-type)**: Aggregates all pools to show total type performance (vertical sum of Marimekko)
+- **[By Pool](./by-pool)**: Aggregates all types to show total pool performance (horizontal sum of Marimekko)
+- **[By Type](./by-type)**: Aggregates all pools to show total type performance (vertical sum of Marimekko)
 
 The Marimekko reveals interactions between pools and types that remain hidden in single-dimension views. For example, a transaction type may generate significant fees overall but only within specific pools, or a major pool may derive most of its fees from just one or two transaction types.
 
-**Pool Identification**
-
-Each transaction is attributed to a pool by:
-- Parsing internal fee events from transaction logs
-- Decoding Borsh-encoded pool identifier
-- Mapping to human-readable pool name (Crypto.1, Community.1, etc.)
-- Consolidating V1/V2 contract versions for cleaner visualization
-
-**Type Classification**
-
-Transaction types are identified using:
-- Instruction name extraction from program logs
-- Version suffix normalization via a lookup table mapping known versioned log names to canonical display names
-- Classification to canonical operation names (category labels such as Opening/Closing/Trigger/System are conceptual only and not a separate chart dimension on this page)
-
-**Data Accuracy**
-
-All values maintain 100% attribution accuracy. Each transaction is counted exactly once, assigned to one pool and one type. The chart layout preserves both dimensions, ensuring the visual representation accurately reflects the underlying fee distribution.
+See the [By Pool](./by-pool) and [By Type](./by-type) methodology sections for details on pool identification, type classification, and data sources.
 
 **Update Frequency**
 
