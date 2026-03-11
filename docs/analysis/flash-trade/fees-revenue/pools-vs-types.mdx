@@ -50,16 +50,19 @@ Two-dimensional fee distribution showing how transaction types and liquidity poo
       const [selectedType, setSelectedType] = useState(null);
       const [topTransactionsPool, setTopTransactionsPool] = useState(null);
       const [topTransactionsPoolType, setTopTransactionsPoolType] = useState(null);
+      const [poolTypeSummary, setPoolTypeSummary] = useState(null);
       const [loading, setLoading] = useState(true);
 
       useEffect(() => {
         Promise.all([
           fetch('/data/flash-trade/top_transactions_pool.json').then(r => r.ok ? r.json() : null).catch(() => null),
           fetch('/data/flash-trade/top_transactions_pool_type.json').then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch('/data/flash-trade/pool_type_summary.json').then(r => r.ok ? r.json() : null).catch(() => null),
         ])
-          .then(([poolData, poolTypeData]) => {
+          .then(([poolData, poolTypeData, summaryData]) => {
             setTopTransactionsPool(poolData);
             setTopTransactionsPoolType(poolTypeData);
+            setPoolTypeSummary(Array.isArray(summaryData) ? summaryData : summaryData?.pools || null);
             setLoading(false);
           })
           .catch(() => setLoading(false));
@@ -112,22 +115,20 @@ Two-dimensional fee distribution showing how transaction types and liquidity poo
         );
       }
 
-      // Compute color maps from transaction data
-      const allTx = topTransactionsPool?.transactions || [];
-      const poolTotals = {};
-      const typeTotals = {};
-      for (const tx of allTx) {
-        const pn = consolidatePoolName(tx.pool);
-        poolTotals[pn] = (poolTotals[pn] || 0) + tx.fee_usdc;
-        typeTotals[tx.type] = (typeTotals[tx.type] || 0) + tx.fee_usdc;
+      // Compute type color map from pool_type_summary (same source & params as Marimekko chart)
+      const summaryTypeTotals = {};
+      if (poolTypeSummary) {
+        for (const pool of poolTypeSummary) {
+          for (const t of pool.types || []) {
+            summaryTypeTotals[t.type] = (summaryTypeTotals[t.type] || 0) + t.usdc_amount;
+          }
+        }
       }
-      const rankedPools = Object.entries(poolTotals).sort((a, b) => b[1] - a[1]).map(([n]) => n);
-      const rankedTypes = Object.entries(typeTotals).sort((a, b) => b[1] - a[1]).map(([n]) => n);
-      const poolColorMap = buildColorMap(rankedPools);
-      const typeColorMap = buildColorMap(rankedTypes);
+      const rankedTypes = Object.entries(summaryTypeTotals).sort((a, b) => b[1] - a[1]).map(([n]) => n);
+      const typeColorMap = buildColorMap(rankedTypes, 'Others', n => n.startsWith('Liquidate'));
 
       const filterChips = [];
-      if (selectedPool) filterChips.push({ label: selectedPool, color: poolColorMap[selectedPool] || '#888888' });
+      if (selectedPool) filterChips.push({ label: selectedPool, color: '#888888' });
       if (selectedType) filterChips.push({ label: selectedType, color: typeColorMap[selectedType] || '#888888' });
 
       return (
@@ -159,21 +160,12 @@ Two-dimensional fee distribution showing how transaction types and liquidity poo
                 <tbody>
                   {displayTransactions.length > 0 ? displayTransactions.map((tx, idx) => {
                     const poolName = consolidatePoolName(tx.pool);
-                    const poolColor = poolColorMap[poolName] || '#888888';
                     const typeColor = typeColorMap[tx.type] || '#888888';
                     return (
                       <tr key={tx.signature} style={tableStyles.bodyRow} {...tableRowHoverHandlers}>
                         <td style={{ ...tableStyles.cell, fontWeight: 600 }}>{idx + 1}</td>
                         <td style={tableStyles.dateCell}>{tx.date}</td>
                         <td style={tableStyles.cell}>
-                          <span style={{
-                            display: 'inline-block',
-                            width: '10px',
-                            height: '10px',
-                            borderRadius: '2px',
-                            backgroundColor: poolColor,
-                            marginRight: '6px',
-                          }} />
                           {poolName}
                         </td>
                         <td style={tableStyles.cell}>
