@@ -438,10 +438,10 @@ export default function PoolStackedAreaChart({
         plotRef={plotRef}
         isMobile={isMobile}
         toggle={
-          <>
+          <div style={{ display: 'flex', gap: '8px' }}>
             <ChartToggle value={view} onChange={setView} options={VIEW_OPTIONS} variant="primary" />
             <ChartToggle value={metric} onChange={setMetric} options={metricOptions} variant="secondary" />
-          </>
+          </div>
         }
       />
 
