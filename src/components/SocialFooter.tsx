@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { DiscordLogo, DiscordLogoIcon, EnvelopeIcon, HeartIcon, HeartStraight, TwitterLogo, XLogoIcon } from '@phosphor-icons/react';
 
 const LINKS = [
@@ -14,13 +14,27 @@ const LINKS = [
     title: 'discord',
     Icon: DiscordLogoIcon,
   },
-  {
-    href: 'mailto:karstenalytics@gmail.com',
-    label: 'karstenalytics@gmail.com',
-    title: 'Send email',
-    Icon: EnvelopeIcon,
-  },
 ];
+
+// Obfuscated email link - assembled at runtime so scrapers don't see the address
+function EmailLink(): React.ReactElement {
+  const ref = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    if (ref.current) {
+      const u = 'karstenalytics';
+      const d = 'gmail.com';
+      const addr = `${u}@${d}`;
+      ref.current.href = `mailto:${addr}`;
+      ref.current.querySelector('span')!.textContent = addr;
+    }
+  }, []);
+  return (
+    <a ref={ref} className="social-footer__link" href="#" title="Send email" rel="noopener noreferrer">
+      <EnvelopeIcon size={18} weight="regular" />
+      <span></span>
+    </a>
+  );
+}
 
 const DONATION_ADDRESS = '7bYtEL23TT9YeELjSaNLi59PHwerNw9woMacYXefr6RF';
 const DONATION_DISPLAY = `${DONATION_ADDRESS.slice(0, 5)}...${DONATION_ADDRESS.slice(-5)}`;
@@ -42,6 +56,7 @@ export default function SocialFooter(): React.ReactElement {
             <span>{label}</span>
           </a>
         ))}
+        <EmailLink />
         <a
           className="social-footer__link social-footer__donate"
           href={`https://solscan.io/account/${DONATION_ADDRESS}`}

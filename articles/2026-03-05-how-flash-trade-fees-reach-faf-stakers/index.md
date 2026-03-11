@@ -64,7 +64,7 @@ graph TD
 <li><strong>Fee generation:</strong> The $10 entry fee accumulates on the Trump.1 <a href="https://solscan.io/account/Crk3yzGpPCt9thXmV9wCkBM9nBq8EHhBct71ArkKY9wA#accountData">Pool account</a> in a field called <code>fees_obligation_usd</code>. It sits there until the next consolidation run.</li>
 <li><strong>Hourly consolidation:</strong> Roughly once per hour and per pool, a <code>swap_fee_internal</code> instruction moves the $10 from the Pool into the reward <a href="https://solscan.io/account/B1b3WnCbwrQC8yk6o5rVLGGJFD7BdQBLyaWsRw4Lqgp2#accountData">Custody account</a> (<code>fees_stats.accrued</code>). In the early days there was one <code>swap_fee_internal</code> per collateral type; now all fees accrue in USD, so there is one per pool per hour.</li>
 <li><strong>Distribution trigger:</strong> Accrued fees need to be committed/distributed to liquidity providers (LPs). When certain on-chain events fire (such as <code>refresh_stake</code> or <code>compounding_fees</code>), the pool's reward-per-LP-staked counter (rPLS) increments and <code>distributed</code> is raised to match <code>accrued</code>. The rPLS increase equals the not-yet-distributed fees (i.e., the then delta between <code>accrued</code> and <code>distributed</code>). But nothing lands in anyone's wallet yet.</li>
-<li><strong>Fee split:</strong> When staker rewards are settled via the twice-daily <code>refresh_stake</code> bursts (midnight and noon UTC), manual <code>collect_stake_fees</code> claims, or <code>compounding_fees</code> the gross amount is split. With Trump.1's <a href="https://docs.flash.trade/flash-trade/flash-trade-protocol/technical-architecture/fee-distribution">80/20 fee share</a>: $8 goes to the LP, $2 goes to the protocol. The $2 is booked to <code>fees_stats.protocol_fee</code>. In practice the effective protocol share might be lower (see below).</li>
+<li><strong>Fee split:</strong> When a <code>refresh_stake</code> or <code>compounding_fees</code> instruction fires and a staker's <code>rewardAmount</code> is greater than zero, the gross earned amount is split. With Trump.1's <a href="https://docs.flash.trade/flash-trade/flash-trade-protocol/technical-architecture/fee-distribution">80/20 fee share</a>: $8 goes to the LP, $2 goes to the protocol. The $2 is booked to <code>fees_stats.protocol_fee</code>. Manual <code>collect_stake_fees</code> claims include a <code>refresh_stake</code> step that books the fee; the claim instruction itself only pays out the already-computed reward. In practice the effective protocol share might be lower (see below).</li>
 <li><strong>The sweep:</strong> Every ~6 hours, <code>move_protocol_fees</code> sweeps accumulated protocol fees and splits them 50/50: <strong>$1 to FAF stakers</strong>, $1 to the protocol treasury.</li>
 </ol>
 
@@ -82,7 +82,7 @@ Every trading instruction on Flash.Trade generates a fee. The fee-bearing instru
 
 - **Position management:** `open_position`, `close_position`, `swap_and_open`, `close_and_swap`, `increase_size`, `decrease_size`
 - **Order execution:** `execute_limit_order`, `execute_limit_with_swap`, `execute_trigger_order`, `execute_trigger_with_swap`
-- **Liquidations:** `liquidate` (special handling, see "Fees That Never Reach Stakers" below)
+- **Liquidations:** `liquidate`
 
 Fees today are always assessed in USDC and added to the pool's `fees_obligation_usd` field on the [Pool program account](https://solscan.io/account/Crk3yzGpPCt9thXmV9wCkBM9nBq8EHhBct71ArkKY9wA#accountData). This field is a holding area: fees accumulate here until the next consolidation sweep.
 
@@ -150,15 +150,17 @@ The `floor()` operation is integer division: fractional remainders are lost as d
 
 ### Step 4: Claim-Time Fee Split (Two-Vault Model)
 
-When LP provider rewards are settled, the gross earned amount is split between the LP provider and the protocol. For the staking vault (sFLP.x), settlement happens through the twice-daily `refresh_stake` bursts (midnight and noon UTC) that process all LP stakers at once, or through manual `collect_stake_fees` claims. For the compounding vault (FLP.x), settlement happens when `compounding_fees` fires and mints new LP tokens into the vault. In both cases, the protocol's share is booked to `fees_stats.protocol_fee`. The split ratio depends on which vault the LP belongs to.
+When LP provider rewards are settled, the gross earned amount is split between the LP provider and the protocol. For the staking vault (sFLP.x), the protocol fee is booked when `refresh_stake` fires and the staker's `rewardAmount` is greater than zero. This happens during the twice-daily automated bursts (midnight and noon UTC) or as part of manual claim transactions, which include a `refresh_stake` before the `collect_stake_fees` payout. The `collect_stake_fees` instruction itself only transfers the staker's accumulated reward balance -- it does not book any new protocol fee. For the compounding vault (FLP.x), settlement happens when `compounding_fees` fires and mints new LP tokens into the vault. In both cases, the protocol's share is booked to `fees_stats.protocol_fee`. The split ratio depends on which vault the LP belongs to.
 
 Each pool has **two vaults**, sometimes with different fee structures:
 
 
-| Vault                         | Settlement triggers                    | Trump.1 LP Share | Trump.1 Protocol Share |
+| Vault                         | Fee-booking triggers                   | Trump.1 LP Share | Trump.1 Protocol Share |
 | ----------------------------- | -------------------------------------- | ---------------- | ---------------------- |
-| **Staking vault** (sFLP.x)    | `refresh_stake`, `collect_stake_fees`, `unstake_instant` | 80%              | 20%                    |
+| **Staking vault** (sFLP.x)    | `refresh_stake`<sup>\*</sup>, `unstake_instant` | 80%              | 20%                    |
 | **Compounding vault** (FLP.x) | `compounding_fees`, vault-touch events (`add_compounding_liquidity`, `remove_compounding_liquidity`, `migrate_stake`, `migrate_flp`) | 95%              | 5%                     |
+
+<sup>\*</sup> Manual `collect_stake_fees` claims include a `refresh_stake` step that books the fee; the claim instruction itself is payout-only.
 
 
 These shares are configured per pool in basis points (bps), where 10,000 bps = 100%. Trump.1's staking vault currently uses `Pool.staking_fee_share_bps = 8000` (80% to LP, 20% to protocol), reduced from 9500 in September 2025. Its compounding vault uses `Pool.compounding_stats.fee_share_bps = 9500` (95% to LP, 5% to protocol), unchanged since pool creation.
@@ -235,11 +237,9 @@ The effective rate varies depending on how much LP sits in each vault and the pe
 
 ## Fees That Never Reach Stakers
 
-Not all on-chain fees flow to the protocol and FAF stakers. Two categories are excluded:
+Not all on-chain fees flow to the protocol and FAF stakers. One category is excluded:
 
-**LP management fees:** When liquidity providers add or remove liquidity (`add_liquidity`, `remove_liquidity`, `remove_compounding_liquidity`), they pay a small fee. These fees are retained within the pool and benefit all LP holders through increased net asset value. They do not flow to `fees_stats.accrued` and therefore never reach `move_protocol_fees`.
-
-**Liquidation fees:** The `fee_amount` in liquidation events goes to the liquidator as an incentive, not to the protocol fee bucket.
+**LP management fees:** When liquidity providers add or remove liquidity (`add_liquidity`, `add_compounding_liquidity`, `add_liquidity_and_stake`, `remove_liquidity`, `remove_compounding_liquidity`), they pay a small fee. These fees are retained within the pool and benefit all LP holders through increased net asset value. They do not flow to `fees_stats.accrued` and therefore never reach `move_protocol_fees`.
 
 ---
 
