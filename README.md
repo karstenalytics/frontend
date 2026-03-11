@@ -20,9 +20,8 @@ This repository contains the public frontend for karstenalytics - a platform pro
 
 All processed analytics data is available as static JSON files in `/static/data/`:
 
-- **Transaction data**: Protocol revenue, staking metrics, wallet analytics
-- **Time-series**: Daily aggregations, historical trends
-- **Attribution**: Multi-dimensional revenue breakdowns (token, type, pool, wallet)
+- **DefiTuna** (`/static/data/defituna/`): Revenue attribution by token, type, pool, and wallet
+- **Flash.Trade** (`/static/data/flash-trade/`): Fee breakdowns by pool and type, staking metrics, wallet usage
 
 These files are updated daily via automated GitHub Actions and can be used for custom analysis or integrations.
 
@@ -44,7 +43,8 @@ Visit http://localhost:3000/ - the site rebuilds automatically on file changes.
 
 ```
 frontend/
-├── docs/              # Markdown content (analysis pages, guides)
+├── articles/          # Blog posts and deep-dive articles
+├── docs/              # Analysis pages and methodology
 ├── src/               # React components and custom theme
 ├── static/            # Static assets and data files
 │   └── data/          # Analytics JSON files (updated daily)
@@ -53,11 +53,6 @@ frontend/
 ```
 
 ## Design Guidelines
-
-See `docs-internal/` for comprehensive design documentation:
-- **CHART_PAGE_STRUCTURE.md** - Page structure and component guidelines
-- **CARD_STYLE_GUIDE.md** - Stat card styling
-- **mobile-chart-optimization.md** - Responsive chart patterns
 
 **Key Components:**
 - `src/components/common/ChartToggle.tsx` - Shared toggle with primary (teal) / secondary (slate) variants
@@ -78,4 +73,4 @@ Contributions welcome for:
 
 ## License
 
-MIT License - Copyright © 2025 karstenalytics
+MIT License - Copyright © 2025-2026 karstenalytics
