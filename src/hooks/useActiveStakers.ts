@@ -7,6 +7,12 @@ export interface ActiveStakersDaily {
   count: number;
 }
 
+export interface DailyChurn {
+  date: string;
+  joined: number;
+  left: number;
+}
+
 export interface StakingDaily {
   date: string;
   staked: number;
@@ -39,6 +45,7 @@ export interface TopStakerByBalance {
 
 export interface ActiveStakersData {
   daily_counts: ActiveStakersDaily[];
+  daily_churn: DailyChurn[];
   daily_balances: StakingDaily[];
   top_wallets: TopStakerWallet[];
   top_stakers: TopStakerByBalance[];
@@ -196,7 +203,11 @@ export function useActiveStakers(protocol: 'defituna' | 'flash-trade' = 'defitun
 
     // Calculate active stakers per day and daily balances
     const dailyCounts: ActiveStakersDaily[] = [];
+    const dailyChurn: DailyChurn[] = [];
     const dailyBalances: StakingDaily[] = [];
+
+    // Track which wallets are currently active (above dust threshold)
+    const activeWallets: Set<string> = new Set();
 
     // Track cumulative pending and withdrawn amounts for Flash.Trade
     let cumulativePending = 0;
@@ -205,6 +216,9 @@ export function useActiveStakers(protocol: 'defituna' | 'flash-trade' = 'defitun
     for (const date of sortedDates) {
       const dayEvents = eventsByDate.get(date)!;
       const isRecent = last7Days.has(date);
+
+      // Snapshot wallets touched today to check churn after processing
+      const touchedWallets: Set<string> = new Set();
 
       // Process all events for this day
       for (const event of dayEvents) {
@@ -219,6 +233,9 @@ export function useActiveStakers(protocol: 'defituna' | 'flash-trade' = 'defitun
         const dPending = event[IDX_D_PENDING] || 0;
         const dWithdrawn = event[IDX_D_WITHDRAWN] || 0;
         const reward = event[IDX_REWARD] || 0;
+
+        // Track this wallet for churn calculation
+        if (dStake !== 0) touchedWallets.add(address);
 
         // Update balance
         const currentBalance = walletBalances.get(address) || 0;
@@ -264,13 +281,28 @@ export function useActiveStakers(protocol: 'defituna' | 'flash-trade' = 'defitun
         }
       }
 
-      // Count wallets with positive balance and sum total staked at end of day
+      // Compute churn: only check wallets whose balance changed today
+      let joined = 0;
+      let left = 0;
+      for (const addr of touchedWallets) {
+        const bal = walletBalances.get(addr) || 0;
+        const wasActive = activeWallets.has(addr);
+        const isActive = bal > DUST_THRESHOLD;
+        if (isActive && !wasActive) joined++;
+        else if (!isActive && wasActive) left++;
+      }
+      dailyChurn.push({ date, joined, left });
+
+      // Update active wallet set and count totals
       let activeCount = 0;
       let totalStaked = 0;
-      for (const balance of walletBalances.values()) {
+      for (const [addr, balance] of walletBalances.entries()) {
         if (balance > DUST_THRESHOLD) {
           activeCount++;
           totalStaked += balance;
+          activeWallets.add(addr);
+        } else {
+          activeWallets.delete(addr);
         }
       }
 
@@ -404,6 +436,7 @@ export function useActiveStakers(protocol: 'defituna' | 'flash-trade' = 'defitun
 
     return {
       daily_counts: dailyCounts,
+      daily_churn: dailyChurn,
       daily_balances: dailyBalances,
       top_wallets: topWallets,
       top_stakers: topStakers,

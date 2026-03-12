@@ -85,11 +85,11 @@ Tracks the number of unique wallets holding active TUNA stakes over time. The co
 
 <BrowserOnly fallback={<div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
   {() => {
-    const UsageTimeSeriesChart = require('@site/src/components/Usage/UsageTimeSeriesChart').default;
+    const ActiveStakersChurnChart = require('@site/src/components/Staking/ActiveStakersChurnChart').default;
     const { useActiveStakers } = require('@site/src/hooks/useActiveStakers');
 
     function StakerChart() {
-      const { data, loading, error, config } = useActiveStakers('defituna');
+      const { data, loading, error } = useActiveStakers('defituna');
 
       if (loading) {
         return (
@@ -102,10 +102,10 @@ Tracks the number of unique wallets holding active TUNA stakes over time. The co
       if (error || !data) return null;
 
       return (
-        <UsageTimeSeriesChart
-          title="Active Stakers"
-          data={data.daily_counts}
-          yAxisLabel="Wallets with Active Stakes"
+        <ActiveStakersChurnChart
+          dailyCounts={data.daily_counts}
+          dailyChurn={data.daily_churn}
+          stakeToken="TUNA"
         />
       );
     }
@@ -235,10 +235,10 @@ This chart helps you:
 
 **Active Stakers Time Series:**
 - **X-axis**: Date (UTC days)
-- **Y-axis**: Number of unique wallets with staked TUNA balance > 0.001
-- **Line trend**: Shows the snapshot count of wallets with a positive staked balance at the end of each day
-- **Increases**: New stakers or wallets that restaked
-- **Decreases**: Wallets that fully unstaked all their positions
+- **Left Y-axis (area line)**: Number of unique wallets with staked TUNA balance > 0.001 (dust threshold)
+- **Right Y-axis (bars)**: Daily gross movement - green bars show wallets that became active ("New Stakers"), red bars show wallets that dropped below the dust threshold ("Fully Unstaked")
+- **New Stakers**: Wallets whose staked balance crossed above the dust threshold on that day. The vast majority are first-time stakers, but the count also includes a small number of wallets that previously fully unstaked and later re-staked.
+- **Fully Unstaked**: Wallets whose staked balance fell to or below the dust threshold (0.001 TUNA), including full unstakes
 
 **Top 50 Stakers Table:**
 - **Rank**: Position by current staked balance (descending)
