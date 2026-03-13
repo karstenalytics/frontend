@@ -1,14 +1,14 @@
 {
   "compound_rate": 56.4,
   "compound_rate_faf": 62.5,
-  "total_claimed_faf": 82125047.74,
-  "compounded_faf": 51305842.53,
-  "compound_count": 3365,
-  "claim_count": 2611,
+  "total_claimed_faf": 82144173.96,
+  "compounded_faf": 51309954.75,
+  "compound_count": 3366,
+  "claim_count": 2615,
   "compounders": 1151,
-  "non_compounders": 637,
-  "faf_token_claimers": 1788,
-  "faf_token_claim_count": 5976,
+  "non_compounders": 639,
+  "faf_token_claimers": 1790,
+  "faf_token_claim_count": 5981,
   "compound_by_epoch": [
     {
       "epoch": "2025-05",
@@ -412,17 +412,17 @@
     },
     {
       "epoch": "2026-03-active",
-      "compound_rate": 50.5,
-      "compound_rate_faf": 53.7,
-      "compounders": 302,
-      "non_compounders": 296,
-      "claimed_faf": 4950951.76,
+      "compound_rate": 50.2,
+      "compound_rate_faf": 53.6,
+      "compounders": 303,
+      "non_compounders": 300,
+      "claimed_faf": 4970077.97,
       "by_stake_size": [
         {
           "tier": "<10K",
-          "compound_rate": 37.0,
-          "compound_rate_faf": 31.9,
-          "total_wallets": 276
+          "compound_rate": 36.6,
+          "compound_rate_faf": 31.4,
+          "total_wallets": 279
         },
         {
           "tier": "10K-100K",
@@ -432,15 +432,15 @@
         },
         {
           "tier": "100K-1M",
-          "compound_rate": 67.4,
-          "compound_rate_faf": 56.8,
-          "total_wallets": 141
+          "compound_rate": 66.9,
+          "compound_rate_faf": 56.7,
+          "total_wallets": 142
         },
         {
           "tier": "1M-10M",
-          "compound_rate": 56.3,
-          "compound_rate_faf": 55.9,
-          "total_wallets": 71
+          "compound_rate": 56.9,
+          "compound_rate_faf": 56.0,
+          "total_wallets": 72
         },
         {
           "tier": "10M+",
@@ -454,6 +454,6 @@
   "changes": {
     "compound_rate_pct": -1.9,
     "compound_rate_faf_pct": -19.5,
-    "claimed_faf_30d": 5032835.65
+    "claimed_faf_30d": 5043538.47
   }
 }
