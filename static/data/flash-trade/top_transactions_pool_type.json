@@ -3117,6 +3117,14 @@
   ],
   "Virtual.1_Liquidate": [
     {
+      "signature": "hnuSEsbkKTupb8M1WnPGGKUAupwcdhM1kbNrkv5GUE5jcTWRX9BSgfXKqiUtGuxJdhFx6Ns1sr7QhF7NPqqJKfu",
+      "timestamp": 1773383058,
+      "date": "2026-03-13",
+      "pool": "Virtual.1",
+      "type": "Liquidate",
+      "fee_usdc": 3064.721851
+    },
+    {
       "signature": "3kBHQiT6vvVGAWVS1Lc3MLatoBxgERVp8bdWLvePpGxdQjNeu7tSWXTk6q1p3kp1bV6Zzn4Pknew7zChtK1tjGAU",
       "timestamp": 1773346884,
       "date": "2026-03-12",
@@ -3187,14 +3195,6 @@
       "pool": "Virtual.1",
       "type": "Liquidate",
       "fee_usdc": 118.519096
-    },
-    {
-      "signature": "enyL5KTAESx5VJq1wrAJr3akbBcDjLWw9eiQ2pinCEPrHwMRBF816DgADYZcrqxBiGTnuygCz2gaWXi4ub5H5Xd",
-      "timestamp": 1753880933,
-      "date": "2025-07-30",
-      "pool": "Virtual.1",
-      "type": "Liquidate",
-      "fee_usdc": 112.516182
     }
   ],
   "Crypto.1_DecreaseSize": [
@@ -4903,20 +4903,20 @@
       "fee_usdc": 0.251349
     },
     {
+      "signature": "5x5PHwAdfRzCVkFWciYbrPiVSGrsXmHeFnRbhd9ki3aAwm949XqMMiTgQTGz1E3VqmFNiBqzeZh9AQ4xk4jVa8ap",
+      "timestamp": 1773419202,
+      "date": "2026-03-13",
+      "pool": "Trump.1",
+      "type": "ExecuteLimitWithSwap",
+      "fee_usdc": 0.138943
+    },
+    {
       "signature": "5e8L4WM3eHmETdGS1BZPhxKyhE68cj8LKRFmqMFeqoKL1eZuRQbHoqB1y5YLZrkTzwuDrh1QYwRb2cB3f9J13KRe",
       "timestamp": 1745597667,
       "date": "2025-04-25",
       "pool": "Trump.1",
       "type": "ExecuteLimitWithSwap",
       "fee_usdc": 0.021168
-    },
-    {
-      "signature": "4XHv96fsd2vRkedPSQ888Vfx7YLUMVufzwR1MXbc6UUHPybiJKUiibt29VGieBg63ALYPT3iGMDVqEPVD7cpPQgo",
-      "timestamp": 1747497784,
-      "date": "2025-05-17",
-      "pool": "Trump.1",
-      "type": "ExecuteLimitWithSwap",
-      "fee_usdc": 0.014459
     }
   ],
   "Governance.1_ExecuteLimitOrder": [
