@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-03-13T00:00:00+00:00",
+  "generated_at": "2026-03-14T00:00:00+00:00",
   "date_range": {
     "start": "2025-07-24",
-    "end": "2026-03-13"
+    "end": "2026-03-14"
   },
   "supply": {
     "max": 1000000000.0
@@ -1863,6 +1863,14 @@
       "total": 865232246.603099,
       "staked_delta": 1140.774566,
       "total_delta": -76959.459611
+    },
+    {
+      "date": "2026-03-14",
+      "staked": 861390365.156935,
+      "unstaked": 3868324.284311,
+      "total": 865258689.441246,
+      "staked_delta": 15061.585851,
+      "total_delta": 26442.838147
     }
   ],
   "active_stakers": {
@@ -2794,6 +2802,10 @@
       {
         "date": "2026-03-13",
         "count": 3638
+      },
+      {
+        "date": "2026-03-14",
+        "count": 3635
       }
     ],
     "description": "Wallets with staked balance > 0 (actively earning rewards)"
@@ -3727,6 +3739,10 @@
       {
         "date": "2026-03-13",
         "count": 3652
+      },
+      {
+        "date": "2026-03-14",
+        "count": 3650
       }
     ],
     "description": "Wallets with staked > 0 OR pending >= 21,000 TUNA (matches API definition)"
@@ -3734,7 +3750,7 @@
   "top_stakers_7d": [
     {
       "address": "DHGaqE14JmUtGG7hgbupFeC5cVPTkjzztXH3GicNZcyB",
-      "amount": 382338.532782
+      "amount": 462819.895531
     },
     {
       "address": "4gpTgAd2nh7ngsPGUQw83bSZUXbbUaBAcfeUiyxqTwNK",
@@ -3749,10 +3765,6 @@
       "amount": 14315.785285
     },
     {
-      "address": "ExFcWT2snFVAHa7hFhFbhE8sHyEcMcvAcy6nr4jQRbeF",
-      "amount": 10832.19362
-    },
-    {
       "address": "7ZdxWgacFAboXnpmUa63rdu5sHBSr1P7EYTM9HpkTVQP",
       "amount": 8708.093462
     },
@@ -3761,16 +3773,20 @@
       "amount": 7419.139872
     },
     {
-      "address": "BQVsRB9iss6563BieMtq7Tt2cccf9s5iZM7cirq1CXbf",
-      "amount": 2407.362139
-    },
-    {
       "address": "ECyvtxvY4KNBt5vfLtdsMrp77mKjL3JD6aha9m3aXBvd",
-      "amount": 1326.281804
+      "amount": 2048.298542
     },
     {
       "address": "5FahYqq27ie8eCBX74iG7Mygwqkmpks9QRdJ2mnRUvS8",
       "amount": 1116.512191
+    },
+    {
+      "address": "7XLX6KXXBB8HhLLXifSUYNW7F8B4oaDDoXzzw4mSJRQ8",
+      "amount": 822.829727
+    },
+    {
+      "address": "7McR5iQZaeC7J6XDgbTR7AR2no7zeXj9Y3xybZEPLoq8",
+      "amount": 781.888499
     }
   ],
   "top_withdrawers_7d": [
@@ -3795,10 +3811,6 @@
       "amount": 118750.0
     },
     {
-      "address": "G3nMrF1PQU5Wo3pBW28hDrSJYpc9ZgzEotNt5u5CPCxa",
-      "amount": 89422.032216
-    },
-    {
       "address": "14dgj9pjciXUMySZVV99knyLzf4AankBLntZWd3bksWX",
       "amount": 86761.404458
     },
@@ -3811,8 +3823,12 @@
       "amount": 53651.281619
     },
     {
-      "address": "AZa2jNPa3eGcRqAa2Z9Cs37qzQ1dKGVjn8B73Dypfetr",
-      "amount": 17906.538434
+      "address": "EeE6sLoKrBMJ1fyxSBJwxdJUeESscFHNiSFstX4VTd61",
+      "amount": 38205.347344
+    },
+    {
+      "address": "55dcRbz5h5LjwHWmMxLvMVMAcW2W6mgLzYPKZpnTGMcZ",
+      "amount": 22662.854625
     }
   ],
   "user_positions_latest": {
@@ -3869,7 +3885,7 @@
     "DNvVcrrGUHivvgNVNtf5DWBr1fv9p1Wga6BTSkBAjkut": 26146.16837,
     "GC2gZ3NhcY4C63a38tP5SojSjHqUkeJq3DDAGaRULAt5": 27735.20449,
     "EpjW3rsw1PtuosadDjvwAuiAU8FGSQ6jn7i5nk2QUc7j": 20000.0,
-    "ECyvtxvY4KNBt5vfLtdsMrp77mKjL3JD6aha9m3aXBvd": 32980807.827082,
+    "ECyvtxvY4KNBt5vfLtdsMrp77mKjL3JD6aha9m3aXBvd": 32981911.372504,
     "91sWXL8WX9KNxbrrPHnSFiBNkhMbMdPFiDt9TPdtyHj7": 39956.05417,
     "DCZPFdbaumPesuEbFJVp2wQzevoGNyqyiTQ4BnimQVte": 1.73477,
     "CkmP7VCAWqFBJY22xDn8CfYqQZxhVxkFjJG15g3xPiVo": 29143.389893,
@@ -4341,7 +4357,7 @@
     "3TLLyv16hxLDs7hF3VUnCm9CvBf4SKvVnpEUrV5JuY9e": 662.967288,
     "CeiBbXwduP3EUqvM5un8SHR4SzztnWU7EaUCo26CqYtM": 674.146093,
     "26M9hYp5nPvnSCq93exSP6crW9xgRdjNJwBkqa411RrZ": 649.565586,
-    "CiVSK81H4kuC4LRiRb93fPLoxFmW5YfCKxnKJsvzzPza": 5539.25667,
+    "CiVSK81H4kuC4LRiRb93fPLoxFmW5YfCKxnKJsvzzPza": 5548.468265,
     "HYQyo4pRxjzpNoSkUteNd4TGFwoiMerAwNLdK9rhD2Xf": 1339.765701,
     "AiMcVyKTtWg5hzhk7L6KVV1Mvr1dwzugy7DM2g936p4A": 624.783803,
     "amZcfrdkKeM98YHCVHT3Bv9Bxg2TAYc8QqS8pUFyCpD": 626.59086,
@@ -5167,7 +5183,6 @@
     "8wg51dYckGN8L38g56LcyNTnkrxYpB4n7sX2BHMSqnpt": 37.175824,
     "2fbQnwAMWnFKzkhNtSxQrduQZaKMPfuD9ccMTuzGXQr5": 37.845779,
     "FGDqEFFupjetHfyt8PZkfjGvZyrYwjTN1ADGcYF4CcRV": 37.171606,
-    "55dcRbz5h5LjwHWmMxLvMVMAcW2W6mgLzYPKZpnTGMcZ": 22662.854625,
     "mPduGUrNLVKxmZUScquTqmSW7UjqTuRc6GMpGitaad1": 37.192998,
     "6Aom16hXKoMnjZohyCHTNorWbWEVyJfR3orExYNu68Jw": 37.693404,
     "FrQZEbUWfaJ2wGUYxto8hmMJRczzv2pA32Q2EEXwSgvQ": 214.560986,
@@ -7215,7 +7230,6 @@
     "9auSQ1coGaEKLqLQZaTmHfXCoKkZhzWmhDPnkht5rmaM": 5766.231203,
     "36U4XGqiL4Xn79fTJmjmfDGNnjm2BpHSQTigSeBSuPXT": 5957.104181,
     "Donk5UQWLxoTmGyVRpA9UjnSYrSvhJjF9KceHNjn84Kp": 811.583418,
-    "EeE6sLoKrBMJ1fyxSBJwxdJUeESscFHNiSFstX4VTd61": 38205.347344,
     "H3DKyvP68FHEvRR9CZLckxMRRQABWDSpU4zuVtcw5MwW": 1602.833261,
     "833VddNQ2unqREhXnePDUwWjtfwcKdvGNdAQNTEJmMFk": 3326.020391,
     "7b8fLHtyNqJSj1MRgbx2zWrEnjufeUSnMrbG1ubsJ2gH": 786.102622,
@@ -7337,7 +7351,7 @@
     "7dnNZvuLctgaCCfRjvk4wYs5wsXjxcuPTSywHAEd59wF": 37.71347,
     "ECb2yCVLWjo7y9RcJJmorY8A5NesdD2fAeeYdDTWp91r": 3676.471178,
     "Fj1674tEozsM7vueAfaGyrW7D1d9WTCg36P4KcWR8J7i": 855.0,
-    "DHGaqE14JmUtGG7hgbupFeC5cVPTkjzztXH3GicNZcyB": 956179.505313,
+    "DHGaqE14JmUtGG7hgbupFeC5cVPTkjzztXH3GicNZcyB": 1036660.868062,
     "JDdHX7JCsnnGdQ3X2u7QbedkcYXdDgi3zP9KKc8ehnAW": 409865.17,
     "8sB4Q1YCHZGXZLjnboG6jTDgrVMKtWEL34D6NSDJYg8C": 1000.0,
     "6UXmNnuPZSnVvS19EruVvX2c5GT4FvK3sPohExmMfJzJ": 200000.0,
@@ -7446,7 +7460,6 @@
     "GVv6361zZWX8foS9Mu4JcAQHGMETRj9kCm4UFfMcvu3x": 62850.949731,
     "26QmkmoPszVfqn75ctYK1rZv1JBifYEKJEVRS5i2UcKf": 55527.723392,
     "7Fj2pJcSDQaUTgwU8riaCJAP5aV7kzq6TZboFufHG4xC": 1814.97843,
-    "HeUyFDWkE732ygf3gNHes68yW5pY4SCatoC3rsN4Ri5Q": 5664.331946,
     "FVmRviTDHwufRcxd7VwNVHX7Y57URyFneEJZfuYsCrSQ": 74.356319,
     "2UPDcEQVCUpYiAjb9tkKLcfim3exeysZhLAyhNkFzD6H": 29.058134,
     "miLkf1WFYFjAZVCbmXxKTtQSXnNMufgshvWqaQvVocT": 157632.388641,
