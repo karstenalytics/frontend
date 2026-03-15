@@ -138,7 +138,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
           const targetWidth = 1000;
           const aspect = logo.naturalHeight / logo.naturalWidth;
           const targetHeight = targetWidth * aspect;
-          ctx.globalAlpha = 0.08;
+          ctx.globalAlpha = 0.04;
           ctx.drawImage(
             logo,
             (1200 - targetWidth) / 2,
