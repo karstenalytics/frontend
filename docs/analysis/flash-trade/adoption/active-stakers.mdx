@@ -150,6 +150,7 @@ Tracks the number of unique wallets holding active FAF stakes over time. The cou
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>% of Total</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>vs. Peak</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>30d Balance %</th>
+                  <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>30d Net</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'center' }}>Timeline</th>
                 </tr>
               </thead>
@@ -175,6 +176,11 @@ Tracks the number of unique wallets holding active FAF stakes over time. The cou
                         >
                           {staker.address.slice(0, 4)}...{staker.address.slice(-4)}
                         </a>
+                        {staker.nansen_label && (
+                          <div style={{ fontSize: '11px', color: 'var(--ifm-color-secondary)', marginTop: '2px' }}>
+                            {staker.nansen_label}
+                          </div>
+                        )}
                       </td>
                       <td style={{ ...tableStyles.cell, textAlign: 'right', fontWeight: 600 }}>
                         {staker.current_balance.toLocaleString(undefined, { maximumFractionDigits: 0 })} FAF
@@ -187,6 +193,11 @@ Tracks the number of unique wallets holding active FAF stakes over time. The cou
                       </td>
                       <td style={{ ...tableStyles.cell, textAlign: 'right', color: changeColor }}>
                         {changeText}
+                      </td>
+                      <td style={{ ...tableStyles.cell, textAlign: 'right', fontSize: '13px', color: staker.net_bought_sold_usd == null ? 'var(--ifm-color-emphasis-600)' : staker.net_bought_sold_usd >= 0 ? 'var(--ifm-color-success)' : 'var(--ifm-color-danger)' }}>
+                        {staker.net_bought_sold_usd != null
+                          ? `${staker.net_bought_sold_usd >= 0 ? '+' : ''}$${Math.abs(staker.net_bought_sold_usd).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+                          : '--'}
                       </td>
                       <td style={{ ...tableStyles.cell, textAlign: 'center' }}>
                         <a

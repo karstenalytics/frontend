@@ -41,6 +41,8 @@ export interface TopStakerByBalance {
   share_pct: number;         // current_balance / totalStaked * 100
   vs_peak_pct: number;       // current_balance / max_ever_balance * 100
   change_30d_pct: number | null; // % change in wallet's own balance over 30d, null if wallet didn't exist 30d ago
+  nansen_label: string | null;        // SNS name (.sol/.skr) or null
+  net_bought_sold_usd: number | null;  // 30d net buy/sell in USD or null
 }
 
 export interface ActiveStakersData {
@@ -64,6 +66,7 @@ export interface ActiveStakersData {
 interface ProtocolConfig {
   protocol: 'defituna' | 'flash-trade';
   cachePath: string;
+  labelsPath: string;
   stakeToken: string;
   rewardToken: string;
 }
@@ -72,12 +75,14 @@ const PROTOCOL_CONFIGS: Record<string, ProtocolConfig> = {
   'defituna': {
     protocol: 'defituna',
     cachePath: '/data/defituna/staker_cache.json.gz',
+    labelsPath: '/data/defituna/nansen_labels.json',
     stakeToken: 'TUNA',
     rewardToken: 'SOL',
   },
   'flash-trade': {
     protocol: 'flash-trade',
     cachePath: '/data/flash-trade/staker_cache.json.gz',
+    labelsPath: '/data/flash-trade/nansen_labels.json',
     stakeToken: 'FAF',
     rewardToken: 'USDC',
   },
@@ -105,8 +110,10 @@ const DUST_THRESHOLD = 0.001;
 export function useActiveStakers(protocol: 'defituna' | 'flash-trade' = 'defituna') {
   const config = PROTOCOL_CONFIGS[protocol];
   const dataPath = useBaseUrl(config.cachePath);
+  const labelsUrl = useBaseUrl(config.labelsPath);
 
   const [rawData, setRawData] = useState<any>(null);
+  const [nansenLabels, setNansenLabels] = useState<Record<string, { label: string | null; net_usd: number }>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -120,8 +127,19 @@ export function useActiveStakers(protocol: 'defituna' | 'flash-trade' = 'defitun
 
         const parsed = await fetchStakerCache(dataPath);
 
+        // Load Nansen labels (non-critical, fail silently)
+        let labels: Record<string, { label: string | null; net_usd: number }> = {};
+        try {
+          const labelsRes = await fetch(labelsUrl);
+          if (labelsRes.ok) {
+            const labelsData = await labelsRes.json();
+            labels = labelsData.labels || {};
+          }
+        } catch { /* non-critical */ }
+
         if (!cancelled) {
           setRawData(parsed);
+          setNansenLabels(labels);
         }
       } catch (err) {
         console.error('Failed to load staker cache:', err);
@@ -137,7 +155,7 @@ export function useActiveStakers(protocol: 'defituna' | 'flash-trade' = 'defitun
 
     loadData();
     return () => { cancelled = true; };
-  }, [dataPath]);
+  }, [dataPath, labelsUrl]);
 
   // Process raw data into active stakers metrics
   const data = useMemo<ActiveStakersData | null>(() => {
@@ -373,12 +391,15 @@ export function useActiveStakers(protocol: 'defituna' | 'flash-trade' = 'defitun
           }
         }
 
+        const nansen = nansenLabels[address];
         return {
           address,
           current_balance: balance,
           share_pct: sharePct,
           vs_peak_pct: vsPeakPct,
           change_30d_pct: change30dPct,
+          nansen_label: nansen?.label ?? null,
+          net_bought_sold_usd: nansen?.net_usd ?? null,
         };
       });
 
@@ -451,7 +472,7 @@ export function useActiveStakers(protocol: 'defituna' | 'flash-trade' = 'defitun
       top50_at_peak_pct: top50AtPeakPct,
       top50_at_peak_change_pp: top50AtPeakChangePp,
     };
-  }, [rawData]);
+  }, [rawData, nansenLabels]);
 
   return { data, loading, error, config };
 }

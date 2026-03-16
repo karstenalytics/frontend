@@ -111,6 +111,8 @@ export interface WalletSummary {
   first_stake_date: string;
   last_activity_date: string;
   days_active: number;
+  nansen_label: string | null;
+  net_bought_sold_usd: number | null;
 }
 
 export interface WalletTimelineData {
@@ -540,6 +542,8 @@ function parseWalletTimeline(
     first_stake_date: firstDate,
     last_activity_date: lastActivityDate,
     days_active: daysActive,
+    nansen_label: null,
+    net_bought_sold_usd: null,
   };
 
   return {
@@ -560,6 +564,7 @@ export interface ProtocolConfig {
   stakeToken: string;
   rewardToken: string;
   cachePath: string;
+  labelsPath: string;
   supportsVesting?: boolean;
 }
 
@@ -569,6 +574,7 @@ const PROTOCOL_CONFIGS: Record<string, ProtocolConfig> = {
     stakeToken: 'TUNA',
     rewardToken: 'SOL',
     cachePath: '/data/defituna/staker_cache.json.gz',
+    labelsPath: '/data/defituna/nansen_labels.json',
     supportsVesting: true,
   },
   'flash-trade': {
@@ -576,6 +582,7 @@ const PROTOCOL_CONFIGS: Record<string, ProtocolConfig> = {
     stakeToken: 'FAF',
     rewardToken: 'USDC',
     cachePath: '/data/flash-trade/staker_cache.json.gz',
+    labelsPath: '/data/flash-trade/nansen_labels.json',
     supportsVesting: false, // Streamflow vesting model incompatible with DefiTuna visualization
   },
 };
@@ -589,6 +596,7 @@ const PROTOCOL_CONFIGS: Record<string, ProtocolConfig> = {
 export function useWalletTimeline(walletAddress: string | null, protocol: 'defituna' | 'flash-trade' = 'defituna') {
   const config = PROTOCOL_CONFIGS[protocol];
   const dataPath = useBaseUrl(config.cachePath);
+  const labelsUrl = useBaseUrl(config.labelsPath);
 
   const [data, setData] = useState<WalletTimelineData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -610,6 +618,16 @@ export function useWalletTimeline(walletAddress: string | null, protocol: 'defit
     try {
       const cache = await fetchStakerCache(dataPath);
 
+      // Load Nansen labels (non-critical, fail silently)
+      let nansenLabels: Record<string, { label: string | null; net_usd: number }> = {};
+      try {
+        const labelsRes = await fetch(labelsUrl);
+        if (labelsRes.ok) {
+          const labelsData = await labelsRes.json();
+          nansenLabels = labelsData.labels || {};
+        }
+      } catch { /* non-critical */ }
+
       // Parse timeline for this wallet
       const result = parseWalletTimeline(address.trim(), cache, config.protocol);
 
@@ -619,6 +637,13 @@ export function useWalletTimeline(walletAddress: string | null, protocol: 'defit
         if (result.summary) {
           result.summary.total_operations = result.operations.length;
         }
+      }
+
+      // Attach Nansen labels to summary
+      if (result.found && result.summary) {
+        const nansen = nansenLabels[address.trim()];
+        result.summary.nansen_label = nansen?.label ?? null;
+        result.summary.net_bought_sold_usd = nansen?.net_usd ?? null;
       }
 
       if (isMountedRef.current) {
@@ -641,7 +666,7 @@ export function useWalletTimeline(walletAddress: string | null, protocol: 'defit
         setLoading(false);
       }
     }
-  }, []);
+  }, [labelsUrl]);
 
   useEffect(() => {
     // Clear any pending debounced calls

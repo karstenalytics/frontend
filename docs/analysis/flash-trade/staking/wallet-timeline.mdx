@@ -323,6 +323,17 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                     </div>
                   </div>
 
+                  {data.summary.nansen_label && (
+                    <div>
+                      <div style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)', marginBottom: '4px' }}>
+                        Nansen Label
+                      </div>
+                      <div style={{ fontSize: '16px', fontWeight: 600 }}>
+                        {data.summary.nansen_label}
+                      </div>
+                    </div>
+                  )}
+
                   <div>
                     <div style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)', marginBottom: '4px' }}>
                       Pending Unstake (Queued)
