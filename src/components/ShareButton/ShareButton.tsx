@@ -69,17 +69,25 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
         .map((trace: any) => ({ ...trace }));
 
       // Build export layout with tight margins and horizontal legend
+      // Preserve the chart's own bottom margin and legend position if they are
+      // larger than the defaults (e.g. PoolTypeMatrixChart has rotated labels
+      // that need extra space).
+      const srcMargin = gd.layout?.margin || {};
+      const srcLegend = gd.layout?.legend || {};
+      const exportB = Math.max(srcMargin.b || 0, 80);
+      const legendYVal = srcLegend.y != null && srcLegend.y < -0.15
+        ? srcLegend.y : -0.15;
       const exportLayout = {
         ...(gd.layout || {}),
-        margin: { ...(gd.layout?.margin || {}), t: titleHeight, b: 80, r: 24 },
+        margin: { ...srcMargin, t: titleHeight, b: exportB, r: 24 },
         legend: {
-          ...(gd.layout?.legend || {}),
+          ...srcLegend,
           orientation: 'h',
           x: 0.5,
           xanchor: 'center',
-          y: -0.15,
+          y: legendYVal,
           yanchor: 'top',
-          font: { ...(gd.layout?.legend?.font || {}), size: 10 },
+          font: { ...(srcLegend.font || {}), size: 10 },
         },
         width: 1200,
         height: 675 - titleHeight,

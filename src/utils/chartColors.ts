@@ -9,7 +9,7 @@
 // 16 visually distinct colors ordered for maximum contrast between adjacent ranks.
 export const CHART_PALETTE: string[] = [
   '#00A3B4', // teal
-  '#FF6B6B', // coral
+  '#E8A317', // gold
   '#4ECDC4', // cyan
   '#F39C12', // orange
   '#8B5CF6', // violet
