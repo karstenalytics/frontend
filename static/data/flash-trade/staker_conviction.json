@@ -1,14 +1,14 @@
 {
-  "compound_rate": 56.4,
-  "compound_rate_faf": 62.4,
-  "total_claimed_faf": 82190697.77,
-  "compounded_faf": 51310144.01,
-  "compound_count": 3368,
-  "claim_count": 2619,
-  "compounders": 1152,
-  "non_compounders": 639,
-  "faf_token_claimers": 1791,
-  "faf_token_claim_count": 5987,
+  "compound_rate": 56.2,
+  "compound_rate_faf": 61.6,
+  "total_claimed_faf": 85375769.94,
+  "compounded_faf": 52593268.53,
+  "compound_count": 3477,
+  "claim_count": 2724,
+  "compounders": 1185,
+  "non_compounders": 683,
+  "faf_token_claimers": 1868,
+  "faf_token_claim_count": 6201,
   "compound_by_epoch": [
     {
       "epoch": "2025-05",
@@ -411,7 +411,7 @@
       ]
     },
     {
-      "epoch": "2026-03-active",
+      "epoch": "2026-03",
       "compound_rate": 50.1,
       "compound_rate_faf": 53.1,
       "compounders": 305,
@@ -449,11 +449,51 @@
           "total_wallets": 12
         }
       ]
+    },
+    {
+      "epoch": "2026-04-active",
+      "compound_rate": 50.9,
+      "compound_rate_faf": 40.3,
+      "compounders": 109,
+      "non_compounders": 105,
+      "claimed_faf": 3185072.18,
+      "by_stake_size": [
+        {
+          "tier": "<10K",
+          "compound_rate": 36.3,
+          "compound_rate_faf": 29.6,
+          "total_wallets": 91
+        },
+        {
+          "tier": "10K-100K",
+          "compound_rate": 72.2,
+          "compound_rate_faf": 99.6,
+          "total_wallets": 36
+        },
+        {
+          "tier": "100K-1M",
+          "compound_rate": 59.6,
+          "compound_rate_faf": 22.3,
+          "total_wallets": 52
+        },
+        {
+          "tier": "1M-10M",
+          "compound_rate": 66.7,
+          "compound_rate_faf": 71.6,
+          "total_wallets": 27
+        },
+        {
+          "tier": "10M+",
+          "compound_rate": 12.5,
+          "compound_rate_faf": 2.0,
+          "total_wallets": 8
+        }
+      ]
     }
   ],
   "changes": {
-    "compound_rate_pct": -1.9,
-    "compound_rate_faf_pct": -19.5,
-    "claimed_faf_30d": 5064199.15
+    "compound_rate_pct": -5.5,
+    "compound_rate_faf_pct": 0.3,
+    "claimed_faf_30d": 8239365.78
   }
 }
