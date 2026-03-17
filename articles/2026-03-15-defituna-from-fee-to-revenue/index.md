@@ -4,7 +4,6 @@ description: DefiTuna collects fees in dozens of different tokens across Orca an
 authors:
   - name: by Karsten
 tags: [defituna, fees, revenue, staking]
-unlisted: true
 ---
 
 DefiTuna was the first protocol I started tracking on karstenalytics. The [dashboards](/analysis/defituna/overview) have been live for a while, but I never wrote the companion article explaining how the fee pipeline actually works. After publishing the [Flash.Trade fee flow](/articles/2026/03/05/how-flash-trade-fees-reach-faf-stakers) deep dive, it was time to give DefiTuna the same treatment. The fee journey turned out to be surprisingly different: fees arrive in dozens of different tokens from pools across two AMMs, all of which need to be converted to SOL before stakers see a single lamport.
