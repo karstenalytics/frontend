@@ -318,7 +318,15 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                 padding: '24px',
                 marginBottom: '24px',
               }}>
-                <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Wallet Summary</h3>
+                <h3 style={{ marginTop: 0, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  Wallet Summary
+                  {data.summary.nansen_label && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 500, color: 'var(--ifm-color-emphasis-700)', background: 'var(--ifm-color-emphasis-200)', borderRadius: '6px', padding: '4px 10px' }}>
+                      <a href="https://nansen.ai" target="_blank" rel="noopener noreferrer" title="Powered by Nansen" style={{ lineHeight: 1, display: 'inline-flex' }}><img src="/img/icons/nansen.png" alt="Nansen" style={{ height: '14px', verticalAlign: 'middle', opacity: 0.7 }} /></a>
+                      {data.summary.nansen_label}
+                    </span>
+                  )}
+                </h3>
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
@@ -332,17 +340,6 @@ Detailed staking history for individual wallet addresses showing balance evoluti
                       {data.summary.current_staked.toLocaleString(undefined, { maximumFractionDigits: 2 })} TUNA
                     </div>
                   </div>
-
-                  {data.summary.nansen_label && (
-                    <div>
-                      <div style={{ fontSize: '13px', color: 'var(--ifm-color-secondary)', marginBottom: '4px' }}>
-                        Nansen Label
-                      </div>
-                      <div style={{ fontSize: '16px', fontWeight: 600 }}>
-                        {data.summary.nansen_label}
-                      </div>
-                    </div>
-                  )}
 
                   {data.summary.current_locked > 0 && (
                     <div>

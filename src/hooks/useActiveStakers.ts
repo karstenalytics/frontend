@@ -383,7 +383,7 @@ export function useActiveStakers(protocol: 'defituna' | 'flash-trade' = 'defitun
         let change30dPct: number | null = null;
         if (walletBalances30dAgo) {
           const balance30d = walletBalances30dAgo.get(address) || 0;
-          if (balance30d > 0) {
+          if (balance30d > DUST_THRESHOLD) {
             change30dPct = ((balance - balance30d) / balance30d) * 100;
           } else if (stats.first_seen <= (snapshotDate || '')) {
             // Wallet existed 30d ago with zero balance, now has a balance
