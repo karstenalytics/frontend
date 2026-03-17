@@ -15,9 +15,7 @@ I wanted to verify that fees are properly transformed into staker revenue, with 
 
 ## The Fee-to-Revenue Journey
 
-[IMAGE: Fee flow diagram showing LP positions (Orca/Fusion) and Fusion AMM trading feeding into Treasury PDA, then branching by token type: SOL (57%) goes directly to WSOL in treasury, other tokens (43%) go through swap_reward conversion first, then deposit_reward every ~3h into the Staking Contract, and finally claim_reward to TUNA Stakers]
-
-The diagram above shows the high-level path. The first thing to notice: unlike Flash.Trade, which accumulates fees in internal on-chain accounting fields and periodically sweeps them through multiple stages, DefiTuna routes every fee directly to the [treasury PDA](https://solscan.io/account/G9XfJoY81n8A9bZKaJFhJYomRrcvFkuJ22em2g8rZuCh) within the same transaction that generates it. No staging areas, no hourly consolidation. But the fee arrives in whatever tokens the pool trades in, which creates a conversion challenge.
+The first thing to notice: unlike Flash.Trade, which accumulates fees in internal on-chain accounting fields and periodically sweeps them through multiple stages, DefiTuna routes every fee directly to the [treasury PDA](https://solscan.io/account/G9XfJoY81n8A9bZKaJFhJYomRrcvFkuJ22em2g8rZuCh) within the same transaction that generates it. No staging areas, no hourly consolidation. But the fee arrives in whatever tokens the pool trades in, which creates a conversion challenge.
 
 Let's trace a single fee with round numbers. A user deposits 10 SOL as collateral and borrows 20 SOL to open a 3x leveraged LP position on the SOL-USDC Orca whirlpool. DefiTuna's docs describe the protocol fee as a percentage of the borrowed funds amount. At the most common observed rate in my dataset, 10 bps (0.10%), that is a fee of **0.02 SOL of value**. Because this is a two-token pool, the fee reaches the treasury split across both tokens: roughly 0.01 SOL and another 0.01 SOL-equivalent in USDC.
 
@@ -29,7 +27,8 @@ All treasury revenue is distributed through the staking contract. There is no on
 
 The following sections zoom into each stage of this journey: how fees are charged, how non-SOL tokens are converted, and how SOL reaches stakers.
 
-**The Fee Model.** DefiTuna is a **leveraged liquidity provision protocol**. Users deposit collateral, borrow additional capital from DefiTuna's lending pools, and deploy the combined amount as concentrated liquidity on Orca Whirlpools or Fusion AMM pools (for LP positions), or as directional bets (for leveraged spot positions).
+**The Fee Model** 
+DefiTuna is a **leveraged liquidity provision protocol**. Users deposit collateral, borrow additional capital from DefiTuna's lending pools, and deploy the combined amount as concentrated liquidity on Orca Whirlpools or Fusion AMM pools (for LP positions), or as directional bets (for leveraged spot positions).
 
 An important detail: [Fusion AMM](https://fusionamm.com/) is not a third-party AMM. It is built by the DefiTuna team, a hybrid CLMM + on-chain orderbook. Fusion AMM is the underlying trading venue, while DefiTuna is the lending and leverage layer on top. Revenue from both shows up in the same treasury-to-staking pipeline traced here.
 
@@ -37,7 +36,8 @@ DefiTuna charges a **protocol fee** on position management (opening, compounding
 
 Lenders who supply capital to the lending pools earn borrowing interest. As of this writing, no lending protocol fee appears to flow to the treasury: in the on-chain data I have observed, all borrower interest goes to lenders.
 
-**The *swap_reward* Conversion Pipeline.** Non-SOL tokens accumulate in the treasury's associated token accounts (ATAs) until a *swap_reward* instruction converts them to WSOL. DefiTuna uses several variants depending on the token and the routing path:
+**The *swap_reward* Conversion Pipeline** 
+Non-SOL tokens accumulate in the treasury's associated token accounts (ATAs) until a *swap_reward* instruction converts them to WSOL. DefiTuna uses several variants depending on the token and the routing path:
 
 - *swap_reward_orca*: Single-hop swap via Orca Whirlpool
 - *swap_reward_fusion*: Single-hop swap via Fusion AMM
@@ -46,13 +46,14 @@ Lenders who supply capital to the lending pools earn borrowing interest. As of t
 
 The conversions are part of the same keeper bot cycle as *deposit_reward*. Every ~3 hours, the bot converts whatever non-SOL tokens have accumulated, down to dust amounts, then decides whether to deposit based on the total WSOL balance (see below). USDC appears in about 99% of conversion cycles because it accumulates fast enough to have a balance every 3 hours. Niche tokens like cbBTC (present in about 6% of cycles) may go days between conversions, not because the bot waits for a minimum balance, but because it takes that long for any fees in that token to appear.
 
-**The Attribution Puzzle.** *swap_reward* transactions create an accounting challenge. When a conversion turns 100 USDC into 0.7 SOL, that 0.7 SOL is not new revenue. It is the SOL-equivalent of USDC fees that were already earned by earlier transactions. If you count both the original USDC inflow and the *swap_reward* SOL output, you double-count.
+*swap_reward* transactions create an accounting challenge. When a conversion turns 100 USDC into 0.7 SOL, that 0.7 SOL is not new revenue. It is the SOL-equivalent of USDC fees that were already earned by earlier transactions. If you count both the original USDC inflow and the *swap_reward* SOL output, you double-count.
 
 I solve this by tracking a ledger of pending ATA balances per mint and per originating transaction type. When a *swap_reward* fires, its SOL output is attributed proportionally back to the original transactions that earned the ATA tokens. The conversion itself is never counted as new revenue.
 
-**The *deposit_reward* Cycle.** Once fees have been converted to SOL, a *deposit_reward* instruction deposits the accumulated WSOL into the [TUNA staking contract](https://solscan.io/account/tUnst2Y2sbmgSgARBpSBZhqPzpoy2iUsdCwb5ToYVJa). The instruction logs a *total_unclaimed_reward* value (in lamports) showing the cumulative SOL available for stakers to claim.
+**The *deposit_reward* Cycle** 
+Once fees have been converted to SOL, a *deposit_reward* instruction deposits the accumulated WSOL into the [TUNA staking contract](https://solscan.io/account/tUnst2Y2sbmgSgARBpSBZhqPzpoy2iUsdCwb5ToYVJa). When *deposit_reward* fires, it simultaneously updates three fields on the Treasury account: *total_reward* and *total_unclaimed_reward* both increase by the exact deposit amount (confirming nothing is skimmed), while *acc_reward_per_share* increases proportionally. This is the accumulator the contract uses to calculate each staker's claimable share. When stakers call *claim_reward*, only *total_unclaimed_reward* decreases. When they *compound_reward*, it decreases (claimed SOL) and *total_staked_shares* increases (re-staked).
 
-**Every 3 hours, like clockwork.** I analyzed all 1,291 *deposit_reward* events in my dataset to understand the cadence and determine what triggers a cycle.
+I analyzed all 1,291 *deposit_reward* events in my dataset to understand the cadence and determine what triggers a cycle.
 
 **The base interval is roughly 3 hours.** During high-volume periods like October 2025, events fire at near-steady 3-hour intervals. On October 1, the first four events landed at 01:49, 04:50, 07:52, and 10:54 UTC. The gaps are 3h01m, 3h02m, and 3h02m; not exactly 3 hours, but close. The small drift that accumulates over successive cycles suggests a timer-based mechanism rather than a fixed cron schedule.
 
@@ -78,7 +79,7 @@ The behavioral model: every ~3 hours, the keeper checks the treasury's WSOL bala
 
 Now that the mechanics are clear, let's look at what actually flowed through this pipeline. Over the 235 days in my dataset (July 24, 2025 to March 15, 2026), the treasury collected **8,381 SOL**.
 
-**Revenue by Source.**
+**Revenue by Source**
 
 - Orca Leveraged LP: 4,268 SOL (50.9%). Position opens, closes, liquidations, compounding
 - Orca Direct transfers: 146 SOL (1.7%). Revenue collected before the current fee system was in place
@@ -95,7 +96,7 @@ This also means treasury revenue is sensitive to market volatility. During volat
 
 Explore the full breakdown on the [revenue by type dashboard](https://karstenalytics.com/analysis/defituna/fees-revenue/by-type).
 
-**Revenue by Pool.**
+**Revenue by Pool**
 
 - Fusion SOL-USDC: 3,053 SOL (36.4%)
 - Orca SOL-USDC: 2,237 SOL (26.7%)
@@ -110,7 +111,8 @@ The treasury receives fees in more than 30 different token mints: 57% as direct 
 
 Explore the full breakdown on the [revenue by pool dashboard](https://karstenalytics.com/analysis/defituna/fees-revenue/by-pool).
 
-**The Liquidation Dependency.** The data above reveals a structural pattern: DefiTuna's revenue is heavily dependent on liquidations. The protocol fee on position opens is small (typically 10 bps), while the liquidation fee (10% per the docs) generates far more per event.
+**The Liquidation Dependency** 
+The data above reveals a structural pattern: DefiTuna's revenue is heavily dependent on liquidations. The protocol fee on position opens is small (typically 10 bps), while the liquidation fee (10% per the docs) generates far more per event.
 
 How much more? Counting all 190,000 revenue events in the dataset (one transaction can contain multiple revenue-generating instructions):
 

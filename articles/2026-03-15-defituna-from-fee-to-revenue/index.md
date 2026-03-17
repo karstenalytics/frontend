@@ -99,7 +99,7 @@ I solve this by tracking a ledger of pending ATA balances per mint and per origi
 
 ### The `deposit_reward` Cycle
 
-Once fees have been converted to SOL, a `deposit_reward` instruction deposits the accumulated WSOL into the [TUNA staking contract](https://solscan.io/account/tUnst2Y2sbmgSgARBpSBZhqPzpoy2iUsdCwb5ToYVJa). The instruction logs a `total_unclaimed_reward` value (in lamports) showing the cumulative SOL available for stakers to claim.
+Once fees have been converted to SOL, a `deposit_reward` instruction deposits the accumulated WSOL into the [TUNA staking contract](https://solscan.io/account/tUnst2Y2sbmgSgARBpSBZhqPzpoy2iUsdCwb5ToYVJa). When `deposit_reward` fires, it simultaneously updates three fields on the Treasury account: `total_reward` and `total_unclaimed_reward` both increase by the exact deposit amount (confirming nothing is skimmed), while `acc_reward_per_share` increases proportionally. This is the accumulator the contract uses to calculate each staker's claimable share. When stakers call `claim_reward`, only `total_unclaimed_reward` decreases. When they `compound_reward`, it decreases (claimed SOL) and `total_staked_shares` increases (re-staked).
 
 #### Every 3 hours, like clockwork
 
