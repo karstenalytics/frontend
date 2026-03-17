@@ -118,11 +118,14 @@ Tracks the number of unique wallets holding active TUNA stakes over time. The co
 
 <BrowserOnly fallback={<div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
   {() => {
+    const { useState } = require('react');
     const { useActiveStakers } = require('@site/src/hooks/useActiveStakers');
     const { tableStyles, tableRowHoverHandlers, linkHoverHandlers, actionButtonHoverHandlers } = require('@site/src/styles/tableStyles');
 
     function StakerTable() {
       const { data, loading, error } = useActiveStakers('defituna');
+      const [currentPage, setCurrentPage] = useState(0);
+      const pageSize = 10;
 
       if (loading) {
         return (
@@ -133,6 +136,10 @@ Tracks the number of unique wallets holding active TUNA stakes over time. The co
       }
 
       if (error || !data) return null;
+
+      const totalPages = Math.ceil(data.top_stakers.length / pageSize);
+      const startIdx = currentPage * pageSize;
+      const pageStakers = data.top_stakers.slice(startIdx, startIdx + pageSize);
 
       return (
         <>
@@ -150,12 +157,12 @@ Tracks the number of unique wallets holding active TUNA stakes over time. The co
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>% of Total</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>vs. Peak</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>30d Balance %</th>
-                  <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>30d Net</th>
+                  <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>30d Market Net <a href="https://nansen.ai" target="_blank" rel="noopener noreferrer" title="Powered by Nansen" style={{ marginLeft: '4px', lineHeight: 1 }}><img src="/img/icons/nansen.png" alt="Nansen" style={{ height: '14px', verticalAlign: 'middle', opacity: 0.7 }} /></a></th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'center' }}>Timeline</th>
                 </tr>
               </thead>
               <tbody>
-                {data.top_stakers.map((staker, idx) => {
+                {pageStakers.map((staker, idx) => {
                   const change = staker.change_30d_pct;
                   const changeColor = change === null ? 'var(--ifm-color-emphasis-600)'
                     : change > 0 ? 'var(--ifm-color-success)'
@@ -165,7 +172,7 @@ Tracks the number of unique wallets holding active TUNA stakes over time. The co
                     : `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
                   return (
                     <tr key={staker.address} style={tableStyles.bodyRow} {...tableRowHoverHandlers}>
-                      <td style={{ ...tableStyles.cell, fontWeight: 600 }}>{idx + 1}</td>
+                      <td style={{ ...tableStyles.cell, fontWeight: 600 }}>{startIdx + idx + 1}</td>
                       <td style={tableStyles.addressCell}>
                         <a
                           href={`https://solscan.io/account/${staker.address}`}
@@ -177,7 +184,8 @@ Tracks the number of unique wallets holding active TUNA stakes over time. The co
                           {staker.address.slice(0, 4)}...{staker.address.slice(-4)}
                         </a>
                         {staker.nansen_label && (
-                          <div style={{ fontSize: '11px', color: 'var(--ifm-color-secondary)', marginTop: '2px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', fontWeight: 500, color: 'var(--ifm-color-emphasis-700)', background: 'var(--ifm-color-emphasis-200)', borderRadius: '4px', padding: '2px 6px', marginTop: '4px', width: 'fit-content' }}>
+                            <a href="https://nansen.ai" target="_blank" rel="noopener noreferrer" title="Powered by Nansen" style={{ lineHeight: 1, display: 'inline-flex' }}><img src="/img/icons/nansen.png" alt="Nansen" style={{ height: '10px', verticalAlign: 'middle', opacity: 0.7 }} /></a>
                             {staker.nansen_label}
                           </div>
                         )}
@@ -216,6 +224,62 @@ Tracks the number of unique wallets holding active TUNA stakes over time. The co
               </tbody>
             </table>
           </div>
+
+          {totalPages > 1 && (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: '16px',
+              paddingTop: '16px',
+              borderTop: '1px solid var(--ifm-toc-border-color)',
+            }}>
+              <div style={{ fontSize: '14px', color: 'var(--ifm-color-secondary)' }}>
+                Showing {startIdx + 1}-{Math.min(startIdx + pageSize, data.top_stakers.length)} of {data.top_stakers.length}
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                  disabled={currentPage === 0}
+                  style={{
+                    padding: '8px 16px',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: currentPage === 0 ? 'var(--ifm-color-secondary)' : 'var(--ifm-font-color-base)',
+                    background: 'var(--ifm-background-surface-color)',
+                    border: '1px solid var(--ifm-toc-border-color)',
+                    borderRadius: 'var(--ifm-global-radius)',
+                    cursor: currentPage === 0 ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  Previous
+                </button>
+                <div style={{
+                  padding: '8px 16px',
+                  fontSize: '14px',
+                  color: 'var(--ifm-color-secondary)',
+                }}>
+                  Page {currentPage + 1} of {totalPages}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+                  disabled={currentPage === totalPages - 1}
+                  style={{
+                    padding: '8px 16px',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: currentPage === totalPages - 1 ? 'var(--ifm-color-secondary)' : 'var(--ifm-font-color-base)',
+                    background: 'var(--ifm-background-surface-color)',
+                    border: '1px solid var(--ifm-toc-border-color)',
+                    borderRadius: 'var(--ifm-global-radius)',
+                    cursor: currentPage === totalPages - 1 ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </>
       );
     }
@@ -258,6 +322,7 @@ This chart helps you:
 - **% of Total**: Wallet's share of all currently staked TUNA
 - **vs. Peak**: Current balance as a percentage of the wallet's all-time-high staked balance (100% = at peak, lower = has partially unstaked)
 - **30d Balance %**: Percent change in the wallet's own staked TUNA balance vs. the 30-day snapshot. "--" if wallet was first seen after the 30-day snapshot date
+- **30d Market Net**: Net USD value of market buys minus sells over the last 30 days, sourced from [Nansen](https://nansen.ai). Shows whether the wallet has been a net buyer (+) or seller (-) on DEXes. "--" if the wallet does not appear in Nansen's trader data.
 - **Timeline**: "See details" button linking to the wallet's full staking timeline page
 
 </details>
@@ -271,6 +336,7 @@ This chart helps you:
 
 - **Staking transactions**: On-chain staking instructions from DefiTuna staking program
 - **Staker cache**: Compressed event log containing all staking activity
+- **[Nansen](https://nansen.ai)**: 30-day DEX trader data (buy/sell volumes) for the TUNA token
 
 **Active Staker Calculation**
 
@@ -295,6 +361,7 @@ The Top 50 Stakers table ranks by:
 - **% of Total**: Each wallet's share of the total staked TUNA across all wallets
 - **vs. Peak**: Compares current balance to the wallet's all-time-high staked balance, showing retention
 - **30d Balance %**: Percent change in each wallet's own staked TUNA balance between now and the 30-day snapshot
+- **30d Market Net**: Net of DEX buys minus sells (USD) over 30 days from Nansen. Independent of staking activity — a wallet can be a net buyer on market while unstaking, or vice versa
 
 **Active Staker Threshold**
 
