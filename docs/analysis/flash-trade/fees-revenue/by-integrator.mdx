@@ -1,0 +1,330 @@
+---
+title: By Integrator
+---
+
+import ChartPageSEO from '@site/src/components/SEO/ChartPageSEO';
+
+<ChartPageSEO
+  title="Fees by Integrator"
+  description="Daily trading fees attributed to protocols integrating with Flash.Trade via CPI"
+  chartType="area"
+/>
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+export const integratorFilter = {
+  _programs: null,
+  _cbs: new Set(),
+  _colors: {},
+  _category: 'trading',
+  _categoryCbs: new Set(),
+  get() { return this._programs; },
+  set(v) { this._programs = v; this._cbs.forEach(fn => fn(v)); },
+  sub(fn) { this._cbs.add(fn); return () => this._cbs.delete(fn); },
+  getColors() { return this._colors; },
+  setColors(m) { this._colors = m; },
+  getCategory() { return this._category; },
+  setCategory(c) { this._category = c; this._categoryCbs.forEach(fn => fn(c)); },
+  subCategory(fn) { this._categoryCbs.add(fn); return () => this._categoryCbs.delete(fn); },
+};
+
+# Fees by Integrator
+
+Daily trading fees attributed to third-party protocols that integrate with Flash.Trade via Cross-Program Invocation (CPI). Shows which external programs route trades through Flash.Trade and how much fee revenue they generate.
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '800px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useState, useEffect } = require('react');
+    const IntegratorStackedChart = require('@site/src/components/common/IntegratorStackedChart').default;
+
+    function ChartSection() {
+      const [visiblePrograms, setLocalPrograms] = useState(integratorFilter.get());
+
+      useEffect(() => {
+        integratorFilter._cbs.add(setLocalPrograms);
+        return () => integratorFilter._cbs.delete(setLocalPrograms);
+      }, []);
+
+      const setVisiblePrograms = (programs) => {
+        integratorFilter.set(programs);
+      };
+
+      return (
+        <IntegratorStackedChart
+          protocol="flash-trade"
+          visiblePrograms={visiblePrograms}
+          onVisibilityChange={setVisiblePrograms}
+          onColorsComputed={(colors) => integratorFilter.setColors(colors)}
+          onFeeCategoryChange={(cat) => integratorFilter.setCategory(cat)}
+        />
+      );
+    }
+
+    return <ChartSection />;
+  }}
+</BrowserOnly>
+
+## Top Transactions
+
+The table displays the largest individual CPI transactions by fee amount. Clicking an integrator in the chart legend filters this table. The Trading/LP toggle also applies.
+
+<BrowserOnly fallback={<div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { useState, useEffect } = require('react');
+    const FilterIndicator = require('@site/src/components/common/FilterIndicator').default;
+    const { tableStyles, tableRowHoverHandlers, linkHoverHandlers } = require('@site/src/styles/tableStyles');
+
+    function TransactionsTable() {
+      const [topTxData, setTopTxData] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+      const [visiblePrograms, setLocalPrograms] = useState(integratorFilter.get());
+      const [category, setCategory] = useState(integratorFilter.getCategory());
+
+      useEffect(() => {
+        integratorFilter._cbs.add(setLocalPrograms);
+        integratorFilter._categoryCbs.add(setCategory);
+        return () => {
+          integratorFilter._cbs.delete(setLocalPrograms);
+          integratorFilter._categoryCbs.delete(setCategory);
+        };
+      }, []);
+
+      useEffect(() => {
+        fetch('/data/flash-trade/top_transactions_integrator.json')
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            setTopTxData(data);
+            setLoading(false);
+          })
+          .catch(err => {
+            setError(err.message);
+            setLoading(false);
+          });
+      }, []);
+
+      const clearFilter = () => {
+        integratorFilter.set(null);
+      };
+
+      if (loading) {
+        return (
+          <div style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingSpinner />
+          </div>
+        );
+      }
+
+      if (error) {
+        return (
+          <div style={{
+            padding: '32px',
+            background: 'var(--ifm-background-surface-color)',
+            border: '1px solid var(--ifm-color-danger)',
+            borderRadius: 'var(--ifm-global-radius)',
+            color: 'var(--ifm-color-danger)',
+          }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '8px' }}>Error Loading Data</div>
+            <p>{error}</p>
+          </div>
+        );
+      }
+
+      let transactions = [];
+      if (topTxData) {
+        if (visiblePrograms) {
+          const merged = [];
+          for (const name of visiblePrograms) {
+            const entries = (topTxData.by_integrator || {})[name] || [];
+            merged.push(...entries);
+          }
+          transactions = merged;
+        } else {
+          transactions = topTxData.transactions || [];
+        }
+        transactions = transactions
+          .filter(tx => tx.category === category)
+          .sort((a, b) => (b.fee_usdc || 0) - (a.fee_usdc || 0))
+          .slice(0, 10);
+      }
+
+      const colors = integratorFilter.getColors();
+      const filterChips = visiblePrograms
+        ? visiblePrograms.map(name => ({ label: name, color: colors[name] || '#888888' }))
+        : [];
+
+      return (
+        <div>
+          <FilterIndicator filters={filterChips} onClear={clearFilter} />
+
+          {topTxData ? (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={tableStyles.table}>
+                <thead>
+                  <tr style={tableStyles.headerRow}>
+                    <th style={tableStyles.headerCell}>#</th>
+                    <th style={tableStyles.headerCell}>Date</th>
+                    <th style={tableStyles.headerCell}>Integrator</th>
+                    <th style={tableStyles.headerCell}>Integration</th>
+                    <th style={tableStyles.headerCell}>Type</th>
+                    <th style={tableStyles.headerCell}>Pool</th>
+                    <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>Fee (USDC)</th>
+                    <th style={tableStyles.headerCell}>Transaction</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.length > 0 ? transactions.map((tx, idx) => {
+                    const color = colors[tx.integrator] || '#888888';
+                    const isCpi = tx.integration_type === 'cpi';
+                    return (
+                      <tr key={tx.signature + idx} style={tableStyles.bodyRow} {...tableRowHoverHandlers}>
+                        <td style={{ ...tableStyles.cell, fontWeight: 600 }}>{idx + 1}</td>
+                        <td style={tableStyles.dateCell}>{tx.date}</td>
+                        <td style={tableStyles.cell}>
+                          <span style={{
+                            display: 'inline-block',
+                            width: '10px',
+                            height: '10px',
+                            borderRadius: '2px',
+                            backgroundColor: color,
+                            marginRight: '6px',
+                          }} />
+                          {tx.integrator}
+                        </td>
+                        <td style={tableStyles.cell}>
+                          <span title={isCpi
+                            ? 'Integrator invokes Flash.Trade via inner CPI'
+                            : 'Both programs at top level (SDK-composed transaction)'}
+                          >
+                            {isCpi ? 'CPI' : 'Co-inv.'}
+                          </span>
+                        </td>
+                        <td style={tableStyles.cell}>{tx.type || '-'}</td>
+                        <td style={tableStyles.cell}>{tx.pool || '-'}</td>
+                        <td style={{ ...tableStyles.cell, textAlign: 'right', fontWeight: 600 }}>
+                          ${(tx.fee_usdc || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                        <td style={tableStyles.addressCell}>
+                          <a
+                            href={`https://solscan.io/tx/${tx.signature}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={tableStyles.link}
+                            {...linkHoverHandlers}
+                          >
+                            {tx.signature.slice(0, 8)}...{tx.signature.slice(-8)}
+                          </a>
+                        </td>
+                      </tr>
+                    );
+                  }) : (
+                    <tr>
+                      <td colSpan={8} style={{ ...tableStyles.cell, textAlign: 'center', padding: '24px' }}>
+                        {visiblePrograms ? 'No transactions found for selected integrators' : 'No transactions available'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={{
+              padding: '32px',
+              textAlign: 'center',
+              background: 'var(--ifm-background-surface-color)',
+              border: '1px solid var(--ifm-toc-border-color)',
+              borderRadius: 'var(--ifm-global-radius)',
+              color: 'var(--ifm-color-secondary)',
+            }}>
+              Transaction data not yet available. The data pipeline will generate this file on the next run.
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return <TransactionsTable />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This chart helps you:
+
+- **Track integration growth**: Monitor which protocols are building on top of Flash.Trade
+- **Identify top integrators**: See which protocols generate the most fees via CPI
+- **Assess integration depth**: Determine if CPI fee revenue is growing or concentrated in a few protocols
+- **Spot new integrations**: Detect when new protocols start routing through Flash.Trade
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+**Chart:**
+- **X-axis**: Date (UTC days)
+- **Y-axis**: Fees in USDC (stacked)
+- **Daily mode**: Stacked bar chart showing each day's CPI fees broken down by integrator program
+- **Cumulative mode**: Stacked area chart showing running totals
+- **Interactions**:
+  - Use the Daily/Cumulative toggle to switch views
+  - Click a legend item to show or hide that integrator
+  - Double-click a legend item to isolate a single integrator
+  - Hover to see values per integrator
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Integration Detection**
+
+A transaction is classified as integrator-routed when a non-Flash.Trade, non-infrastructure program appears as a top-level instruction invoker alongside or instead of the Flash.Trade program. Infrastructure programs (SPL Token, Associated Token, Memo, System Program, Lighthouse, etc.) are excluded.
+
+Each integrator transaction is further classified by integration type:
+
+- **CPI**: The external program invokes Flash.Trade as an inner instruction (cross-program invocation). The integrator program is definitively the caller.
+- **Co-invocation**: Both the integrator and Flash.Trade appear as separate top-level instructions in the same transaction. This pattern is used by protocols whose SDKs compose multi-program transactions (e.g., Jupiter routing a swap leg through Flash.Trade, or Loopscale orchestrating lending alongside position management). While the on-chain data does not prove the direction of integration, these co-invocations typically originate from the integrator's frontend or SDK.
+
+The summary data includes per-integrator CPI vs co-invocation counts so the dominant pattern for each program is visible.
+
+**Fee Extraction**
+
+Per-transaction fees are extracted via CPI event decoding: Swap fees use SwapLogV2 events with per-custody oracle prices and exact token decimals from the pool custody mapping. Perpetual trading fees (OpenPosition, ClosePosition, etc.) use collateral price fields from the corresponding CPI events. Transactions whose Flash.Trade CPI invocation failed (inner program error, outer tx succeeded) are excluded because the instruction is rolled back and no fees are collected.
+
+**Difference from By Pool / By Type Charts**
+
+This chart measures **gross fees at the point of generation** (as reported by CPI events), whereas the By Pool and By Type charts measure **net revenue received by the treasury** (from the reconciled attribution system). Three factors cause the totals to differ:
+
+- **Fee rebates**: Generated fees are gross; treasury receipts are net of rebates
+- **Conversion slippage**: Non-USDC fees are converted via SwapFeeInternal at market rates that may differ from the oracle price at generation time
+- **Batching**: Fees reach the treasury via periodic MoveProtocolFees events, not per-transaction
+
+As a result, integrator fee totals will be slightly higher than corresponding treasury revenue and should not be directly compared across chart types.
+
+**Program Identification**
+
+Integrator programs are identified by their on-chain address. Names are resolved via a curated mapping of known Solana programs. Unresolved addresses are displayed by their truncated public key.
+
+**Top Transactions Table**
+- Shows the 10 largest CPI transactions by fee for the active category (Trading/LP)
+- Clicking an integrator in the chart legend filters the table to that integrator's top transactions
+- Type and Pool are resolved from CPI event decoding; early transactions may show "-"
+
+**Known Limitations**
+
+- Transaction table stores up to 10 entries per integrator; applying an integrator filter reveals that integrator's individual top 10
+- New event versions or pool custodies may temporarily fail to decode until the IDL or custody mapping is updated
+- Some integrators may use intermediate proxy programs, appearing as different addresses
+- Co-invocation transactions cannot be definitively attributed from on-chain data alone; the external program may be the initiator (e.g., Jupiter routing) or a passive companion (e.g., assertion guards). Known passive programs are excluded via an infrastructure blocklist.
+
+**Update Frequency**
+
+Data is updated once per day via the automated data pipeline.
+
+</details>
