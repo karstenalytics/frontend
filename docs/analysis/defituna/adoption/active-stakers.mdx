@@ -157,7 +157,7 @@ Tracks the number of unique wallets holding active TUNA stakes over time. The co
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>% of Total</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>vs. Peak</th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>30d Balance %</th>
-                  <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>30d Market Net <a href="https://nansen.ai" target="_blank" rel="noopener noreferrer" title="Powered by Nansen" style={{ marginLeft: '4px', lineHeight: 1 }}><img src="/img/icons/nansen.png" alt="Nansen" style={{ height: '14px', verticalAlign: 'middle', opacity: 0.7 }} /></a></th>
+                  <th style={{ ...tableStyles.headerCell, textAlign: 'right' }}>30d DEX Net <a href="https://nansen.ai" target="_blank" rel="noopener noreferrer" title="Powered by Nansen" style={{ marginLeft: '4px', lineHeight: 1 }}><img src="/img/icons/nansen.png" alt="Nansen" style={{ height: '14px', verticalAlign: 'middle', opacity: 0.7 }} /></a></th>
                   <th style={{ ...tableStyles.headerCell, textAlign: 'center' }}>Timeline</th>
                 </tr>
               </thead>
@@ -322,7 +322,7 @@ This chart helps you:
 - **% of Total**: Wallet's share of all currently staked TUNA
 - **vs. Peak**: Current balance as a percentage of the wallet's all-time-high staked balance (100% = at peak, lower = has partially unstaked)
 - **30d Balance %**: Percent change in the wallet's own staked TUNA balance vs. the 30-day snapshot. "--" if wallet was first seen after the 30-day snapshot date
-- **30d Market Net**: Net USD value of market buys minus sells over the last 30 days, sourced from [Nansen](https://nansen.ai). Shows whether the wallet has been a net buyer (+) or seller (-) on DEXes. "--" if the wallet does not appear in Nansen's trader data.
+- **30d DEX Net**: Net USD value of market buys minus sells over the last 30 days, sourced from [Nansen](https://nansen.ai). Shows whether the wallet has been a net buyer (+) or seller (-) on DEXes. "--" if the wallet does not appear in Nansen's trader data.
 - **Timeline**: "See details" button linking to the wallet's full staking timeline page
 
 </details>
@@ -361,7 +361,7 @@ The Top 50 Stakers table ranks by:
 - **% of Total**: Each wallet's share of the total staked TUNA across all wallets
 - **vs. Peak**: Compares current balance to the wallet's all-time-high staked balance, showing retention
 - **30d Balance %**: Percent change in each wallet's own staked TUNA balance between now and the 30-day snapshot
-- **30d Market Net**: Net of DEX buys minus sells (USD) over 30 days from Nansen. Independent of staking activity — a wallet can be a net buyer on market while unstaking, or vice versa
+- **30d DEX Net**: Net of DEX buys minus sells (USD) over 30 days from Nansen. Independent of staking activity — a wallet can be a net buyer on DEXes while unstaking, or vice versa
 
 **Active Staker Threshold**
 
