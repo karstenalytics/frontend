@@ -1,0 +1,58 @@
+---
+title: Overview
+sidebar_label: Overview
+sidebar_custom_props:
+  icon: Info
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# Overview & Intro
+
+Summary of USX stablecoin supply, YieldVault metrics, and wallet activity for the Solstice protocol on Solana.
+
+## Key Metrics
+
+<BrowserOnly fallback={<div style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const OverviewMetrics = require('@site/src/components/Solstice/OverviewMetrics').default;
+    return <OverviewMetrics />;
+  }}
+</BrowserOnly>
+
+## What is Solstice?
+
+From the [Solstice documentation](https://docs.solstice.fi):
+
+> Solstice is a yield infrastructure protocol on Solana. USX is the Solstice stablecoin, and eUSX is the yield-bearing vault token that allows depositors to earn yield on their USX holdings.
+
+The protocol is built around two core primitives:
+
+- **USX**: A stablecoin minted by depositing USDC collateral. Each USX is redeemable for the underlying USDC through a fully-backed depository model
+- **eUSX**: A yield-bearing vault token. Depositors lock USX into the YieldVault and receive eUSX, which grows in value over time as the Harvester distributes yield into the vault. The eUSX price (USX per eUSX) increases monotonically as yield compounds
+
+The Harvester program stages yield in weekly batches, then distributes it into the vault daily. This creates a predictable 7-day refill-and-drain cycle visible in the [Yield Pipeline](./yield-pipeline) chart.
+
+When depositors want to exit, they unlock their eUSX, which burns the token and moves the underlying USX into a cooldown escrow. Two cooldown durations exist: 1-day and 7-day. After maturity, the USX can be withdrawn.
+
+## What can I learn from the data?
+
+Use the pages below based on what you want to analyze:
+
+- [Yield Pipeline](./yield-pipeline): How yield flows from the Harvester into the YieldVault. Track the 7-day staging cycle, daily distributions, APY trends, and the eUSX price trajectory
+- [Supply & Unlock](./supply): eUSX supply with cooldown breakdown (queued vs withdrawable), USX total supply with daily mint/redeem flows, and the largest active queued positions
+- [YieldVault Wallet Activity](./active-wallets): Daily and weekly depositor, unlocker, and withdrawer counts with a toggle to isolate first-time YieldVault interactions
+
+## About the data
+
+All data is derived from on-chain transactions across four Solstice programs:
+
+- **USX** ([USXyiST...](https://solscan.io/account/USXyiSTsPEWz55pSK7sZoUL79ntoVGQbaTDT57tH6bx)): Stablecoin core (mint, redeem, collateral management)
+- **eUSX** ([eUSXyKo...](https://solscan.io/account/eUSXyKoZ6aGejYVbnp3wtWQ1E8zuokLAJPecPxxtgG3)): YieldVault (lock, unlock, withdraw, yield distribution)
+- **Harvester** ([HARVwfM...](https://solscan.io/account/HARVwfMHiKGrMPkSGDfNTsGE1FzWmEdKCfdswnJxAKp3)): Yield staging and distribution
+- **JEC Router** ([JECsVKi...](https://solscan.io/account/JECsVKiiivXoRhxtCPJdE5Z6U1cHaqMRR8F5pKg2bDdT)): Swap-and-lock routing
+
+Each transaction is classified by instruction type and token transfers are tracked via pre/post balance deltas. The protocol architecture was reconstructed through on-chain binary analysis (no public IDL is available), with instruction semantics verified via live probes and cross-referenced against observed token flows.
+
+Data is automatically updated once per day.
