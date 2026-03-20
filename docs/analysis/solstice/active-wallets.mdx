@@ -1,0 +1,98 @@
+---
+title: eUSX Vault Wallet Activity
+sidebar_class_name: hidden
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# eUSX Vault Wallet Activity
+
+Tracks unique wallets interacting with the eUSX YieldVault. The orange New % line (right axis) shows what share of active wallets are first-time participants. Toggle between daily granularity with 30-day moving averages and weekly rolling counts.
+
+## Current Metrics
+
+<BrowserOnly fallback={<LoadingSpinner />}>
+  {() => {
+    const { ActiveWalletsMetrics } = require('@site/src/components/Solstice/ActiveWalletsChart');
+    return <ActiveWalletsMetrics />;
+  }}
+</BrowserOnly>
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { ActiveWalletsChartView } = require('@site/src/components/Solstice/ActiveWalletsChart');
+    return <ActiveWalletsChartView />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This chart helps you:
+
+- **Track adoption momentum**: Monitor daily and weekly wallet counts to see whether the vault is attracting new depositors
+- **Assess new wallet share**: The New % line reveals whether activity is driven by new participants or returning wallets rotating positions
+- **Spot withdrawal waves**: Spikes in daily active wallets often coincide with unlock/withdraw events triggered by external catalysts
+- **Identify trend shifts**: The 30-day MA smooths daily noise and reveals sustained growth or contraction in vault engagement
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+- **Daily view (default)**:
+  - **Teal line with markers (left axis)**: Daily unique wallets that deposited, unlocked, or withdrew from the eUSX vault
+  - **Gray line (left axis)**: 30-day moving average of daily active wallets
+  - **Orange line (right axis)**: New %, the percentage of daily active wallets that are interacting with the vault for the first time. First 7 days are trimmed because the seen-wallet pool is too small for meaningful percentages
+  - **Gray line (right axis)**: 30-day moving average of New %
+- **Weekly view**: Rolling 7-day unique wallet counts. Each point represents the number of distinct wallets active in the preceding 7-day window. No moving average is shown
+- **Interactions**:
+  - Use the toggle to switch between daily and weekly views
+  - Hover to see exact values
+  - Click "30-day MA" in the legend to show/hide both moving average lines simultaneously
+  - Drag to zoom on desktop, double-click to reset
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Key Concepts**
+
+- **Depositor**: A wallet that executed an eUSX `lock` transaction (deposits USX into the YieldVault, receives eUSX)
+- **Unlocker**: A wallet that executed an eUSX `unlock` transaction (triggers cooldown, burns eUSX, moves USX to escrow)
+- **Withdrawer**: A wallet that executed an eUSX `withdraw` transaction (claims USX from escrow after cooldown maturity)
+- **Active wallet**: Any wallet that performed at least one of the above on a given day
+- **New wallet**: A wallet whose first-ever vault interaction occurred on that day. Tracked cumulatively from the start of the data window
+- **USX minting and redemption** are excluded because they are performed by a small fixed set of wallets (13 minters, 12 redeemers), not organic user activity
+
+**New % Calculation**
+
+- Daily: (new depositors + new unlockers + new withdrawers) / daily active wallets
+- Weekly: 7-day rolling new unique wallets / 7-day rolling active unique wallets
+- First 7 daily data points are trimmed because the cumulative seen-wallet pool is too small for meaningful percentages
+
+**Weekly Rolling Counts**
+
+- Each data point represents the number of distinct wallets active in the preceding 7-day window, computed by deduplicating wallet addresses across the window
+- This is not a sum of daily counts (which would overcount wallets active on multiple days)
+
+**Data Sources**
+
+- Wallet addresses are extracted from the `feePayer` field of each classified on-chain transaction
+- Classification is based on the instruction type detected in the transaction's log messages
+
+**Data Update Frequency**
+
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- **Data window start**: New wallet tracking begins from the earliest cached data. Wallets active before the data window are counted as "new" on their first appearance, which may inflate early new-wallet counts. Accuracy improves over time as the seen-wallet pool grows
+- **Multi-sig wallets**: Transactions initiated via multi-sig or CPI from other programs are attributed to the fee payer, which may not be the beneficial owner
+
+</details>
