@@ -1,6 +1,7 @@
 ---
 title: Supply & Unlock
-sidebar_class_name: hidden
+sidebar_custom_props:
+  icon: ChartBar
 ---
 
 import BrowserOnly from '@docusaurus/BrowserOnly';
@@ -8,7 +9,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # eUSX Supply & Unlock
 
-Tracks eUSX supply alongside USX queued for withdrawal after unlock, broken down by 1-day and 7-day duration. Toggle to USX Supply for the total stablecoin supply trajectory with eUSX-bound share.
+Tracks eUSX supply alongside USX queued for withdrawal after unlock, broken down by 1-day and 7-day duration, with the share of USX locked in the YieldVault on the right axis. Toggle to USX Supply to see the total stablecoin supply alongside daily mint and redeem flows.
 
 ## Current Metrics
 
@@ -43,9 +44,9 @@ Largest queued positions by USX value. These are individual unlock events where 
 
 This page helps you:
 
-- **Monitor withdrawal pressure**: Track the queued and withdrawable layers relative to active eUSX to gauge how much capital is exiting the vault
+- **Monitor withdrawal pressure**: Track the queued and withdrawable layers relative to active eUSX to gauge how much capital is exiting the YieldVault
 - **Assess queue duration preference**: Compare 1-day vs 7-day queued volumes to understand depositor urgency when unlocking
-- **Evaluate USX stablecoin adoption**: Toggle to USX Supply to see total supply growth and what share is locked in the eUSX vault
+- **Evaluate USX stablecoin adoption**: Toggle to USX Supply to see total supply growth and what share is locked in the YieldVault
 - **Identify large unlock events**: The queued positions table surfaces the biggest individual unlocks still pending maturity
 
 ## How to Read This Chart
@@ -59,7 +60,8 @@ This page helps you:
   - **Orange area**: USX queued with 1-day duration, unlocked today and maturing tomorrow
   - **Indigo area (top)**: USX queued with 7-day duration, unlocked in the past 7 days and not yet matured
   - The total height represents all eUSX-related TVL (active + queued + withdrawable)
-- **USX Supply view**: Stacked area chart showing total USX stablecoin supply over time, with an orange line on the right axis showing the eUSX-bound share (percentage of USX locked in the eUSX vault)
+- **eUSX Supply right axis**: Dotted orange line showing the percentage of total USX supply locked in the YieldVault (`vault USX balance / USX supply`)
+- **USX Supply view**: USX stablecoin supply area on the left axis, with green bars (minted) and red bars (redeemed) on a zero-centered right axis showing daily gross mint and redeem flows
 - **Top Queued Positions table**: Shows the 10 largest individual unlock events still queued, with wallet address, USX amount, duration, unlock date, maturity date, and a link to the unlock transaction on Solscan
 - **Interactions**:
   - Use the toggle to switch between eUSX and USX views
@@ -88,10 +90,16 @@ This page helps you:
 - **Withdrawable**: Matured positions not yet withdrawn = cumulative unlocks - cumulative withdrawals - currently queued
 - Duration is determined on-chain from the `unlock_ready_at` timestamp in the eUSX unlock event
 
-**USX Share Queued**
+**eUSX Withdrawal Queue**
 
-- **Formula**: queued USX / (vault USX balance + queued USX)
-- Both terms are in USX, giving the fraction of total eUSX-related USX that is queued for withdrawal
+- **Formula**: (queued + withdrawable) / (vault USX balance + queued + withdrawable)
+- Combines both pending (not yet matured) and withdrawable (matured but not claimed) USX
+- All terms are in USX, giving the fraction of total eUSX-related USX in the withdrawal pipeline
+
+**USX Locked in YieldVault**
+
+- **Formula**: vault USX balance / USX supply * 100
+- Shows what percentage of the total USX stablecoin supply is locked in the YieldVault
 
 **Queued Positions**
 

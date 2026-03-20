@@ -1,5 +1,7 @@
 ---
 title: Yield Pipeline
+sidebar_custom_props:
+  icon: Percent
 ---
 
 import BrowserOnly from '@docusaurus/BrowserOnly';
@@ -7,7 +9,7 @@ import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
 # Yield Pipeline
 
-Tracks daily USX yield flowing from Solstice's Harvester program into the eUSX YieldVault, showing the on-chain mechanics behind yield generation. Toggle between the Harvester balance view and the distribution view to explore the 7-day staging cycle and per-share yield dynamics.
+Tracks daily USX yield flowing from Solstice's Harvester program into the YieldVault, showing the on-chain mechanics behind yield generation. Toggle between the Harvester balance view and the distribution view to explore the 7-day staging cycle and per-share yield dynamics.
 
 ## Current Metrics
 
@@ -29,7 +31,7 @@ Tracks daily USX yield flowing from Solstice's Harvester program into the eUSX Y
 
 ## Yield Events
 
-Recent `add_yield` (operator stages USX into the Harvester) and `distribute_yield` (Harvester pushes USX to the eUSX vault) events. The "USX Balance After" column shows the remaining USX in the Harvester staging account after each event.
+Recent `add_yield` (operator stages USX into the Harvester) and `distribute_yield` (Harvester pushes USX to the YieldVault) events. The "USX Balance After" column shows the remaining USX in the Harvester staging account after each event.
 
 <BrowserOnly fallback={<LoadingSpinner />}>
   {() => {
@@ -56,7 +58,7 @@ This chart helps you:
   - **Teal staircase area (left axis)**: The Harvester account balance. Jumps up sharply when `add_yield` stages new USX (~weekly), then steps down daily as `distribute_yield` pushes USX into the vault. The sawtooth pattern reflects the 7-day refill-and-drain cycle
   - **Gold line (right axis)**: eUSX price (USX backing per eUSX share). Grows monotonically as yield accrues into the vault
 - **Distribution view**:
-  - **Teal staircase area (left axis)**: Daily USX distributed from the Harvester into the eUSX vault
+  - **Teal staircase area (left axis)**: Daily USX distributed from the Harvester into the YieldVault
   - **Gold line (right axis)**: Yield per eUSX in micro-USX (= distributed / eUSX supply). When distribution rises but yield-per-eUSX falls, new deposits are diluting per-share returns
 - **Events table**: Lists individual staged and distributed events with exact amounts, the resulting Harvester balance, eUSX supply at that time, YieldVault balance change, and cumulative USX distributed
 - **Interactions**:
@@ -78,9 +80,9 @@ This chart helps you:
 
 **Yield Distribution**
 
-- **Mechanism**: The Harvester program executes `distribute_yield` transactions that move staged USX into the eUSX vault via a CPI call to `transfer_in_yield`
+- **Mechanism**: The Harvester program executes `distribute_yield` transactions that move staged USX into the YieldVault via a CPI call to `transfer_in_yield`
 - **Measurement**: Daily yield is the sum of USX token transfers into the vault across all `distribute_yield` transactions for each day
-- **Cycle**: The operator stages a lump sum via `add_yield` roughly once per week. The Harvester then drips it out in 7 equal daily installments via `distribute_yield`
+- **Cycle**: The operator stages a lump sum via `add_yield` roughly once per week. The Harvester then drips it out in approximately equal daily installments over 7 days via `distribute_yield`
 
 **APY Calculation**
 

@@ -100,6 +100,14 @@ const sidebars: SidebarsConfig = {
         'analysis/flash-trade/staking/staker-conviction',
       ],
     },
+    {
+      type: 'html',
+      value: '<span class="sidebar-heading">SOLSTICE</span>',
+    },
+    'analysis/solstice/overview',
+    'analysis/solstice/supply',
+    'analysis/solstice/active-wallets',
+    'analysis/solstice/yield-pipeline',
   ],
 };
 

@@ -1,14 +1,15 @@
 ---
-title: eUSX Vault Wallet Activity
-sidebar_class_name: hidden
+title: YieldVault Wallet Activity
+sidebar_custom_props:
+  icon: TrendUp
 ---
 
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
 
-# eUSX Vault Wallet Activity
+# YieldVault Wallet Activity
 
-Tracks unique wallets interacting with the eUSX YieldVault. The orange New % line (right axis) shows what share of active wallets are first-time participants. Toggle between daily granularity with 30-day moving averages and weekly rolling counts.
+Tracks unique wallets interacting with the YieldVault, split into depositors, unlockers, and withdrawers. Toggle between daily and weekly granularity, and between all active wallets and new (first-time) wallets.
 
 ## Current Metrics
 
@@ -32,26 +33,26 @@ Tracks unique wallets interacting with the eUSX YieldVault. The orange New % lin
 
 This chart helps you:
 
-- **Track adoption momentum**: Monitor daily and weekly wallet counts to see whether the vault is attracting new depositors
-- **Assess new wallet share**: The New % line reveals whether activity is driven by new participants or returning wallets rotating positions
-- **Spot withdrawal waves**: Spikes in daily active wallets often coincide with unlock/withdraw events triggered by external catalysts
-- **Identify trend shifts**: The 30-day MA smooths daily noise and reveals sustained growth or contraction in vault engagement
+- **Track adoption momentum**: Monitor daily and weekly wallet counts to see whether the YieldVault is attracting new depositors
+- **Assess new wallet composition**: Toggle to "New" to isolate first-time depositors, unlockers, and withdrawers from returning wallets
+- **Spot withdrawal waves**: Spikes in unlocker/withdrawer bars often coincide with external catalysts driving vault exits
+- **Compare daily vs weekly**: The weekly view deduplicates wallets across a 7-day window, smoothing daily noise
 
 ## How to Read This Chart
 
 <details>
 <summary>Click to expand chart reading guide</summary>
 
-- **Daily view (default)**:
-  - **Teal line with markers (left axis)**: Daily unique wallets that deposited, unlocked, or withdrew from the eUSX vault
-  - **Gray line (left axis)**: 30-day moving average of daily active wallets
-  - **Orange line (right axis)**: New %, the percentage of daily active wallets that are interacting with the vault for the first time. First 7 days are trimmed because the seen-wallet pool is too small for meaningful percentages
-  - **Gray line (right axis)**: 30-day moving average of New %
-- **Weekly view**: Rolling 7-day unique wallet counts. Each point represents the number of distinct wallets active in the preceding 7-day window. No moving average is shown
+- **Stacked bar chart** with three categories per day (or per 7-day window):
+  - **Teal**: Depositors, wallets that locked USX into the YieldVault
+  - **Orange**: Unlockers, wallets that triggered a cooldown (unlock event)
+  - **Slate**: Withdrawers, wallets that withdrew USX after cooldown maturity
+- **Primary toggle (Daily / Weekly)**: Daily shows per-day counts. Weekly shows rolling 7-day unique wallet counts, deduplicated across the window
+- **Secondary toggle (All / New)**: All shows every active wallet. New shows only first-time interactions per category
 - **Interactions**:
-  - Use the toggle to switch between daily and weekly views
-  - Hover to see exact values
-  - Click "30-day MA" in the legend to show/hide both moving average lines simultaneously
+  - Use the toggles to switch between time granularity and scope
+  - Hover to see exact counts per category
+  - Click legend entries to show/hide individual categories
   - Drag to zoom on desktop, double-click to reset
 
 </details>
@@ -67,7 +68,7 @@ This chart helps you:
 - **Unlocker**: A wallet that executed an eUSX `unlock` transaction (triggers cooldown, burns eUSX, moves USX to escrow)
 - **Withdrawer**: A wallet that executed an eUSX `withdraw` transaction (claims USX from escrow after cooldown maturity)
 - **Active wallet**: Any wallet that performed at least one of the above on a given day
-- **New wallet**: A wallet whose first-ever vault interaction occurred on that day. Tracked cumulatively from the start of the data window
+- **New wallet**: A wallet whose first-ever YieldVault interaction occurred on that day. Tracked cumulatively from the start of the data window
 - **USX minting and redemption** are excluded because they are performed by a small fixed set of wallets (13 minters, 12 redeemers), not organic user activity
 
 **New % Calculation**
