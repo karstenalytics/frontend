@@ -34,12 +34,12 @@ export function SupplyMetrics(): JSX.Element {
   const lastCooldown = cooldownLedger.length > 0 ? cooldownLedger[cooldownLedger.length - 1] : null;
   const prevCooldown = cooldownLedger.length > 7 ? cooldownLedger[cooldownLedger.length - 8] : null;
 
-  const cooldownTotal = lastCooldown?.cooldown_total_outstanding ?? 0;
+  const queuedTotal = (lastCooldown?.cooldown_total_outstanding ?? 0) + (lastCooldown?.matured_not_withdrawn ?? 0);
   const eusxSupply = lastTvl?.eusx_supply ?? 0;
   const vaultUsx = lastTvl?.vault_usx_balance ?? 0;
-  // Both terms in USX: vault balance (USX backing eUSX) + queued USX
-  const cooldownShare = vaultUsx > 0
-    ? (cooldownTotal / (vaultUsx + cooldownTotal)) * 100
+  // Both terms in USX: vault balance (USX backing eUSX) + withdrawal queue (queued + withdrawable)
+  const withdrawalShare = vaultUsx > 0
+    ? (queuedTotal / (vaultUsx + queuedTotal)) * 100
     : null;
 
   // 7-day changes
@@ -49,13 +49,13 @@ export function SupplyMetrics(): JSX.Element {
   const eusxChange = (prevTvl && lastTvl && prevTvl.eusx_supply > 0)
     ? ((lastTvl.eusx_supply - prevTvl.eusx_supply) / prevTvl.eusx_supply) * 100
     : null;
-  const prevCooldownTotal = prevCooldown?.cooldown_total_outstanding ?? 0;
+  const prevQueuedTotal = (prevCooldown?.cooldown_total_outstanding ?? 0) + (prevCooldown?.matured_not_withdrawn ?? 0);
   const prevVaultUsx = prevTvl?.vault_usx_balance ?? 0;
   const prevShare = prevVaultUsx > 0
-    ? (prevCooldownTotal / (prevVaultUsx + prevCooldownTotal)) * 100
+    ? (prevQueuedTotal / (prevVaultUsx + prevQueuedTotal)) * 100
     : null;
-  const shareChange = (cooldownShare != null && prevShare != null)
-    ? cooldownShare - prevShare
+  const shareChange = (withdrawalShare != null && prevShare != null)
+    ? withdrawalShare - prevShare
     : null;
 
   return (
@@ -79,13 +79,13 @@ export function SupplyMetrics(): JSX.Element {
         tooltip={"Total eUSX tokens in circulation. eUSX represents locked USX positions in the YieldVault.\nChange shows the 7-day percentage change."}
       />
       <MetricCard
-        title="USX Share Queued"
-        value={cooldownShare}
+        title="eUSX Withdrawal Queue"
+        value={withdrawalShare}
         format="percent"
         decimals={2}
         change={shareChange}
         changeUnit="pp"
-        tooltip={"Percentage of total eUSX-related USX currently queued for withdrawal.\nFormula: queued USX / (vault USX + queued USX).\nChange shows the 7-day shift in percentage points."}
+        tooltip={"Share of eUSX-related USX in the withdrawal queue (queued + withdrawable).\nFormula: (queued + withdrawable) / (vault USX + queued + withdrawable).\nChange shows the 7-day shift in percentage points."}
       />
     </div>
   );
@@ -142,12 +142,20 @@ export function SupplyChartView(): JSX.Element {
     d.usx_supply > 0 ? (d.vault_usx_balance / d.usx_supply) * 100 : 0
   );
 
+  // Symmetric range for mint/redeem bars (zero centered)
+  const maxMintRedeem = Math.max(
+    ...sliced.map(d => d.usx_gross_minted || 0),
+    ...sliced.map(d => d.usx_gross_redeemed || 0),
+    1,
+  );
+  const mintRedeemRange: [number, number] = [-maxMintRedeem * 1.05, maxMintRedeem * 1.05];
+
   // Latest values for badges
   const latest = sliced.length > 0 ? sliced[sliced.length - 1] : null;
   const lastCd = latest ? cooldownByDate[latest.date] : null;
 
   // Legend sizing (matching StakingBalanceChart pattern)
-  const numLegendItems = view === 'eusx' ? 4 : 2;
+  const numLegendItems = view === 'eusx' ? 5 : 3;
   const legendY = isMobile ? -0.1 : -0.15;
   const bottomMargin = isMobile ? numLegendItems * 25 + 10 : 60;
   const plotAreaBase = isMobile ? 350 : 370;
@@ -199,6 +207,16 @@ export function SupplyChartView(): JSX.Element {
           fillcolor: 'rgba(99, 102, 241, 0.3)',
           hovertemplate: '<b>%{y:,.0f}</b> USX queued (7d)<extra></extra>',
         },
+        {
+          x: dates,
+          y: eusxBoundPct,
+          type: 'scatter' as const,
+          mode: 'lines' as const,
+          name: 'USX Locked in YieldVault',
+          yaxis: 'y2' as const,
+          line: { color: ORANGE_QUEUED, width: 2, dash: 'dot' as const },
+          hovertemplate: '<b>%{y:.1f}%</b> of USX locked in YieldVault<extra></extra>',
+        },
       ]
     : [
         {
@@ -207,20 +225,29 @@ export function SupplyChartView(): JSX.Element {
           type: 'scatter' as const,
           mode: 'lines' as const,
           name: 'USX Supply',
-          stackgroup: 'one',
+          fill: 'tozeroy' as const,
           line: { color: accentColor },
           fillcolor: accentTransparent,
           hovertemplate: '<b>%{y:,.0f}</b> USX<extra></extra>',
         },
         {
           x: dates,
-          y: eusxBoundPct,
-          type: 'scatter' as const,
-          mode: 'lines' as const,
-          name: 'eUSX-Bound Share',
+          y: sliced.map(d => d.usx_gross_minted || 0),
+          type: 'bar' as const,
+          name: 'Minted',
+          marker: { color: 'rgba(16, 185, 129, 0.7)' },
           yaxis: 'y2' as const,
-          line: { color: ORANGE_QUEUED, width: 2 },
-          hovertemplate: '<b>%{y:.1f}%</b> in eUSX vault<extra></extra>',
+          hovertemplate: '<b>+%{y:,.0f}</b> USX minted<extra></extra>',
+        },
+        {
+          x: dates,
+          y: sliced.map(d => -(d.usx_gross_redeemed || 0)),
+          customdata: sliced.map(d => d.usx_gross_redeemed || 0),
+          type: 'bar' as const,
+          name: 'Redeemed',
+          marker: { color: 'rgba(239, 68, 68, 0.7)' },
+          yaxis: 'y2' as const,
+          hovertemplate: '<b>-%{customdata:,.0f}</b> USX redeemed<extra></extra>',
         },
       ];
 
@@ -293,27 +320,6 @@ export function SupplyChartView(): JSX.Element {
           </div>
         </div>
       )}
-      {latest && view === 'usx' && (
-        <div
-          style={{
-            display: 'flex',
-            gap: '16px',
-            marginBottom: '16px',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            marginLeft: isMobile ? '16px' : 0,
-            marginRight: isMobile ? '16px' : 0,
-          }}
-        >
-          <div className="badge badge--primary" style={{
-            padding: isMobile ? '8px 12px' : '12px 16px',
-            fontSize: isMobile ? '12px' : '14px',
-            textAlign: 'center',
-          }}>
-            <strong>{latest.usx_supply.toLocaleString(undefined, { maximumFractionDigits: 0 })}</strong> USX
-          </div>
-        </div>
-      )}
       <Plot
         data={traces}
         layout={{
@@ -337,21 +343,33 @@ export function SupplyChartView(): JSX.Element {
             tickfont: { size: isMobile ? 8 : 12 },
             rangemode: 'tozero',
           },
-          ...(view === 'usx' ? {
-            yaxis2: {
-              ...template.layout?.yaxis,
-              title: isMobile ? '' : {
-                text: 'eUSX-Bound Share (%)',
-                font: { size: 14 },
-              },
-              tickfont: { size: isMobile ? 8 : 12 },
-              ticksuffix: '%',
-              overlaying: 'y' as const,
-              side: 'right' as const,
-              showgrid: false,
-              rangemode: 'tozero',
+          yaxis2: view === 'eusx' ? {
+            ...template.layout?.yaxis,
+            title: isMobile ? '' : {
+              text: 'USX Locked in YieldVault (%)',
+              font: { size: 14, color: ORANGE_QUEUED },
+              standoff: 10,
             },
-          } : {}),
+            tickfont: { size: isMobile ? 8 : 12, color: ORANGE_QUEUED },
+            ticksuffix: '%',
+            overlaying: 'y' as const,
+            side: 'right' as const,
+            showgrid: false,
+            rangemode: 'tozero',
+          } : {
+            ...template.layout?.yaxis,
+            title: isMobile ? '' : {
+              text: 'Mint / Redeem (USX)',
+              font: { size: 14 },
+              standoff: 10,
+            },
+            tickfont: { size: isMobile ? 8 : 12 },
+            overlaying: 'y' as const,
+            side: 'right' as const,
+            showgrid: false,
+            range: mintRedeemRange,
+            zeroline: true,
+          },
           legend: {
             orientation: 'h' as const,
             yanchor: 'top' as const,
@@ -362,8 +380,8 @@ export function SupplyChartView(): JSX.Element {
           },
           dragmode: isMobile ? false : 'zoom',
           margin: isMobile
-            ? { l: 25, r: view === 'usx' ? 25 : 5, t: 16, b: bottomMargin }
-            : { l: 70, r: view === 'usx' ? 70 : 24, t: 16, b: bottomMargin },
+            ? { l: 25, r: 25, t: 16, b: bottomMargin }
+            : { l: 70, r: 70, t: 16, b: bottomMargin },
         }}
         config={{
           ...config,

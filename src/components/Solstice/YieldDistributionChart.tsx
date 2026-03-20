@@ -88,7 +88,7 @@ export function YieldMetrics(): JSX.Element {
         decimals={2}
         change={apyChange}
         changeUnit="pp"
-        tooltip={"Annualized yield rate based on 7-day average daily HARVS distributions into the eUSX vault.\nChange compares the current 7-day APY to the value 7 days ago."}
+        tooltip={"Annualized yield rate based on 7-day average daily HARVS distributions into the YieldVault.\nChange compares the current 7-day APY to the value 7 days ago."}
       />
       <MetricCard
         title="Cumulative Yield Distributed"
@@ -96,7 +96,7 @@ export function YieldMetrics(): JSX.Element {
         format="number"
         decimals={0}
         suffix=" USX"
-        tooltip={"Total USX distributed by HARVS into the eUSX yield vault since protocol inception. This value only increases over time and reflects the compounding power of the HARVS distribution mechanism."}
+        tooltip={"Total USX distributed by HARVS into the YieldVault since protocol inception. This value only increases over time and reflects the compounding power of the HARVS distribution mechanism."}
       />
       <MetricCard
         title="eUSX Price"
@@ -305,6 +305,7 @@ export function YieldChart(): JSX.Element {
             font: { size: 12 },
           },
           hovermode: 'x unified',
+          dragmode: isMobile ? false : 'zoom',
         }}
         config={config}
         useResizeHandler

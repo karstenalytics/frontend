@@ -18,6 +18,8 @@ export interface SolsticeTvlDay {
   vault_usx_net_flow: number;
   eusx_supply_delta: number;
   usx_supply_delta: number;
+  usx_gross_minted: number;
+  usx_gross_redeemed: number;
 }
 
 export interface SolsticeKeyMetrics {

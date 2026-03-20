@@ -70,7 +70,7 @@ export function ActiveWalletsMetrics(): JSX.Element {
         format="number"
         decimals={0}
         change={activeChange}
-        tooltip={"Sum of daily unique eUSX vault wallets over the last 7 days.\nChange compares to the prior 7-day period."}
+        tooltip={"Sum of daily unique YieldVault wallets over the last 7 days.\nChange compares to the prior 7-day period."}
       />
       <MetricCard
         title="7d New Wallets"
@@ -170,7 +170,7 @@ export function ActiveWalletsChartView(): JSX.Element {
 
   const timeLabel = isDaily ? 'Daily' : 'Weekly';
   const scopeLabel = isNew ? 'New' : 'Active';
-  const chartTitle = `${timeLabel} ${scopeLabel} eUSX Vault Wallets`;
+  const chartTitle = `${timeLabel} ${scopeLabel} YieldVault Wallets`;
   const yLabel = isNew ? 'New Wallets' : (isDaily ? 'Wallets' : 'Wallets (7-day)');
 
   return (
