@@ -1,0 +1,116 @@
+---
+title: Supply & Unlock
+sidebar_class_name: hidden
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import LoadingSpinner from '@site/src/components/common/LoadingSpinner';
+
+# eUSX Supply & Unlock
+
+Tracks eUSX supply alongside USX queued for withdrawal after unlock, broken down by 1-day and 7-day duration. Toggle to USX Supply for the total stablecoin supply trajectory with eUSX-bound share.
+
+## Current Metrics
+
+<BrowserOnly fallback={<LoadingSpinner />}>
+  {() => {
+    const { SupplyMetrics } = require('@site/src/components/Solstice/SupplyChart');
+    return <SupplyMetrics />;
+  }}
+</BrowserOnly>
+
+## Data
+
+<BrowserOnly fallback={<div style={{ minHeight: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingSpinner /></div>}>
+  {() => {
+    const { SupplyChartView } = require('@site/src/components/Solstice/SupplyChart');
+    return <SupplyChartView />;
+  }}
+</BrowserOnly>
+
+## Top Queued Positions
+
+Largest queued positions by USX value. These are individual unlock events where the maturity period has not yet passed.
+
+<BrowserOnly fallback={<LoadingSpinner />}>
+  {() => {
+    const { CooldownTable } = require('@site/src/components/Solstice/SupplyChart');
+    return <CooldownTable />;
+  }}
+</BrowserOnly>
+
+## Use Cases
+
+This page helps you:
+
+- **Monitor withdrawal pressure**: Track the queued and withdrawable layers relative to active eUSX to gauge how much capital is exiting the vault
+- **Assess queue duration preference**: Compare 1-day vs 7-day queued volumes to understand depositor urgency when unlocking
+- **Evaluate USX stablecoin adoption**: Toggle to USX Supply to see total supply growth and what share is locked in the eUSX vault
+- **Identify large unlock events**: The queued positions table surfaces the biggest individual unlocks still pending maturity
+
+## How to Read This Chart
+
+<details>
+<summary>Click to expand chart reading guide</summary>
+
+- **eUSX Supply view (default)**: Stacked area chart showing four layers:
+  - **Teal area (bottom)**: Active eUSX supply, tokens currently locked in the YieldVault earning yield
+  - **Slate area**: Withdrawable USX, matured positions that have not yet been withdrawn
+  - **Orange area**: USX queued with 1-day duration, unlocked today and maturing tomorrow
+  - **Indigo area (top)**: USX queued with 7-day duration, unlocked in the past 7 days and not yet matured
+  - The total height represents all eUSX-related TVL (active + queued + withdrawable)
+- **USX Supply view**: Stacked area chart showing total USX stablecoin supply over time, with an orange line on the right axis showing the eUSX-bound share (percentage of USX locked in the eUSX vault)
+- **Top Queued Positions table**: Shows the 10 largest individual unlock events still queued, with wallet address, USX amount, duration, unlock date, maturity date, and a link to the unlock transaction on Solscan
+- **Interactions**:
+  - Use the toggle to switch between eUSX and USX views
+  - Hover to see exact values for each layer
+  - Click legend entries to show/hide individual traces
+  - Drag to zoom on desktop, double-click to reset
+
+</details>
+
+## Methodology
+
+<details>
+<summary>Click to expand technical details</summary>
+
+**Key Concepts**
+
+- **eUSX**: A yield-bearing token representing locked USX in the Solstice YieldVault. Its value grows as yield accrues
+- **Unlock**: The event of initiating a withdrawal. Unlocking burns eUSX and puts the underlying USX into a queue with a maturity period (1 day or 7 days)
+- **Queued**: The state of USX after an unlock event, waiting for the maturity period to pass before it can be withdrawn
+- **USX**: The Solstice stablecoin, minted by depositing USDC collateral
+
+**Queued Balance Calculation**
+
+- **Queued 1d**: USX unlocked with 1-day duration on the current day (matures the next day, so only today's unlocks are queued at any point)
+- **Queued 7d**: Sum of USX unlocked with 7-day duration over the past 7 days (each matures 7 days after its unlock date)
+- **Withdrawable**: Matured positions not yet withdrawn = cumulative unlocks - cumulative withdrawals - currently queued
+- Duration is determined on-chain from the `unlock_ready_at` timestamp in the eUSX unlock event
+
+**USX Share Queued**
+
+- **Formula**: queued USX / (vault USX balance + queued USX)
+- Both terms are in USX, giving the fraction of total eUSX-related USX that is queued for withdrawal
+
+**Queued Positions**
+
+- Individual unlock events are extracted from on-chain transaction data
+- A position is "queued" if its maturity timestamp has not yet passed
+- Table shows the 10 largest by USX value
+
+**Data Sources**
+
+- eUSX supply and USX supply are tracked via pre/post token balance deltas across all on-chain transactions
+- Unlock durations are extracted from the unlock event payload (86,400s = 1 day, 604,800s = 7 days)
+
+**Data Update Frequency**
+
+Data is automatically updated once per day. Check the "Last updated" timestamp in the site header for data freshness.
+
+**Known Limitations**
+
+- **Queue approximation**: The sliding-window model assumes all unlocks mature exactly at their duration boundary. Intra-day timing differences may cause minor discrepancies
+- **Position tracking**: Only recent days (last 7-8 days) are scanned for queued positions. Older daily records without per-event data will show no positions
+
+</details>
