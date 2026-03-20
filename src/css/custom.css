@@ -672,6 +672,10 @@ figure,
   padding: 0px 1px 3px 1px !important;
 }
 
+.modebar-group:empty {
+  display: none !important;
+}
+
 .js-plotly-plot .plotly .modebar {
   top: -10px !important;
 }

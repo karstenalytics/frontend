@@ -11,8 +11,8 @@ export const CHART_PALETTE: string[] = [
   '#00A3B4', // teal
   '#E8A317', // gold
   '#4ECDC4', // cyan
-  '#F39C12', // orange
   '#8B5CF6', // violet
+  '#EC4899', // pink
   '#3498DB', // blue
   '#E67E22', // amber
   '#DDA0DD', // plum

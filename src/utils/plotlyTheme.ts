@@ -143,7 +143,7 @@ export function getPlotlyTemplate(isDark: boolean, options?: PlotlyTemplateOptio
 export const defaultPlotlyConfig = {
   displayModeBar: 'hover',
   displaylogo: false,
-  modeBarButtonsToRemove: ['zoom2d', 'autoscale', 'select2d', 'lasso2d'],
+  modeBarButtonsToRemove: ['zoom2d', 'autoscale', 'select2d', 'lasso2d', 'toImage'],
   responsive: true,
   doubleClick: false, // Disable double-click to isolate trace message
 } as const;
