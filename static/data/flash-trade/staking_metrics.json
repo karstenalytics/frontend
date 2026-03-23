@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-03-22T03:31:52.698674+00:00",
+  "generated_at": "2026-03-23T03:36:29.999821+00:00",
   "date_range": {
     "start": "2025-04-12",
-    "end": "2026-03-21"
+    "end": "2026-03-22"
   },
   "supply": {
     "max": 1000000000
@@ -3791,36 +3791,43 @@
       "staked_delta": 139841.958417058,
       "total_delta": 184142.7925029993,
       "price": 0.0034555927765337877
+    },
+    {
+      "date": "2026-03-22",
+      "staked": 701100583.308906,
+      "pending": 32857251.942208,
+      "unstaked": 13457713.73906,
+      "vested": 0.0,
+      "total": 747415548.990174,
+      "staked_delta": 3060311.283863902,
+      "total_delta": -196981.8015099764,
+      "price": 0.0033816144950703053
     }
   ],
   "top_stakers_7d": [
     {
       "address": "HpLhDxPuPAqzq72n32C8iyAb3bF1mWV3AEMbfda2EyvQ",
-      "amount": 12302683.533532
+      "amount": 12008286.686381
+    },
+    {
+      "address": "EZQT1dh9Jvo19pRxh3Djr9wDWUjcEnfoAjFZGV2yLXY8",
+      "amount": 2991903.5722029996
     },
     {
       "address": "DNJMnjZMqaNeAfwzuCshyMw71mE4H4Pu95upBt7WHpS1",
       "amount": 1000000.0
     },
     {
-      "address": "H1my2PywqoGzAZZSWCEVDVJBCZnz6jZxSDWJSk22hC9A",
-      "amount": 861213.949074
-    },
-    {
       "address": "8JhfspbLt93jeHA1xMnse7kwntiT27wyMYhZmwDym9Go",
       "amount": 490391.645906
     },
     {
-      "address": "DgzWqku67fPeuWgmyZbNa7U7yicKRhbjM7nB86Yx2ojQ",
-      "amount": 441264.791034
+      "address": "H1my2PywqoGzAZZSWCEVDVJBCZnz6jZxSDWJSk22hC9A",
+      "amount": 424856.029752
     },
     {
       "address": "CPYRPM421AaXBM5qGShnWsoiZMVcrCCS3JYfPG7SYYAK",
       "amount": 422410.13182099996
-    },
-    {
-      "address": "GdDMKaQZBnKJwUFZ77SV3QBkUoq9uzcZbU97eyQWyKjZ",
-      "amount": 381709.369044
     },
     {
       "address": "xrDhLM8GCxSztSUBeWYw9Mcik12qkgcFrL7rE3F753j",
@@ -3828,21 +3835,21 @@
     },
     {
       "address": "BQVsRB9iss6563BieMtq7Tt2cccf9s5iZM7cirq1CXbf",
-      "amount": 293306.425388
+      "amount": 278971.365131
     },
     {
       "address": "EXAJCe1eubYrrcSsE1nA9mcDoF83WWRWqBVZ6yJCHmhE",
       "amount": 277253.792431
+    },
+    {
+      "address": "6UWmvCRJvbXDrcmgHsG9kPHVJNyCmTUUCGUrSi5NbCkK",
+      "amount": 229891.732084
     }
   ],
   "top_withdrawers_7d": [
     {
       "address": "HpLhDxPuPAqzq72n32C8iyAb3bF1mWV3AEMbfda2EyvQ",
-      "amount": 12302683.533532
-    },
-    {
-      "address": "H1my2PywqoGzAZZSWCEVDVJBCZnz6jZxSDWJSk22hC9A",
-      "amount": 861213.949074
+      "amount": 12008286.686381
     },
     {
       "address": "kjvKSHpZfWRxC2zsrRi7Y3pXpReofiG9YXVxzMRjG8d",
@@ -3853,12 +3860,8 @@
       "amount": 511864.092884
     },
     {
-      "address": "88tU5wda6PdnMdHJZAsTJd3xKdryTcgRXqXC9DynZPKo",
-      "amount": 304529.748713
-    },
-    {
-      "address": "BxcaUTCoPVZS6xeKvwKVEX3Jo4gawMgNahFiW6UsV3uv",
-      "amount": 200001.0
+      "address": "H1my2PywqoGzAZZSWCEVDVJBCZnz6jZxSDWJSk22hC9A",
+      "amount": 424856.029752
     },
     {
       "address": "EX4AHoumKjRoXN5YjVZiGAgcCi2nxzjV9KhVZa9BSSDD",
@@ -3873,19 +3876,27 @@
       "amount": 173230.502148
     },
     {
-      "address": "GzdF9rTPhmUuG2E4kq6JXjB8mPngHsvqMJGHdmk9j3aQ",
-      "amount": 137861.656633
+      "address": "9Mc9QHz6ECuCXFHAizTf3cTJN11EEKBet2NadvjA4vqi",
+      "amount": 122051.490629
+    },
+    {
+      "address": "8RY1BVY7VmtsXCjvdr1XXiM5mwL5xszUVmVnyh6nTExt",
+      "amount": 101516.790074
+    },
+    {
+      "address": "FxYsG6cuB418DAeVgMxkUSocvm1RPzg7Jvsf4Ry5mVNo",
+      "amount": 77543.227501
     }
   ],
-  "total_staked": 698040272.0250404,
-  "staking_wallets": 4340,
-  "active_stakers": 1461,
-  "percent_staked": 69.8,
-  "rewards_30d_usdc": 36369.003498000005,
-  "current_apr": 18.34,
-  "total_rewards_usdc": 454666.0875640001,
+  "total_staked": 701100583.3089046,
+  "staking_wallets": 4359,
+  "active_stakers": 1470,
+  "percent_staked": 70.11,
+  "rewards_30d_usdc": 37125.488826,
+  "current_apr": 19.05,
+  "total_rewards_usdc": 455837.6148570001,
   "changes": {
-    "active_stakers_pct": 18.6,
-    "percent_staked_pct": 0.74
+    "active_stakers_pct": 18.8,
+    "percent_staked_pct": 1.39
   }
 }
