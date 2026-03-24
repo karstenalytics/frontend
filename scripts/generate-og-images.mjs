@@ -14,7 +14,7 @@
  */
 
 import { createServer } from 'http';
-import { readFileSync, mkdirSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, mkdirSync, writeFileSync, existsSync, readdirSync } from 'fs';
 import { join, extname, resolve } from 'path';
 import { chromium } from 'playwright';
 import { fileURLToPath } from 'url';
@@ -23,8 +23,55 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = resolve(__dirname, '..');
 const BUILD_DIR = join(ROOT, 'build');
 const OG_DIR = join(BUILD_DIR, 'img', 'og');
-const PAGES_FILE = join(ROOT, 'og-pages.json');
+const DOCS_DIR = join(ROOT, 'docs', 'analysis');
 const PLOTLY_JS = join(ROOT, 'node_modules', 'plotly.js-dist-min', 'plotly.min.js');
+
+/** Parse flat YAML frontmatter from MDX content (no external dependency). */
+function parseFrontmatter(content) {
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) return {};
+  const fm = {};
+  for (const line of match[1].split(/\r?\n/)) {
+    const m = line.match(/^(\w[\w_]*)\s*:\s*"?(.+?)"?\s*$/);
+    if (m) fm[m[1]] = m[2];
+  }
+  return fm;
+}
+
+/**
+ * Auto-discover chart pages by scanning MDX frontmatter.
+ * Pages with chart_type in frontmatter are included.
+ */
+function discoverChartPages() {
+  const pages = [];
+
+  function walk(dir, segments) {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        walk(join(dir, entry.name), [...segments, entry.name]);
+      } else if (entry.name.endsWith('.mdx')) {
+        const content = readFileSync(join(dir, entry.name), 'utf-8');
+        const fm = parseFrontmatter(content);
+        if (!fm.chart_type) continue;
+
+        const baseName = entry.name.replace('.mdx', '');
+        const pathSegments = [...segments, baseName];
+        const urlPath = '/analysis/' + pathSegments.join('/');
+        const slug = pathSegments.join('-');
+
+        pages.push({
+          path: urlPath,
+          slug,
+          title: fm.title || baseName,
+          description: fm.description || '',
+        });
+      }
+    }
+  }
+
+  walk(DOCS_DIR, []);
+  return pages;
+}
 
 const MIME_TYPES = {
   '.html': 'text/html',
@@ -191,6 +238,7 @@ async function exportChartInBrowser(page, chartTitle, pagePath) {
       // Title with protocol prefix
       const protocol = pagePath.includes('/flash-trade/') ? 'Flash.Trade'
         : pagePath.includes('/defituna/') ? 'DefiTuna'
+        : pagePath.includes('/solstice/') ? 'Solstice'
         : '';
       const exportTitle = protocol ? `${protocol}: ${chartTitle}` : chartTitle;
       ctx.fillStyle = '#1b1b1d';
@@ -211,7 +259,7 @@ async function main() {
     process.exit(1);
   }
 
-  const pages = JSON.parse(readFileSync(PAGES_FILE, 'utf-8'));
+  const pages = discoverChartPages();
   console.log(`Generating OG images for ${pages.length} chart pages...`);
 
   mkdirSync(OG_DIR, { recursive: true });
