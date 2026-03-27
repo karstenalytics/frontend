@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-03-26T03:46:18.781927+00:00",
+  "generated_at": "2026-03-27T03:42:14.609107+00:00",
   "date_range": {
     "start": "2025-04-12",
-    "end": "2026-03-25"
+    "end": "2026-03-26"
   },
   "supply": {
     "max": 1000000000
@@ -3835,9 +3835,28 @@
       "staked_delta": -3732210.892773032,
       "total_delta": 1872964.2866369486,
       "price": 0.00390089727335853
+    },
+    {
+      "date": "2026-03-26",
+      "staked": 704300472.028706,
+      "pending": 31874566.147068,
+      "unstaked": 13977656.472146,
+      "vested": 0.0,
+      "total": 750152694.64792,
+      "staked_delta": 19012170.75244999,
+      "total_delta": 415464.3237490654,
+      "price": 0.004075972368623807
     }
   ],
   "top_stakers_7d": [
+    {
+      "address": "HpLhDxPuPAqzq72n32C8iyAb3bF1mWV3AEMbfda2EyvQ",
+      "amount": 12008286.686381
+    },
+    {
+      "address": "DgzWqku67fPeuWgmyZbNa7U7yicKRhbjM7nB86Yx2ojQ",
+      "amount": 10999955.193698
+    },
     {
       "address": "EZQT1dh9Jvo19pRxh3Djr9wDWUjcEnfoAjFZGV2yLXY8",
       "amount": 2991903.5722029996
@@ -3851,6 +3870,10 @@
       "amount": 424856.029752
     },
     {
+      "address": "GzoLxP3FsQUBRhCZM1qphj1eWsfC21s3y1oqRHC9qWYP",
+      "amount": 396217.634509
+    },
+    {
       "address": "8cbymXrxXwtXqahVYZ326dciUkerQF97hdwqGiTKfX9r",
       "amount": 380783.394121
     },
@@ -3859,30 +3882,22 @@
       "amount": 361688.88146299997
     },
     {
+      "address": "JBsoMW6K78mNjgi1yWneesvuVGsLjefDdmhFmASL727B",
+      "amount": 275216.00886299997
+    },
+    {
       "address": "8FfbLCe3ENubN8eypcGS4pMQU3SAHybYS1gtZmaJVuHz",
       "amount": 218625.868664
-    },
-    {
-      "address": "GzoLxP3FsQUBRhCZM1qphj1eWsfC21s3y1oqRHC9qWYP",
-      "amount": 201274.23491400003
-    },
-    {
-      "address": "GELrMEvkU4pAvBp2BX3b2PqcdRsLmRtRCJJuWPtXWMDZ",
-      "amount": 173448.540451
-    },
-    {
-      "address": "4su3rNbPNVV1xeXifPR1xPYFsskwxkyx5XpRjUfbcyYK",
-      "amount": 148662.205509
-    },
-    {
-      "address": "8pqoGo2az4UjjTYYvjQbPRYH8RXKExGEiSme2N57QpWy",
-      "amount": 139163.298654
     }
   ],
   "top_withdrawers_7d": [
     {
       "address": "DgzWqku67fPeuWgmyZbNa7U7yicKRhbjM7nB86Yx2ojQ",
       "amount": 11183343.427038
+    },
+    {
+      "address": "14Rc89JyUskByj21r7hbsNFKB7Z5isV3xMwPMnozHydY",
+      "amount": 4743189.817017
     },
     {
       "address": "D8Mcv9RcLJPM8A65qS1PDt6RKL7zGiV44D6mF9P4K8Z9",
@@ -3915,21 +3930,17 @@
     {
       "address": "8FfbLCe3ENubN8eypcGS4pMQU3SAHybYS1gtZmaJVuHz",
       "amount": 218625.868664
-    },
-    {
-      "address": "GELrMEvkU4pAvBp2BX3b2PqcdRsLmRtRCJJuWPtXWMDZ",
-      "amount": 209230.502148
     }
   ],
-  "total_staked": 685288301.2762548,
-  "staking_wallets": 4384,
-  "active_stakers": 1473,
-  "percent_staked": 68.53,
-  "rewards_30d_usdc": 36782.855607,
-  "current_apr": 16.74,
-  "total_rewards_usdc": 458330.8734620001,
+  "total_staked": 704300472.0287046,
+  "staking_wallets": 4389,
+  "active_stakers": 1476,
+  "percent_staked": 70.43,
+  "rewards_30d_usdc": 36430.449821,
+  "current_apr": 15.44,
+  "total_rewards_usdc": 458999.7924580001,
   "changes": {
-    "active_stakers_pct": 19.6,
-    "percent_staked_pct": 0.38
+    "active_stakers_pct": 19.8,
+    "percent_staked_pct": 2.27
   }
 }
