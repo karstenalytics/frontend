@@ -741,7 +741,7 @@
     "2027-08-01": 0.0
   },
   "date_range": {
-    "end": "2026-03-31",
+    "end": "2026-04-01",
     "start": "2025-07-24"
   },
   "held_by_vesting_wallets_timeline": {
@@ -995,10 +995,11 @@
     "2026-03-28": 1025707.057702,
     "2026-03-29": 1025707.057702,
     "2026-03-30": 906957.057702,
-    "2026-03-31": 906957.057702
+    "2026-03-31": 906957.057702,
+    "2026-04-01": 906957.057702
   },
   "metadata": {
-    "generated_at": "2026-04-01T03:47:22.678202+00:00",
+    "generated_at": "2026-04-02T03:30:25.295175+00:00",
     "total_supply": 1000000000,
     "tuna_decimals": 6
   },
@@ -1021,14 +1022,14 @@
     "8A5mDnwzGXFseoX34Ek5MkRnDA3QieqoW8DUMJbksJbS": 23090000.0,
     "8Ji51bchqqwZYCXAXVQAK3FwPsWnupZQa4jDeCVFqdmM": 6866778.7779370025,
     "8mMMikQp5sFETSmWQfzrBbDSYUNW7UQrmUcW9yv2AvxB": 7000000.0,
-    "8ogfg8uU66AASKwGbzZDTPasQ4QKt4rfnUZQ2TTDyeJy": 106875.0,
+    "8ogfg8uU66AASKwGbzZDTPasQ4QKt4rfnUZQ2TTDyeJy": 71250.0,
     "A7UTmRy8AbHxEsEFJwUj7KQGK4SJ3EbBXdSkSgnDePDB": 10000000.0,
     "APN3kwv1TUxhadMyECFoBYGNYfjyXYsAuZyS6nY4LzY9": 527500.0,
     "AbifZaK9yo1w8gfonT8TkZzefV47RSuJmpxpsusD5cV6": 68750.0,
     "AgV713LkpRzfEwjK2WTsndp86QffuTxfRZ5SLukumbfc": 375000.0,
     "Ah4LQvVDGGAbtqFoDZvNV4yRYMMhqZpJGLZWGnZA3rPP": 207812.49999999994,
     "BbJP5VT3nprTeMC2cZgHQiWiw2j9KQCTso3idWUXXp7z": 4303396.991766999,
-    "BenGcYAaMnVReHwqRmqHtC2dX7nd88e3UtGHz3i6EN1U": 89062.49999999997,
+    "BenGcYAaMnVReHwqRmqHtC2dX7nd88e3UtGHz3i6EN1U": 71249.99999999997,
     "C31s8y9zXnUbXzejPQ4ZaUj8JdR6j3zseAAcmDr8k51x": 5000001.999999999,
     "C4BWvTPm2nCbqhLSuyc7PPWUoVVe1pjrYhdco3MbZLaL": 59375.0,
     "CpbBBcUv9ic5RbADfGLvGTqCnMCY7wmw2WijJcky6Qxf": 356250.0,
@@ -1945,9 +1946,30 @@
     "2026-03-28": 750893240.2923319,
     "2026-03-29": 750893240.2923319,
     "2026-03-30": 750893240.2923319,
-    "2026-03-31": 750833865.2923319
+    "2026-03-31": 750833865.2923319,
+    "2026-04-01": 750780427.7923319
   },
   "vesting_wallet_staking_operations": [
+    {
+      "amount": 35625.0,
+      "date": "2026-04-01",
+      "mint": null,
+      "pool": 410381423,
+      "signature": "YkGvz34XgdZaHCatt2sYakSTDCX8TJE4xrDMce1cmiUkuoG9uNY5nVeAcnHuvQqjFmjmZYff8gGppfF2J3USd2g",
+      "timestamp": "2026-04-01T20:10:00Z",
+      "type": "unstake",
+      "wallet": "8ogfg8uU66AASKwGbzZDTPasQ4QKt4rfnUZQ2TTDyeJy"
+    },
+    {
+      "amount": 17812.5,
+      "date": "2026-04-01",
+      "mint": null,
+      "pool": 410332113,
+      "signature": "2tPZMH7ut3XfeP9e4rqFNWTprx1irAgnmmtL9vnvvhjAKt3KKLouTYz532pRJh4R8L4Z6tGibekL5VbdGUmQYWqE",
+      "timestamp": "2026-04-01T14:47:33Z",
+      "type": "unstake",
+      "wallet": "BenGcYAaMnVReHwqRmqHtC2dX7nd88e3UtGHz3i6EN1U"
+    },
     {
       "amount": 59375.0,
       "date": "2026-03-31",

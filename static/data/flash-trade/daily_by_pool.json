@@ -23811,6 +23811,61 @@
         "Equity.1": 2.787937,
         "Crypto.1": 1385.52769
       }
+    },
+    {
+      "date": "2026-04-01",
+      "pools": {
+        "Crypto.1": {
+          "trading_fees_usdc": 4684.010912,
+          "non_trading_fees_usdc": 0.0,
+          "lp_fees_usdc": 12.357139,
+          "gross_fees_usdc": 4684.010912,
+          "total_fees_usdc": 4696.368051
+        },
+        "Governance.1": {
+          "trading_fees_usdc": 866.922195,
+          "non_trading_fees_usdc": 0.0,
+          "lp_fees_usdc": 11.682319,
+          "gross_fees_usdc": 866.922195,
+          "total_fees_usdc": 878.604514
+        },
+        "Ore.1": {
+          "trading_fees_usdc": 0.0,
+          "non_trading_fees_usdc": 0.0,
+          "lp_fees_usdc": 0.118619,
+          "gross_fees_usdc": 0.0,
+          "total_fees_usdc": 0.118619
+        },
+        "Virtual.1": {
+          "trading_fees_usdc": 661.699229,
+          "non_trading_fees_usdc": 0.0,
+          "lp_fees_usdc": 0.0,
+          "gross_fees_usdc": 661.699229,
+          "total_fees_usdc": 661.699229
+        }
+      },
+      "totals": {
+        "trading_fees_usdc": 6212.632336,
+        "non_trading_fees_usdc": 0.0,
+        "lp_fees_usdc": 24.158078,
+        "gross_fees_usdc": 6212.632336,
+        "total_fees_usdc": 6236.790414
+      },
+      "pools_simple": {
+        "Crypto.1": 4684.010912,
+        "Governance.1": 866.922195,
+        "Ore.1": 0.0,
+        "Virtual.1": 661.699229
+      },
+      "revenue": {
+        "Crypto.1": 1835.116748,
+        "Virtual.1": 159.976834,
+        "Governance.1": 263.825403,
+        "Community.1": 16.871182,
+        "Trump.1": 11.169166,
+        "Equity.1": 10.005839,
+        "Community.2": 1.608737
+      }
     }
   ]
 }
