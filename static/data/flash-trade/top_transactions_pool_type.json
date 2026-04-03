@@ -3263,20 +3263,20 @@
       "fee_usdc": 422.417852
     },
     {
+      "signature": "5j47rrni3yzGUmHLKx5fLSV9R1G46UKcA7vfuohMVwcxepEHJfjkjTd3FKGr4d3w8GF8mA4G3hnvUgbTbuRvS8bZ",
+      "timestamp": 1775104329,
+      "date": "2026-04-02",
+      "pool": "Crypto.1",
+      "type": "DecreaseSize",
+      "fee_usdc": 408.814285
+    },
+    {
       "signature": "53hqYuUSQtMMTWMmsSz1hLXL84CYaFr7hvZrAMiT4TQtfCvWRF9KZZHvXFza2nBLPmcPakyf2awTBwT9tRAytoJc",
       "timestamp": 1752779034,
       "date": "2025-07-17",
       "pool": "Crypto.1",
       "type": "DecreaseSize",
       "fee_usdc": 306.679121
-    },
-    {
-      "signature": "2YuFJwhf36P6XDF2QfLSeckmCP92pwZkLSo5w5tRWBz7EVZJhX2YrnWRTh27raPxBbVvFGv2j4Exznrh2TsdMxpE",
-      "timestamp": 1774632189,
-      "date": "2026-03-27",
-      "pool": "Crypto.1",
-      "type": "DecreaseSize",
-      "fee_usdc": 306.189184
     }
   ],
   "Governance.1_Liquidate": [
@@ -4453,6 +4453,14 @@
       "fee_usdc": 400.763095
     },
     {
+      "signature": "38K8ko1Qcp42gJFdWshksVXegyqLN9QX3CBkJonVTMn5E9EZ1TYjKUAQtHwSWhr7JsubTfArdPY7jb5GDWaapEyw",
+      "timestamp": 1775102626,
+      "date": "2026-04-02",
+      "pool": "Virtual.1",
+      "type": "ExecuteTriggerOrder",
+      "fee_usdc": 259.683751
+    },
+    {
       "signature": "41hXTMwEEh6mJ5U1vZYNjp7FHhPX1ed9Mvjs75PECuRBT8ryVHfDoBKbimG8PD23mnPDj2MX2fctwMmA9Qhixwoa",
       "timestamp": 1750342954,
       "date": "2025-06-19",
@@ -4499,14 +4507,6 @@
       "pool": "Virtual.1",
       "type": "ExecuteTriggerOrder",
       "fee_usdc": 167.762265
-    },
-    {
-      "signature": "3bCa58jMe2irX3BhtNpt8NvWWHXoRGwAmb7RGUry1nd7DE5ErMfpEP62WMtVUzQSruKBqginjVfM5pTJJP9yPYh",
-      "timestamp": 1773048804,
-      "date": "2026-03-09",
-      "pool": "Virtual.1",
-      "type": "ExecuteTriggerOrder",
-      "fee_usdc": 150.659708
     }
   ],
   "Community.1_Liquidate": [
@@ -7465,6 +7465,14 @@
       "fee_usdc": 86.347692
     },
     {
+      "signature": "4hqDpTJaFdARGc4Uy2o18GrwUGa8yMEnEeDPkcNz2diqdJXHr3uV1jM1shzTxf5yEdn8UHoAfyQgn9kYQ5CC4HKg",
+      "timestamp": 1775134902,
+      "date": "2026-04-02",
+      "pool": "Equity.1",
+      "type": "ClosePosition",
+      "fee_usdc": 48.045932
+    },
+    {
       "signature": "DujLc39epXokrFHR6BSj52tkxBePE7CMKD3R3FFv2Yj4Bt4j5jdGLFMRxSb7VDt7FzPVFEQXynCyLT6N76Q7DSv",
       "timestamp": 1775056536,
       "date": "2026-04-01",
@@ -7479,6 +7487,14 @@
       "pool": "Equity.1",
       "type": "ClosePosition",
       "fee_usdc": 14.219431
+    },
+    {
+      "signature": "5Vfs7JfAVLoXmHfsM9bAgfbVhxGWUumF5DeYstbo6A1oynzfiSTpXgEWQDPMgRdx694qZw4uYNTvPQQQiEmdDGxQ",
+      "timestamp": 1775129317,
+      "date": "2026-04-02",
+      "pool": "Equity.1",
+      "type": "ClosePosition",
+      "fee_usdc": 7.974823
     },
     {
       "signature": "56b9Dv3nR7q63Kj9yig6qtVcnUxSajqS1YBC7jKcSggfExMoYuodfpmjWKGsjhGhLeLZMHDQ5mbx5KpjBnxhqksA",
@@ -7519,25 +7535,25 @@
       "pool": "Equity.1",
       "type": "ClosePosition",
       "fee_usdc": 1.27876
-    },
-    {
-      "signature": "3qEYkzmwSk7nt7F5ZZaSp35ZeCPTeFRqkfXggyJREUMxUmTsgj4imEdzyAFb4mfrqRb7Ex5KqgL7mRp8PgbqxZXZ",
-      "timestamp": 1774486554,
-      "date": "2026-03-26",
-      "pool": "Equity.1",
-      "type": "ClosePosition",
-      "fee_usdc": 1.104734
-    },
-    {
-      "signature": "4qjvMrSmRSjZ8BrtSgskayCLxyZni1W6XzLwdLTUSxs38uTzwYoeaNEdLLHrqt4BdwMH2yGRiqcceMDtcRyyD2m5",
-      "timestamp": 1774479202,
-      "date": "2026-03-25",
-      "pool": "Equity.1",
-      "type": "ClosePosition",
-      "fee_usdc": 0.509098
     }
   ],
   "Equity.1_CloseAndSwap": [
+    {
+      "signature": "3P7fg7AhKV2L2HnDvpedN3U81D4x5GBrGzGtsCU2x1LqmXk3UePJhXahw3LJ1arBTdQ37wAJKZFYqnXpWzrYTcj",
+      "timestamp": 1775138179,
+      "date": "2026-04-02",
+      "pool": "Equity.1",
+      "type": "CloseAndSwap",
+      "fee_usdc": 12.070482
+    },
+    {
+      "signature": "4pVL9EAJvoSMoV7DNHEefoRkDyiJBHJWJzKo3PdStJrch6de6jKcuqZ4dFa7UKAxoKDRuoD6U6P9ez9FBjti66WD",
+      "timestamp": 1775156219,
+      "date": "2026-04-02",
+      "pool": "Equity.1",
+      "type": "CloseAndSwap",
+      "fee_usdc": 11.101842
+    },
     {
       "signature": "3xyJEDDP9VDZsc4Ft1HJWdtTf88UyLhcMTvPM2v34HwN5wx25pFFxHDA67bnpwwecoDFay3t1YpYBKXJcAppDoCW",
       "timestamp": 1774370350,
@@ -7601,25 +7617,25 @@
       "pool": "Equity.1",
       "type": "CloseAndSwap",
       "fee_usdc": 0.747154
-    },
-    {
-      "signature": "5c9MqL2e4c3HrC44cwPF95a7JYwP8WwmPiZhYNj6rnCbMT8iHpsqLX1FjhGuXAq96UVv7Xpc93dVTUhm3mCjKLYD",
-      "timestamp": 1774542760,
-      "date": "2026-03-26",
-      "pool": "Equity.1",
-      "type": "CloseAndSwap",
-      "fee_usdc": 0.739879
-    },
-    {
-      "signature": "5xSzoZLzBNnXEBBVUczdEUuZFxkM4qvCwPHJrCHJRG927wroewe7ZvANyjSNzKxtYom31i9LxPn5z6T4EJcgaMEJ",
-      "timestamp": 1774627610,
-      "date": "2026-03-27",
-      "pool": "Equity.1",
-      "type": "CloseAndSwap",
-      "fee_usdc": 0.684669
     }
   ],
   "Equity.1_IncreaseSize": [
+    {
+      "signature": "KD8HVE4Ea4u8ygZCAfx3uoWaqSNE87DcffqGTCaEUBJR3kKABaWgtr31rsCEGBMAKVz7rvk12EihjpgKRSoviBw",
+      "timestamp": 1775128811,
+      "date": "2026-04-02",
+      "pool": "Equity.1",
+      "type": "IncreaseSize",
+      "fee_usdc": 16.086538
+    },
+    {
+      "signature": "8o8tkRJpj4zqMshzdiDZdeCyBJgFCQkampqgCenzZz3W6qWddSpsitGdMeozrXkkd2nN6nyb4NfJZGhKkwdWkb1",
+      "timestamp": 1775130034,
+      "date": "2026-04-02",
+      "pool": "Equity.1",
+      "type": "IncreaseSize",
+      "fee_usdc": 13.136318
+    },
     {
       "signature": "4fBKt5CVaB2MwFcdbiPeh2htisYvPJqSEu59F85YKciFdKGPD1FomwZ14HLfFGQtrsaUBuKCK9zvxjMFTFTpMU79",
       "timestamp": 1774362014,
@@ -7670,6 +7686,14 @@
     }
   ],
   "Equity.1_SwapAndOpen": [
+    {
+      "signature": "2NgbrNjyEo9bRCJx3qtWgzyBXhYF4sr3VppyE29SS4jfTggeQPvkCieXu8LpLU6zhZErGueBzUYB3SszHaaedgfc",
+      "timestamp": 1775101709,
+      "date": "2026-04-02",
+      "pool": "Equity.1",
+      "type": "SwapAndOpen",
+      "fee_usdc": 6.902564
+    },
     {
       "signature": "RK6K3jPWzHoxVn3YD2CMndiDSqBaMSLrAPnkjQ2mzkGu9nu6YeGvtQ3U7mb4q9w9PcvZNWRVT2Fx24YUcgt9ga3",
       "timestamp": 1774360972,
@@ -7741,17 +7765,17 @@
       "pool": "Equity.1",
       "type": "SwapAndOpen",
       "fee_usdc": 0.680672
-    },
-    {
-      "signature": "g2GcJcemxUPyyr93tLnxASKEAHjeDu7BMazGcowqHw2aagKxVkDUKvSEF5NCT3RRiLbjcXQYwpXofMer7TCeF2c",
-      "timestamp": 1774469001,
-      "date": "2026-03-25",
-      "pool": "Equity.1",
-      "type": "SwapAndOpen",
-      "fee_usdc": 0.544998
     }
   ],
   "Equity.1_OpenPosition": [
+    {
+      "signature": "4F4uRxqqB7XATyUo7P51irvJDo1WakPvtNKNpfpxFLepyqubPkGpiKBP2shgD3YfWjNwDafaJiKCCEjbfphqsxWd",
+      "timestamp": 1775103436,
+      "date": "2026-04-02",
+      "pool": "Equity.1",
+      "type": "OpenPosition",
+      "fee_usdc": 12.454437
+    },
     {
       "signature": "2bLNKEcQvm3bRr5Lv2vGQQU5gvFLwrhK8cKGhpcqEzGNLDWqN8P4SWY1UyaKjRahuQW3NMvfYXiWDnW3BePfTpJf",
       "timestamp": 1774631773,
@@ -7759,6 +7783,22 @@
       "pool": "Equity.1",
       "type": "OpenPosition",
       "fee_usdc": 7.453955
+    },
+    {
+      "signature": "3jJsJCTLV3J5X1T5tkrbqKm8DGd9cKXcPQ9f5y1UXgsSNvRYwCuj1cFNWn7xGqT1CfptCK2cUBk9L72w2vtaSyob",
+      "timestamp": 1775094910,
+      "date": "2026-04-02",
+      "pool": "Equity.1",
+      "type": "OpenPosition",
+      "fee_usdc": 6.466463
+    },
+    {
+      "signature": "4FxneFMNcnkma9K62MYPJT9H3tWeDTNrAZrmtJyfBHMinSypNz83LKQ53zfG1b5bqQXwRfxUv5GPwf4avNHQS4aE",
+      "timestamp": 1775129180,
+      "date": "2026-04-02",
+      "pool": "Equity.1",
+      "type": "OpenPosition",
+      "fee_usdc": 4.795314
     },
     {
       "signature": "41a1s3ySdargtcuznGuhTnXqr2qoiSA4PJpynNpKe52WEEwf8fkJHfCtnNmtq3DwUFYEYEYkZQnpsiJzuebvPhAc",
@@ -7807,30 +7847,6 @@
       "pool": "Equity.1",
       "type": "OpenPosition",
       "fee_usdc": 1.104658
-    },
-    {
-      "signature": "35Y7NeMhGnVExW9ZK7C7VBQuQD733H4BprjssmdVH4ZBmqFPfqQyZzjEpWVUpqnfkoquVwxk1zysyTGQhxR8UEfk",
-      "timestamp": 1774879157,
-      "date": "2026-03-30",
-      "pool": "Equity.1",
-      "type": "OpenPosition",
-      "fee_usdc": 0.946269
-    },
-    {
-      "signature": "2MDK8cq3e8gBgP9e745eoZRMhonHnBn9ird1aPGJHrrhV7GQ93oVPpWxQ92EFbFbQBMbpgg7a6jFyQooUo9XAT5v",
-      "timestamp": 1775067658,
-      "date": "2026-04-01",
-      "pool": "Equity.1",
-      "type": "OpenPosition",
-      "fee_usdc": 0.94619
-    },
-    {
-      "signature": "2vVPSy3uKnCp3253C9qkYN7G7GBuGj9p2Fk9tqwx2A22mwxM3kfYb5DUcaXmBwswWZer1Yt2beno6ZVrHWAAX6rL",
-      "timestamp": 1774418346,
-      "date": "2026-03-25",
-      "pool": "Equity.1",
-      "type": "OpenPosition",
-      "fee_usdc": 0.566655
     }
   ],
   "Equity.1_Liquidate": [

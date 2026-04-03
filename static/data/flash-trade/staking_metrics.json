@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-04-02T03:38:46.245367+00:00",
+  "generated_at": "2026-04-03T03:40:25.932748+00:00",
   "date_range": {
     "start": "2025-04-12",
-    "end": "2026-04-01"
+    "end": "2026-04-02"
   },
   "supply": {
     "max": 1000000000
@@ -3912,17 +3912,20 @@
       "staked_delta": 2094123.3450570107,
       "total_delta": 1957801.0026880503,
       "price": 0.0046207849851625064
+    },
+    {
+      "date": "2026-04-02",
+      "staked": 693493782.318705,
+      "pending": 43843652.501221,
+      "unstaked": 16966739.07911,
+      "vested": 0.0,
+      "total": 754304173.899036,
+      "staked_delta": -231890.76264607906,
+      "total_delta": -14287.050258994102,
+      "price": 0.004361062759418478
     }
   ],
   "top_stakers_7d": [
-    {
-      "address": "HpLhDxPuPAqzq72n32C8iyAb3bF1mWV3AEMbfda2EyvQ",
-      "amount": 12008286.686381
-    },
-    {
-      "address": "DgzWqku67fPeuWgmyZbNa7U7yicKRhbjM7nB86Yx2ojQ",
-      "amount": 11000663.882678
-    },
     {
       "address": "8ddc12hR2ePg4UkkWcecd9ShcNJyHrkBpLDjd8Yjn4GG",
       "amount": 2008396.378076
@@ -3930,6 +3933,10 @@
     {
       "address": "HU8zLAcKnnY2RUZYxQmdvFmYgCwCH62UEf87GSCjsRHX",
       "amount": 1561380.5465409998
+    },
+    {
+      "address": "3KZzyQk7fovSnA6z9Ji51b91Q9m56BsCeVJWcKLsSTRF",
+      "amount": 510000.0
     },
     {
       "address": "GzdF9rTPhmUuG2E4kq6JXjB8mPngHsvqMJGHdmk9j3aQ",
@@ -3941,19 +3948,23 @@
     },
     {
       "address": "Dk3FKXE6PQf68HdyYpGJijaNckyAzpmJjXDvZdbp5jGA",
-      "amount": 346925.151806
-    },
-    {
-      "address": "JBsoMW6K78mNjgi1yWneesvuVGsLjefDdmhFmASL727B",
-      "amount": 275216.00886299997
+      "amount": 378960.528681
     },
     {
       "address": "VsuD3az72vWnUPkHLCCKXJSr5wGaakCdLE3Qa8yxtNz",
       "amount": 247729.825152
     },
     {
-      "address": "HwnYQi6N2jtCfpAVCidy5KnwkMWFna2jwF4sFUCmdEd6",
-      "amount": 216853.660526
+      "address": "xrDhLM8GCxSztSUBeWYw9Mcik12qkgcFrL7rE3F753j",
+      "amount": 215233.98044
+    },
+    {
+      "address": "CPYRPM421AaXBM5qGShnWsoiZMVcrCCS3JYfPG7SYYAK",
+      "amount": 150827.13179
+    },
+    {
+      "address": "8RY1BVY7VmtsXCjvdr1XXiM5mwL5xszUVmVnyh6nTExt",
+      "amount": 75345.25319399999
     }
   ],
   "top_withdrawers_7d": [
@@ -3962,16 +3973,16 @@
       "amount": 12008286.686381
     },
     {
-      "address": "14Rc89JyUskByj21r7hbsNFKB7Z5isV3xMwPMnozHydY",
-      "amount": 4743189.817017
-    },
-    {
       "address": "5jHcwjL6mmvgWEvTkPk3Ps6Fu7M6moiocASQuBLmbX4f",
       "amount": 2000000.0
     },
     {
       "address": "7TaFSH77wFpjCHJuqidcpRaQG7Josz9rLgqfVfihiGcq",
       "amount": 1426759.320597
+    },
+    {
+      "address": "3KZzyQk7fovSnA6z9Ji51b91Q9m56BsCeVJWcKLsSTRF",
+      "amount": 510000.0
     },
     {
       "address": "GzdF9rTPhmUuG2E4kq6JXjB8mPngHsvqMJGHdmk9j3aQ",
@@ -3986,27 +3997,27 @@
       "amount": 215000.0
     },
     {
+      "address": "GTwxNXhJKiqfq3ZGYzDcjjMGMA1ZHPe1n8hvmYgKLrG5",
+      "amount": 200004.0
+    },
+    {
+      "address": "FtmymvA6CEKzoY7C6LLA53KAMTp69R12DhGx8mFPsDBe",
+      "amount": 102605.344719
+    },
+    {
       "address": "CzJub5sS1rZgrhmb4VbK3prMsUVQDRf1UgRkRxbxhKjv",
       "amount": 61431.354042
-    },
-    {
-      "address": "5cFcxqkXW9iK8c332aHcjkwRFsKvrvscapHjSjc5M2pa",
-      "amount": 50000.0
-    },
-    {
-      "address": "HSBUdmH4cz76tAoVj6X2AEbjXAohDPr981yV2Bg6DrVm",
-      "amount": 31980.344315
     }
   ],
-  "total_staked": 693725673.0813502,
-  "staking_wallets": 4427,
-  "active_stakers": 1486,
-  "percent_staked": 69.37,
-  "rewards_30d_usdc": 35369.50043199999,
-  "current_apr": 13.42,
-  "total_rewards_usdc": 463990.5660930001,
+  "total_staked": 693493782.3187042,
+  "staking_wallets": 4431,
+  "active_stakers": 1482,
+  "percent_staked": 69.35,
+  "rewards_30d_usdc": 33734.751182,
+  "current_apr": 13.57,
+  "total_rewards_usdc": 465217.66751300014,
   "changes": {
-    "active_stakers_pct": 19.0,
-    "percent_staked_pct": -0.28
+    "active_stakers_pct": 18.3,
+    "percent_staked_pct": -0.35
   }
 }
