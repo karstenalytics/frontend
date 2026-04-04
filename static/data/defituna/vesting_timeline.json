@@ -741,7 +741,7 @@
     "2027-08-01": 0.0
   },
   "date_range": {
-    "end": "2026-04-02",
+    "end": "2026-04-03",
     "start": "2025-07-24"
   },
   "held_by_vesting_wallets_timeline": {
@@ -997,10 +997,11 @@
     "2026-03-30": 906957.057702,
     "2026-03-31": 906957.057702,
     "2026-04-01": 906957.057702,
-    "2026-04-02": 906957.057702
+    "2026-04-02": 906957.057702,
+    "2026-04-03": 898054.057702
   },
   "metadata": {
-    "generated_at": "2026-04-03T03:31:30.092064+00:00",
+    "generated_at": "2026-04-04T03:18:46.952323+00:00",
     "total_supply": 1000000000,
     "tuna_decimals": 6
   },
@@ -1011,7 +1012,7 @@
     "2za7CsxwinroKbS2pMxsZ22b4TExjjhZvRYQUj7Hnk4n": 0.0,
     "31bz9pFqHC6a5DFRk2DrXhzWghNSh6Ybb6D7dcPzvWw7": 296875.0,
     "3fTrmoWk4DGVx6x1xDtKaJciRYCQ76wr28dEsMtdh3zM": 750000.0,
-    "3rJe7FAeMDxUYkLMYVcBj1ZPX4o8Ukt4h3mWgyS9a6Jy": 8177119.981374001,
+    "3rJe7FAeMDxUYkLMYVcBj1ZPX4o8Ukt4h3mWgyS9a6Jy": 8177926.875365001,
     "4aUhpwZCrd3paaUEj4FEeEbpAq76kG4PmuDJp59fksrM": 475000.0,
     "5A2gBoqU5GkBfFN7qQvp1RR2TTKXnFT2wt9w8e9RnXx5": 148437.5,
     "5eXV2EHffops3QbxqsFCsARb9Lq6MtUnWL7bfw6cVnrw": 6569692.144627,
@@ -1949,9 +1950,20 @@
     "2026-03-30": 750893240.2923319,
     "2026-03-31": 750833865.2923319,
     "2026-04-01": 750780427.7923319,
-    "2026-04-02": 750768552.7923319
+    "2026-04-02": 750768552.7923319,
+    "2026-04-03": 750769359.6863229
   },
   "vesting_wallet_staking_operations": [
+    {
+      "amount": 806.893991,
+      "date": "2026-04-03",
+      "mint": null,
+      "pool": 410723799,
+      "signature": "4s8FgfgYM1ybtELVvnH1qDLJA4QBhPdyhqoVGGbdRWePPgCRHk16qJiMTT7uv8iECm2cvT9ypVvmKR73ge2rqRb4",
+      "timestamp": "2026-04-03T09:26:37Z",
+      "type": "stake",
+      "wallet": "3rJe7FAeMDxUYkLMYVcBj1ZPX4o8Ukt4h3mWgyS9a6Jy"
+    },
     {
       "amount": 11875.0,
       "date": "2026-04-02",
@@ -9619,7 +9631,7 @@
     "AgV713LkpRzfEwjK2WTsndp86QffuTxfRZ5SLukumbfc": 0.0,
     "Ah4LQvVDGGAbtqFoDZvNV4yRYMMhqZpJGLZWGnZA3rPP": 0.0,
     "BbJP5VT3nprTeMC2cZgHQiWiw2j9KQCTso3idWUXXp7z": 0.0,
-    "BenGcYAaMnVReHwqRmqHtC2dX7nd88e3UtGHz3i6EN1U": 8903.170564,
+    "BenGcYAaMnVReHwqRmqHtC2dX7nd88e3UtGHz3i6EN1U": 0.170564,
     "C31s8y9zXnUbXzejPQ4ZaUj8JdR6j3zseAAcmDr8k51x": 125053.888268,
     "C4BWvTPm2nCbqhLSuyc7PPWUoVVe1pjrYhdco3MbZLaL": 0.0,
     "CpbBBcUv9ic5RbADfGLvGTqCnMCY7wmw2WijJcky6Qxf": 0.0,
