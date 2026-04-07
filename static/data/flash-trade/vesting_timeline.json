@@ -775,7 +775,7 @@
     "2027-04-22": 1.0740768630057573e-07
   },
   "date_range": {
-    "end": "2026-04-05",
+    "end": "2026-04-06",
     "start": "2025-04-12"
   },
   "held_by_vesting_wallets_timeline": {
@@ -1137,16 +1137,17 @@
     "2026-04-02": 17366632.132449,
     "2026-04-03": 17366632.132449,
     "2026-04-04": 17366632.132449,
-    "2026-04-05": 17366632.132449
+    "2026-04-05": 17366632.132449,
+    "2026-04-06": 17395478.286296
   },
   "metadata": {
     "faf_decimals": 6,
-    "generated_at": "2026-04-06T03:51:52.190152+00:00",
+    "generated_at": "2026-04-07T03:41:47.124720+00:00",
     "total_supply": 1000000000
   },
   "per_wallet_staked": {
     "8F2PPM3LwqyoRvEvEbCLbAKn2wPAghFbpsLdrkaYbrGP": 0.0,
-    "8VfUAxXgPythY5cKqbYBnV3w252VZCVsDnDPRjnj1s2W": 5129553.535435999,
+    "8VfUAxXgPythY5cKqbYBnV3w252VZCVsDnDPRjnj1s2W": 5163445.499721998,
     "9GNMc7JHLRevrj67pdRtzuKpJyKR7UUQgfTdnnQbCzcx": 0.0,
     "AXXy1euNV4tJf6zu5JRyPczgugDoKvaWBtc7nGqNfpmX": 855175.5368069998,
     "C1wmXbLDZJrxkn9VQg77xpWvpF96ba23TBP6VhEmYUYK": 9073517.72152
@@ -1162,7 +1163,7 @@
       "label": "Advisory 0.15%",
       "period_seconds": 1209600,
       "recipient": "AXXy1euNV4tJf6zu5JRyPczgugDoKvaWBtc7nGqNfpmX",
-      "remaining_faf": 807692.307672,
+      "remaining_faf": 778846.153825,
       "start_time": "2025-04-21T11:32:14",
       "status": "active",
       "total_faf": 1500000.0,
@@ -1428,8 +1429,8 @@
           "type": "periodic"
         }
       ],
-      "wallet_faf_balance": 0.0,
-      "withdrawn_faf": 692307.692328
+      "wallet_faf_balance": 28846.153847,
+      "withdrawn_faf": 721153.846175
     },
     {
       "allocation": 1750000,
@@ -1441,7 +1442,7 @@
       "label": "Advisory 0.175%",
       "period_seconds": 1209600,
       "recipient": "8VfUAxXgPythY5cKqbYBnV3w252VZCVsDnDPRjnj1s2W",
-      "remaining_faf": 135567.85713599995,
+      "remaining_faf": 101675.89284999995,
       "start_time": "2025-04-21T11:47:04",
       "status": "active",
       "total_faf": 948975.0,
@@ -1588,7 +1589,7 @@
         }
       ],
       "wallet_faf_balance": 0.0,
-      "withdrawn_faf": 813407.142864
+      "withdrawn_faf": 847299.10715
     },
     {
       "allocation": 1000000,
@@ -3055,9 +3056,20 @@
     "2026-04-02": 15058246.793762991,
     "2026-04-03": 15058246.793762991,
     "2026-04-04": 15058246.793762991,
-    "2026-04-05": 15058246.793762991
+    "2026-04-05": 15058246.793762991,
+    "2026-04-06": 15092138.75804899
   },
   "vesting_wallet_staking_operations": [
+    {
+      "amount": 33891.964286,
+      "date": "2026-04-06",
+      "mint": null,
+      "pool": 411405850,
+      "signature": "5fW1pQZ7mHNmX6BKiXdX3QeAcV5Bidjaca3JMLYh6CjbSGvCAo1LVp4Py7QYNUQrScRd3syhzhLcg9kPXFvvUwhw",
+      "timestamp": "2026-04-06T11:53:38Z",
+      "type": "stake",
+      "wallet": "8VfUAxXgPythY5cKqbYBnV3w252VZCVsDnDPRjnj1s2W"
+    },
     {
       "amount": 41640.650069,
       "date": "2026-03-24",
@@ -3823,7 +3835,7 @@
     "8F2PPM3LwqyoRvEvEbCLbAKn2wPAghFbpsLdrkaYbrGP": 461538.461544,
     "8VfUAxXgPythY5cKqbYBnV3w252VZCVsDnDPRjnj1s2W": 0.0,
     "9GNMc7JHLRevrj67pdRtzuKpJyKR7UUQgfTdnnQbCzcx": 9160789.873425,
-    "AXXy1euNV4tJf6zu5JRyPczgugDoKvaWBtc7nGqNfpmX": 0.0,
+    "AXXy1euNV4tJf6zu5JRyPczgugDoKvaWBtc7nGqNfpmX": 28846.153847,
     "C1wmXbLDZJrxkn9VQg77xpWvpF96ba23TBP6VhEmYUYK": 7744303.79748
   }
 }
