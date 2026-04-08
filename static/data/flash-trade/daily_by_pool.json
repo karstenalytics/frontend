@@ -24154,6 +24154,78 @@
         "Crypto.1": 1573.777548,
         "Equity.1": 5.192527
       }
+    },
+    {
+      "date": "2026-04-07",
+      "pools": {
+        "Community.1": {
+          "trading_fees_usdc": 64.826774,
+          "non_trading_fees_usdc": 0.0,
+          "lp_fees_usdc": 2.597684,
+          "gross_fees_usdc": 64.826774,
+          "total_fees_usdc": 67.424458
+        },
+        "Crypto.1": {
+          "trading_fees_usdc": 7453.649593,
+          "non_trading_fees_usdc": 0.0,
+          "lp_fees_usdc": 56.127015,
+          "gross_fees_usdc": 7453.649593,
+          "total_fees_usdc": 7509.776608
+        },
+        "Governance.1": {
+          "trading_fees_usdc": 1181.27664,
+          "non_trading_fees_usdc": 0.0,
+          "lp_fees_usdc": 0.196638,
+          "gross_fees_usdc": 1181.27664,
+          "total_fees_usdc": 1181.473278
+        },
+        "Ore.1": {
+          "trading_fees_usdc": 0.192362,
+          "non_trading_fees_usdc": 0.0,
+          "lp_fees_usdc": 0.125373,
+          "gross_fees_usdc": 0.192362,
+          "total_fees_usdc": 0.317735
+        },
+        "Trump.1": {
+          "trading_fees_usdc": 2.561203,
+          "non_trading_fees_usdc": 0.0,
+          "lp_fees_usdc": 0.0,
+          "gross_fees_usdc": 2.561203,
+          "total_fees_usdc": 2.561203
+        },
+        "Virtual.1": {
+          "trading_fees_usdc": 582.594684,
+          "non_trading_fees_usdc": 0.0,
+          "lp_fees_usdc": 0.874685,
+          "gross_fees_usdc": 582.594684,
+          "total_fees_usdc": 583.469369
+        }
+      },
+      "totals": {
+        "trading_fees_usdc": 9285.101256,
+        "non_trading_fees_usdc": 0.0,
+        "lp_fees_usdc": 59.921395,
+        "gross_fees_usdc": 9285.101256,
+        "total_fees_usdc": 9345.022651
+      },
+      "pools_simple": {
+        "Community.1": 64.826774,
+        "Crypto.1": 7453.649593,
+        "Governance.1": 1181.27664,
+        "Ore.1": 0.192362,
+        "Trump.1": 2.561203,
+        "Virtual.1": 582.594684
+      },
+      "revenue": {
+        "Virtual.1": 277.527087,
+        "Governance.1": 239.553235,
+        "Community.1": 15.759342,
+        "Community.2": 5.703234,
+        "Trump.1": 4.179899,
+        "Equity.1": 14.14369,
+        "Crypto.1": 1296.734713,
+        "Ore.1": 0.010768
+      }
     }
   ]
 }

@@ -1,14 +1,14 @@
 {
   "compound_rate": 55.8,
-  "compound_rate_faf": 61.2,
-  "total_claimed_faf": 89630513.51,
-  "compounded_faf": 54862983.06,
-  "compound_count": 3769,
-  "claim_count": 2992,
-  "compounders": 1293,
-  "non_compounders": 776,
-  "faf_token_claimers": 2069,
-  "faf_token_claim_count": 6761,
+  "compound_rate_faf": 61.1,
+  "total_claimed_faf": 89745112.76,
+  "compounded_faf": 54876951.46,
+  "compound_count": 3773,
+  "claim_count": 2999,
+  "compounders": 1295,
+  "non_compounders": 778,
+  "faf_token_claimers": 2073,
+  "faf_token_claim_count": 6772,
   "compound_by_epoch": [
     {
       "epoch": "2025-05",
@@ -452,23 +452,23 @@
     },
     {
       "epoch": "2026-04-active",
-      "compound_rate": 51.8,
-      "compound_rate_faf": 47.8,
-      "compounders": 401,
-      "non_compounders": 373,
-      "claimed_faf": 7439815.74,
+      "compound_rate": 51.6,
+      "compound_rate_faf": 47.2,
+      "compounders": 405,
+      "non_compounders": 380,
+      "claimed_faf": 7554414.99,
       "by_stake_size": [
         {
           "tier": "<10K",
           "compound_rate": 42.4,
-          "compound_rate_faf": 38.7,
-          "total_wallets": 413
+          "compound_rate_faf": 38.5,
+          "total_wallets": 420
         },
         {
           "tier": "10K-100K",
-          "compound_rate": 64.8,
+          "compound_rate": 63.9,
           "compound_rate_faf": 67.7,
-          "total_wallets": 142
+          "total_wallets": 144
         },
         {
           "tier": "100K-1M",
@@ -478,9 +478,9 @@
         },
         {
           "tier": "1M-10M",
-          "compound_rate": 61.8,
-          "compound_rate_faf": 64.6,
-          "total_wallets": 68
+          "compound_rate": 61.4,
+          "compound_rate_faf": 62.4,
+          "total_wallets": 70
         },
         {
           "tier": "10M+",
@@ -494,6 +494,6 @@
   "changes": {
     "compound_rate_pct": -5.5,
     "compound_rate_faf_pct": 0.3,
-    "claimed_faf_30d": 7590537.11
+    "claimed_faf_30d": 7692217.91
   }
 }
