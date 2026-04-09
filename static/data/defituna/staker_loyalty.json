@@ -1,59 +1,59 @@
 {
-  "generated_at": "2026-04-07T00:00:00+00:00",
+  "generated_at": "2026-04-08T00:00:00+00:00",
   "date_range": {
     "start": "2025-07-24",
-    "end": "2026-04-07"
+    "end": "2026-04-08"
   },
   "summary": {
-    "total_users": 654,
+    "total_users": 653,
     "compound_only_users": 266,
     "claim_only_users": 216,
-    "mixed_users": 172,
-    "total_rewards_sol": 7169.597348673004,
-    "total_compounded_sol": 262.77051296699983,
-    "total_claimed_sol": 6906.826835706003,
-    "compound_rate": 3.6650665328595498,
-    "loyalty_score": 40.67278287461774
+    "mixed_users": 171,
+    "total_rewards_sol": 7169.579753828003,
+    "total_compounded_sol": 262.7166777209999,
+    "total_claimed_sol": 6906.8630761070035,
+    "compound_rate": 3.6643246430270815,
+    "loyalty_score": 40.73506891271057
   },
   "user_segments": {
     "by_behavior": {
       "compound_only": {
         "count": 266,
-        "percentage": 40.67278287461774
+        "percentage": 40.73506891271057
       },
       "claim_only": {
         "count": 216,
-        "percentage": 33.02752293577982
+        "percentage": 33.078101071975496
       },
       "mixed": {
-        "count": 172,
-        "percentage": 26.299694189602445
+        "count": 171,
+        "percentage": 26.186830015313934
       }
     },
     "by_reward_size": {
       "whales": {
         "label": "Whales (>10 SOL)",
         "user_count": 24,
-        "avg_compound_rate": 0.1889336041966784,
-        "total_rewards": 6982.708050499001
+        "avg_compound_rate": 0.18894821379125992,
+        "total_rewards": 6982.859266061
       },
       "large": {
         "label": "Large (1-10 SOL)",
         "user_count": 51,
-        "avg_compound_rate": 0.45395099409261513,
-        "total_rewards": 133.749217576
+        "avg_compound_rate": 0.453954121028161,
+        "total_rewards": 133.78041387200003
       },
       "medium": {
         "label": "Medium (0.1-1 SOL)",
-        "user_count": 127,
-        "avg_compound_rate": 0.6148254719877281,
-        "total_rewards": 45.920176367
+        "user_count": 126,
+        "avg_compound_rate": 0.6131484812201429,
+        "total_rewards": 45.710455662
       },
       "small": {
         "label": "Small (<0.1 SOL)",
         "user_count": 452,
-        "avg_compound_rate": 0.588205839104436,
-        "total_rewards": 7.219904231
+        "avg_compound_rate": 0.5882062636620371,
+        "total_rewards": 7.229618233000001
       }
     },
     "by_stake_size": {
@@ -80,9 +80,9 @@
       "tier6": {
         "label": "5-10M TUNA",
         "user_count": 6,
-        "avg_compound_rate": 25.82000674717434,
-        "total_staked_tuna": 38826640.442876995,
-        "total_rewards": 336.729914908,
+        "avg_compound_rate": 25.8367075435681,
+        "total_staked_tuna": 38827184.587537,
+        "total_rewards": 336.8811304700001,
         "compound_only_users": 0,
         "claim_only_users": 2,
         "mixed_users": 4
@@ -91,7 +91,7 @@
         "label": "1-5M TUNA",
         "user_count": 15,
         "avg_compound_rate": 24.8442057477972,
-        "total_staked_tuna": 30163515.005322002,
+        "total_staked_tuna": 29863515.005322002,
         "total_rewards": 212.707044268,
         "compound_only_users": 1,
         "claim_only_users": 5,
@@ -100,39 +100,39 @@
       "tier4": {
         "label": "500K-1M TUNA",
         "user_count": 6,
-        "avg_compound_rate": 24.448009113353937,
+        "avg_compound_rate": 24.43137192125581,
         "total_staked_tuna": 3956133.490265,
-        "total_rewards": 25.919168905,
+        "total_rewards": 25.936819252,
         "compound_only_users": 0,
         "claim_only_users": 2,
         "mixed_users": 4
       },
       "tier3": {
         "label": "100K-500K TUNA",
-        "user_count": 68,
-        "avg_compound_rate": 48.352526038792924,
-        "total_staked_tuna": 14334818.054955002,
-        "total_rewards": 102.28314332599994,
+        "user_count": 66,
+        "avg_compound_rate": 50.10600566287402,
+        "total_staked_tuna": 13770921.694045998,
+        "total_rewards": 98.37273375099994,
         "compound_only_users": 16,
-        "claim_only_users": 22,
-        "mixed_users": 30
+        "claim_only_users": 21,
+        "mixed_users": 29
       },
       "tier2": {
         "label": "10K-100K TUNA",
-        "user_count": 149,
-        "avg_compound_rate": 57.34118667723324,
-        "total_staked_tuna": 4987109.945268001,
-        "total_rewards": 31.403004267000014,
+        "user_count": 150,
+        "avg_compound_rate": 51.30889011580262,
+        "total_staked_tuna": 5082407.156490001,
+        "total_rewards": 35.12633581300001,
         "compound_only_users": 68,
-        "claim_only_users": 37,
+        "claim_only_users": 38,
         "mixed_users": 44
       },
       "tier1": {
         "label": "<10K TUNA",
         "user_count": 402,
-        "avg_compound_rate": 50.19061633431278,
-        "total_staked_tuna": 846635.9592609996,
-        "total_rewards": 7.890440268,
+        "avg_compound_rate": 50.194512654563226,
+        "total_staked_tuna": 846639.4099049995,
+        "total_rewards": 7.891057543,
         "compound_only_users": 181,
         "claim_only_users": 144,
         "mixed_users": 77
@@ -394,10 +394,10 @@
     },
     {
       "week": "2026-W15",
-      "claim_amount": 1.2296604340000001,
-      "compound_amount": 0.181595024,
-      "total_amount": 1.411255458,
-      "compound_rate": 12.867622440047278
+      "claim_amount": 1.3582508950000003,
+      "compound_amount": 0.307141693,
+      "total_amount": 1.6653925880000002,
+      "compound_rate": 18.442599973910774
     }
   ],
   "visualizations": {
@@ -406,57 +406,57 @@
         "min": 0.0,
         "max": 1000.0,
         "label": "0-1K",
-        "count": 2297,
-        "total_tuna": 470285.61825500004
+        "count": 2296,
+        "total_tuna": 469741.910177
       },
       {
         "min": 1000.0,
         "max": 10000.0,
         "label": "1K-10K",
-        "count": 823,
-        "total_tuna": 2774042.474011997
+        "count": 822,
+        "total_tuna": 2772988.5355809974
       },
       {
         "min": 10000.0,
         "max": 50000.0,
         "label": "10K-50K",
         "count": 268,
-        "total_tuna": 5557048.208949004
+        "total_tuna": 5557283.706410003
       },
       {
         "min": 50000.0,
         "max": 100000.0,
         "label": "50K-100K",
-        "count": 53,
-        "total_tuna": 3794830.501843999
+        "count": 54,
+        "total_tuna": 3889892.215604999
       },
       {
         "min": 100000.0,
         "max": 500000.0,
         "label": "100K-500K",
-        "count": 94,
-        "total_tuna": 19955868.767958008
+        "count": 93,
+        "total_tuna": 19641972.407049004
       },
       {
         "min": 500000.0,
         "max": 1000000.0,
         "label": "500K-1M",
-        "count": 12,
-        "total_tuna": 7899299.845962
+        "count": 11,
+        "total_tuna": 7399299.845962
       },
       {
         "min": 1000000.0,
         "max": 5000000.0,
         "label": "1M-5M",
         "count": 17,
-        "total_tuna": 33540883.922811
+        "total_tuna": 33240883.922811
       },
       {
         "min": 5000000.0,
         "max": 10000000.0,
         "label": "5M-10M",
         "count": 7,
-        "total_tuna": 45826640.442876995
+        "total_tuna": 45827184.587537
       },
       {
         "min": 10000000.0,
@@ -553,8 +553,8 @@
       },
       {
         "stake_tuna": 750296.074382,
-        "compound_rate": 0.32825572619115273,
-        "total_rewards_sol": 8.157011398,
+        "compound_rate": 0.32754697179216435,
+        "total_rewards_sol": 8.174661745,
         "behavior": "mixed",
         "address_short": "3ovDaHpv...VypN"
       },
@@ -657,9 +657,9 @@
         "address_short": "7iMWCxXH...9vQz"
       },
       {
-        "stake_tuna": 8178681.630514,
-        "compound_rate": 56.43796945955184,
-        "total_rewards_sol": 80.288770838,
+        "stake_tuna": 8179225.775174,
+        "compound_rate": 56.489617870442224,
+        "total_rewards_sol": 80.38407653800002,
         "behavior": "mixed",
         "address_short": "3rJe7FAe...a6Jy"
       },
@@ -798,8 +798,8 @@
       },
       {
         "stake_tuna": 6866778.777937,
-        "compound_rate": 20.156244096597618,
-        "total_rewards_sol": 67.89143661100002,
+        "compound_rate": 20.139658712702943,
+        "total_rewards_sol": 67.94734647300002,
         "behavior": "mixed",
         "address_short": "8Ji51bch...qdmM"
       },
@@ -895,9 +895,9 @@
         "address_short": "DMyPeKZ8...7SAA"
       },
       {
-        "stake_tuna": 352082.428956,
-        "compound_rate": 98.12609838613767,
-        "total_rewards_sol": 1.5104444539999997,
+        "stake_tuna": 352159.594885,
+        "compound_rate": 98.1427545118209,
+        "total_rewards_sol": 1.5239904029999998,
         "behavior": "mixed",
         "address_short": "BfTissTz...8CvB"
       },
@@ -1091,13 +1091,6 @@
         "address_short": "jcmQqHZJ...M7DE"
       },
       {
-        "stake_tuna": 183973.526838,
-        "compound_rate": 82.61263087034526,
-        "total_rewards_sol": 0.217136185,
-        "behavior": "mixed",
-        "address_short": "CSsuKh9j...Ybm1"
-      },
-      {
         "stake_tuna": 50000.0,
         "compound_rate": 0.0,
         "total_rewards_sol": 0.581738235,
@@ -1217,9 +1210,9 @@
         "address_short": "F8h5ntgR...yjWY"
       },
       {
-        "stake_tuna": 10109.990997,
+        "stake_tuna": 10115.607159,
         "compound_rate": 100.0,
-        "total_rewards_sol": 0.10973093499999999,
+        "total_rewards_sol": 0.11072574599999999,
         "behavior": "compound_only",
         "address_short": "DSV6i4n9...tJNm"
       },
@@ -2358,9 +2351,9 @@
         "address_short": "RdafdfBt...kVen"
       },
       {
-        "stake_tuna": 60583.774878,
+        "stake_tuna": 60597.873368,
         "compound_rate": 100.0,
-        "total_rewards_sol": 0.3876508819999999,
+        "total_rewards_sol": 0.3900618309999999,
         "behavior": "compound_only",
         "address_short": "7kfLovRd...rZ9N"
       },
@@ -2568,7 +2561,7 @@
         "address_short": "HBKW3Qhx...F15x"
       },
       {
-        "stake_tuna": 16525.942352,
+        "stake_tuna": 16731.482184,
         "compound_rate": 83.85058062989974,
         "total_rewards_sol": 0.09584280800000002,
         "behavior": "mixed",
@@ -3275,9 +3268,9 @@
         "address_short": "D82kLfTQ...PHRo"
       },
       {
-        "stake_tuna": 36688.685432,
+        "stake_tuna": 36711.584695,
         "compound_rate": 100.0,
-        "total_rewards_sol": 0.267601243,
+        "total_rewards_sol": 0.271610963,
         "behavior": "compound_only",
         "address_short": "DZSmgX9g...75FP"
       },
@@ -3872,7 +3865,7 @@
       {
         "stake_tuna": 30284.190143,
         "compound_rate": 0.0,
-        "total_rewards_sol": 0.084073534,
+        "total_rewards_sol": 0.084507996,
         "behavior": "claim_only",
         "address_short": "39zxA5yC...J7N1"
       },
@@ -4052,9 +4045,9 @@
         "address_short": "5JAJnWih...jVCE"
       },
       {
-        "stake_tuna": 24272.096912,
-        "compound_rate": 93.25730832522966,
-        "total_rewards_sol": 0.08838372400000002,
+        "stake_tuna": 24273.539116,
+        "compound_rate": 93.2764983287939,
+        "total_rewards_sol": 0.08863598600000003,
         "behavior": "mixed",
         "address_short": "8TUdrASy...bK3D"
       },
@@ -4066,9 +4059,9 @@
         "address_short": "EB2rKGPb...U8eH"
       },
       {
-        "stake_tuna": 8896.298389,
+        "stake_tuna": 8899.749033,
         "compound_rate": 100.0,
-        "total_rewards_sol": 0.036518884,
+        "total_rewards_sol": 0.037136159,
         "behavior": "compound_only",
         "address_short": "8YQg11uW...ktxA"
       },
@@ -4479,7 +4472,7 @@
         "address_short": "FnTZd22G...HBgw"
       },
       {
-        "stake_tuna": 380000.0,
+        "stake_tuna": 95000.0,
         "compound_rate": 0.0,
         "total_rewards_sol": 3.706819339,
         "behavior": "claim_only",
@@ -4689,7 +4682,7 @@
         "address_short": "GRowGA1c...Zgpv"
       },
       {
-        "stake_tuna": 3600000.0,
+        "stake_tuna": 3300000.0,
         "compound_rate": 0.0,
         "total_rewards_sol": 13.882018294,
         "behavior": "claim_only",
@@ -4920,9 +4913,9 @@
         "address_short": "AxqQqW1g...G5zu"
       },
       {
-        "stake_tuna": 98108.867262,
+        "stake_tuna": 98156.482533,
         "compound_rate": 100.0,
-        "total_rewards_sol": 0.035777408999999996,
+        "total_rewards_sol": 0.044187411999999995,
         "behavior": "compound_only",
         "address_short": "DPe2o7k5...pDT9"
       },
@@ -5055,8 +5048,8 @@
     ]
   },
   "changes": {
-    "loyalty_score_pct": -0.51,
-    "compound_rate_pct": 0.01,
-    "compound_only_users_pct": 0.8
+    "loyalty_score_pct": -0.36,
+    "compound_rate_pct": 0.02,
+    "compound_only_users_pct": 1.1
   }
 }
