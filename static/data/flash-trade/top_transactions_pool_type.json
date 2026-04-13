@@ -3009,6 +3009,14 @@
       "fee_usdc": 39.567006
     },
     {
+      "signature": "4qbgdaUNoSmUANxJHBjeDWGiepmPwv1Xo86TGkuEbet9gNcfTjzLvJxmAai5tvh8DLohPXYYM4hYmGWFUX2ATaAW",
+      "timestamp": 1775957995,
+      "date": "2026-04-12",
+      "pool": "Trump.1",
+      "type": "DecreaseSize",
+      "fee_usdc": 36.979409
+    },
+    {
       "signature": "53QQeuiydCarpHFHG8gihA11dgSqJ6YLYGgXk8nwgghbZL611jA1fardrKbMSrQ1g2MQv4fZxLWc9uPEAAGWzeTK",
       "timestamp": 1751120713,
       "date": "2025-06-28",
@@ -3023,14 +3031,6 @@
       "pool": "Trump.1",
       "type": "DecreaseSize",
       "fee_usdc": 32.437982
-    },
-    {
-      "signature": "5hi9Jqj7Fpyifd5BeqyzQ6LihafNmK9bmuin6hmgPihfBfjikS2tTGy6AkNU7kzNeoGu9rs8BTgwgPr8RXekifzC",
-      "timestamp": 1768674600,
-      "date": "2026-01-17",
-      "pool": "Trump.1",
-      "type": "DecreaseSize",
-      "fee_usdc": 31.847347
     }
   ],
   "Community.3_IncreaseSize": [
@@ -4839,6 +4839,22 @@
   ],
   "Trump.1_ExecuteLimitWithSwap": [
     {
+      "signature": "6WSGdWsR7XuXKhTmLkgmeVwNipBqEDLkzVKte8YjGYvB3Y2eEsD8k9SJX2en6Bcaa2iA6asbpR2xE7DcmpUTzZh",
+      "timestamp": 1776031271,
+      "date": "2026-04-12",
+      "pool": "Trump.1",
+      "type": "ExecuteLimitWithSwap",
+      "fee_usdc": 11.345615
+    },
+    {
+      "signature": "42md15eKKDn6nWTnF7qoB4LQrWWqrQQQx4bsrAx6MHqtcb3BGC7CWrQtCzDPUFxprKtvXi7HyZvRxgBNXergK5ry",
+      "timestamp": 1775957997,
+      "date": "2026-04-12",
+      "pool": "Trump.1",
+      "type": "ExecuteLimitWithSwap",
+      "fee_usdc": 5.927966
+    },
+    {
       "signature": "4ttKpBk5NgHCxoKv7octwCPCXw9wxSc5oDLUco8ZLDABzKnpn4ztautDFusMNkUoquwMikMTksRbGW1o5hdvbDKg",
       "timestamp": 1753819763,
       "date": "2025-07-29",
@@ -4901,22 +4917,6 @@
       "pool": "Trump.1",
       "type": "ExecuteLimitWithSwap",
       "fee_usdc": 0.251349
-    },
-    {
-      "signature": "3KU7x24rb4vArtWSvQYCh6JK19GqntAwekYBEyviA36QDWcLJ4StVaC4UQXNtNd6cMVqimJ65kvVqc6HdKLb9MGN",
-      "timestamp": 1773984064,
-      "date": "2026-03-20",
-      "pool": "Trump.1",
-      "type": "ExecuteLimitWithSwap",
-      "fee_usdc": 0.227396
-    },
-    {
-      "signature": "5x5PHwAdfRzCVkFWciYbrPiVSGrsXmHeFnRbhd9ki3aAwm949XqMMiTgQTGz1E3VqmFNiBqzeZh9AQ4xk4jVa8ap",
-      "timestamp": 1773419202,
-      "date": "2026-03-13",
-      "pool": "Trump.1",
-      "type": "ExecuteLimitWithSwap",
-      "fee_usdc": 0.138943
     }
   ],
   "Governance.1_ExecuteLimitOrder": [
@@ -7443,6 +7443,14 @@
       "pool": "Crypto.1",
       "type": "ExecuteLimitOrder",
       "fee_usdc": 88.119076
+    },
+    {
+      "signature": "4FH5ru5KKsykbnKTk38Ddyqq9SKFES2SWzgbJXNMFWm3nwnLe6y7FnTGqVJin8kViWSvFQfQBkCUiD9BuGTBKpTU",
+      "timestamp": 1775960170,
+      "date": "2026-04-12",
+      "pool": "Crypto.1",
+      "type": "ExecuteLimitOrder",
+      "fee_usdc": 29.550116
     }
   ],
   "Virtual.1_ExecuteLimitWithSwap": [
