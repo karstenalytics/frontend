@@ -1,14 +1,14 @@
 {
   "compound_rate": 55.7,
   "compound_rate_faf": 61.1,
-  "total_claimed_faf": 90019955.27,
-  "compounded_faf": 55024517.86,
-  "compound_count": 3792,
-  "claim_count": 3026,
-  "compounders": 1301,
-  "non_compounders": 786,
-  "faf_token_claimers": 2087,
-  "faf_token_claim_count": 6818,
+  "total_claimed_faf": 90036845.33,
+  "compounded_faf": 55041308.08,
+  "compound_count": 3795,
+  "claim_count": 3028,
+  "compounders": 1303,
+  "non_compounders": 787,
+  "faf_token_claimers": 2090,
+  "faf_token_claim_count": 6823,
   "compound_by_epoch": [
     {
       "epoch": "2025-05",
@@ -452,17 +452,17 @@
     },
     {
       "epoch": "2026-04-active",
-      "compound_rate": 51.0,
-      "compound_rate_faf": 47.4,
-      "compounders": 424,
-      "non_compounders": 407,
-      "claimed_faf": 7829257.5,
+      "compound_rate": 51.1,
+      "compound_rate_faf": 47.6,
+      "compounders": 427,
+      "non_compounders": 409,
+      "claimed_faf": 7846147.57,
       "by_stake_size": [
         {
           "tier": "<10K",
-          "compound_rate": 40.8,
+          "compound_rate": 40.9,
           "compound_rate_faf": 36.4,
-          "total_wallets": 448
+          "total_wallets": 452
         },
         {
           "tier": "10K-100K",
@@ -478,9 +478,9 @@
         },
         {
           "tier": "1M-10M",
-          "compound_rate": 62.0,
-          "compound_rate_faf": 63.8,
-          "total_wallets": 71
+          "compound_rate": 62.5,
+          "compound_rate_faf": 64.0,
+          "total_wallets": 72
         },
         {
           "tier": "10M+",
@@ -494,6 +494,6 @@
   "changes": {
     "compound_rate_pct": -5.5,
     "compound_rate_faf_pct": 0.3,
-    "claimed_faf_30d": 7875781.31
+    "claimed_faf_30d": 7846190.21
   }
 }

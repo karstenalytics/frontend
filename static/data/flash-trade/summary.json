@@ -1,41 +1,41 @@
 {
-  "total_fees_usdc": 4048002.0463640005,
-  "total_revenue_usdc": 4048002.0463640005,
-  "protocol_revenue_usdc": 949272.5761949997,
-  "staker_revenue_usdc": 474636.28644300014,
-  "treasury_revenue_usdc": 474636.2897519997,
-  "total_transactions": 1922322,
-  "days_tracked": 366,
+  "total_fees_usdc": 4056117.6182710007,
+  "total_revenue_usdc": 4056117.6182710007,
+  "protocol_revenue_usdc": 950591.6272399997,
+  "staker_revenue_usdc": 475295.81196000014,
+  "treasury_revenue_usdc": 475295.81527999975,
+  "total_transactions": 1927761,
+  "days_tracked": 367,
   "date_range": {
     "start": "2025-04-12",
-    "end": "2026-04-12"
+    "end": "2026-04-13"
   },
   "by_type": {
-    "CloseAndSwap": 637383.3754219989,
-    "SwapAndOpen": 729329.3566190018,
-    "Liquidate": 404366.0167350006,
-    "IncreaseSize": 258229.32309899954,
-    "OpenPosition": 696680.2245819998,
-    "DecreaseSize": 109348.0021130004,
-    "ExecuteTriggerWithSwap": 326897.15377699956,
-    "ExecuteTriggerOrder": 278235.33397500013,
-    "ClosePosition": 590174.3407120007,
-    "ExecuteLimitWithSwap": 11803.731516999997,
-    "ExecuteLimitOrder": 5266.051347999999,
+    "CloseAndSwap": 638212.4869569989,
+    "SwapAndOpen": 729987.7016200017,
+    "Liquidate": 404714.7841050006,
+    "IncreaseSize": 259328.2303979995,
+    "OpenPosition": 698022.7420119998,
+    "DecreaseSize": 109879.2712030004,
+    "ExecuteTriggerWithSwap": 327042.3152119996,
+    "ExecuteTriggerOrder": 279552.31392600015,
+    "ClosePosition": 591782.2390600009,
+    "ExecuteLimitWithSwap": 11813.949539999998,
+    "ExecuteLimitOrder": 5492.447772999999,
     "ForceSettlePosition": 289.136465
   },
   "by_pool": {
     "Community.1": {
-      "fees_usdc": 259042.49427200004,
-      "protocol_revenue_usdc": 5632.266429000003,
-      "staker_revenue_usdc": 2816.1330250000024,
-      "treasury_revenue_usdc": 2816.1334039999997
+      "fees_usdc": 259081.74219500003,
+      "protocol_revenue_usdc": 5635.832677000003,
+      "staker_revenue_usdc": 2817.9161480000025,
+      "treasury_revenue_usdc": 2817.9165289999996
     },
     "Community.2": {
-      "fees_usdc": 130886.97688599995,
-      "protocol_revenue_usdc": 4113.440822000001,
-      "staker_revenue_usdc": 2056.7202230000007,
-      "treasury_revenue_usdc": 2056.7205989999993
+      "fees_usdc": 130895.32059199995,
+      "protocol_revenue_usdc": 4118.378776000001,
+      "staker_revenue_usdc": 2059.189199000001,
+      "treasury_revenue_usdc": 2059.189576999999
     },
     "Community.3": {
       "fees_usdc": 11737.429372999995,
@@ -44,22 +44,22 @@
       "treasury_revenue_usdc": 81.53123400000001
     },
     "Crypto.1": {
-      "fees_usdc": 2990956.774108998,
-      "protocol_revenue_usdc": 799119.9483039997,
-      "staker_revenue_usdc": 399559.97385799984,
-      "treasury_revenue_usdc": 399559.97444600007
+      "fees_usdc": 2997671.186585998,
+      "protocol_revenue_usdc": 800000.2044499997,
+      "staker_revenue_usdc": 400000.10192999983,
+      "treasury_revenue_usdc": 400000.1025200001
     },
     "Equity.1": {
-      "fees_usdc": 647.864764,
-      "protocol_revenue_usdc": 213.863948,
-      "staker_revenue_usdc": 106.931963,
-      "treasury_revenue_usdc": 106.93198500000001
+      "fees_usdc": 805.4097360000001,
+      "protocol_revenue_usdc": 258.465626,
+      "staker_revenue_usdc": 129.232802,
+      "treasury_revenue_usdc": 129.23282400000002
     },
     "Governance.1": {
-      "fees_usdc": 276966.86432500003,
-      "protocol_revenue_usdc": 64370.44478800002,
-      "staker_revenue_usdc": 32185.22210000001,
-      "treasury_revenue_usdc": 32185.222688
+      "fees_usdc": 277523.75058800005,
+      "protocol_revenue_usdc": 64518.927921000024,
+      "staker_revenue_usdc": 32259.46366600001,
+      "treasury_revenue_usdc": 32259.464255000003
     },
     "Ore.1": {
       "fees_usdc": 72759.50591400004,
@@ -74,23 +74,23 @@
       "treasury_revenue_usdc": 4231.314705999999
     },
     "Trump.1": {
-      "fees_usdc": 53613.495708999966,
-      "protocol_revenue_usdc": 4228.438619000001,
-      "staker_revenue_usdc": 2114.2190339999993,
-      "treasury_revenue_usdc": 2114.219585
+      "fees_usdc": 53893.67324399997,
+      "protocol_revenue_usdc": 4237.5847920000015,
+      "staker_revenue_usdc": 2118.7921189999993,
+      "treasury_revenue_usdc": 2118.792673
     },
     "Virtual.1": {
-      "fees_usdc": 170242.357279,
-      "protocol_revenue_usdc": 55088.29776899999,
-      "staker_revenue_usdc": 27544.148689999998,
-      "treasury_revenue_usdc": 27544.149079000003
+      "fees_usdc": 170601.31631,
+      "protocol_revenue_usdc": 55316.35748199999,
+      "staker_revenue_usdc": 27658.178546,
+      "treasury_revenue_usdc": 27658.178936000004
     }
   },
   "fee_buckets": {
-    "trading_fees_usdc": 3099548.93,
-    "non_trading_fees_usdc": 847586.68,
-    "lp_fees_usdc": 27582.33,
-    "gross_fees_usdc": 3947135.61,
-    "total_fees_usdc": 3974717.95
+    "trading_fees_usdc": 3107212.14,
+    "non_trading_fees_usdc": 847587.64,
+    "lp_fees_usdc": 27589.21,
+    "gross_fees_usdc": 3954799.78,
+    "total_fees_usdc": 3982388.99
   }
 }
