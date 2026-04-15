@@ -741,7 +741,7 @@
     "2027-08-01": 0.0
   },
   "date_range": {
-    "end": "2026-04-13",
+    "end": "2026-04-14",
     "start": "2025-07-24"
   },
   "held_by_vesting_wallets_timeline": {
@@ -1008,10 +1008,11 @@
     "2026-04-10": 898054.057702,
     "2026-04-11": 898054.057702,
     "2026-04-12": 898054.057702,
-    "2026-04-13": 927741.557702
+    "2026-04-13": 927741.557702,
+    "2026-04-14": 927741.557702
   },
   "metadata": {
-    "generated_at": "2026-04-14T03:43:33.760173+00:00",
+    "generated_at": "2026-04-15T03:42:34.564735+00:00",
     "total_supply": 1000000000,
     "tuna_decimals": 6
   },
@@ -1049,7 +1050,7 @@
     "DHeDGRTCaGTxaYkCVUZ6noNXQJ2pnk4QgeEJXJTCEUQe": 643112.233646,
     "DMbArkMKpMoctM57tnRfYLp1wVd7QCoBWnwETmLDCTDk": 359375.0,
     "DeTu8nW3MWeWCDyvZnvVGkW9YAYrK7SZWw9hosYc8QNR": 700000.0,
-    "DhFW86DfdpbP83nMqLX75v3xNob35aQ7XbSpqyaon4G1": 1077121.5176529996,
+    "DhFW86DfdpbP83nMqLX75v3xNob35aQ7XbSpqyaon4G1": 249999.99999999965,
     "DnzRAvmGszi38jMcmCFJ5v7AhDa7hPzn6gD2Aqykjnc1": 2005072.1018990001,
     "Dp1o9FTC5YBERrYq1MrqBTME55XG5PA2VfEx174jgsb9": 95000.0,
     "Ds48oyaeRSGfoXGtGMqyVJZnmvq9qvhVLXy1LfjdTWfh": 166250.0,
@@ -1971,9 +1972,20 @@
     "2026-04-10": 731149721.0861319,
     "2026-04-11": 731149721.0861319,
     "2026-04-12": 731149721.0861319,
-    "2026-04-13": 731149721.0861319
+    "2026-04-13": 731149721.0861319,
+    "2026-04-14": 730322599.568479
   },
   "vesting_wallet_staking_operations": [
+    {
+      "amount": 827121.517653,
+      "date": "2026-04-14",
+      "mint": null,
+      "pool": 413114987,
+      "signature": "5de8i116RAcRe7QooAoXgU6eRfYFupqvzf4RFsnG4aQMvTNSrMgrRJa6zzQcEE6gXTo2BEWnuCsYnsUV5X31gg8d",
+      "timestamp": "2026-04-14T07:08:28Z",
+      "type": "unstake",
+      "wallet": "DhFW86DfdpbP83nMqLX75v3xNob35aQ7XbSpqyaon4G1"
+    },
     {
       "amount": 18750000.0,
       "date": "2026-04-09",
